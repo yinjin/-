@@ -166,12 +166,7 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
-        <!-- Flyway for database migrations -->
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
-            <version>10.8.1</version>
-        </dependency>
+        <!-- Database migrations handled by application initializer (scripts under classpath:db/) -->
         
         <!-- Testcontainers for integration testing with MySQL in CI -->
         <dependency>
@@ -205,17 +200,7 @@
                     </excludes>
                 </configuration>
             </plugin>
-            <!-- Flyway Maven Plugin -->
-            <plugin>
-                <groupId>org.flywaydb</groupId>
-                <artifactId>flyway-maven-plugin</artifactId>
-                <version>10.8.1</version>
-                <configuration>
-                    <schemas>
-                        <schema>public</schema>
-                    </schemas>
-                </configuration>
-            </plugin>
+            <!-- Flyway plugin removed; runtime will execute SQL scripts on startup -->
         </plugins>
     </build>
 </project>

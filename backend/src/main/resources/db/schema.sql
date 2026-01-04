@@ -12,14 +12,19 @@ CREATE TABLE IF NOT EXISTS sys_user (
     username VARCHAR(50) NOT NULL UNIQUE COMMENT '用户名',
     password VARCHAR(255) NOT NULL COMMENT '密码',
     real_name VARCHAR(50) NOT NULL COMMENT '真实姓名',
+    employee_no VARCHAR(20) COMMENT '工号/学号',
     phone VARCHAR(20) COMMENT '手机号',
     email VARCHAR(100) COMMENT '邮箱',
-    role VARCHAR(20) NOT NULL COMMENT '角色: ADMIN-管理员, TEACHER-教师, STUDENT-学生',
+    department_id BIGINT COMMENT '部门ID',
+    role_id BIGINT COMMENT '角色ID',
+    avatar VARCHAR(500) COMMENT '头像URL',
     status TINYINT DEFAULT 1 COMMENT '状态: 0-禁用, 1-启用',
     create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    last_login_time DATETIME COMMENT '最后登录时间',
+    login_count INT DEFAULT 0 COMMENT '登录次数',
     INDEX idx_username (username),
-    INDEX idx_role (role)
+    INDEX idx_role_id (role_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='系统用户表';
 
 -- 耗材分类表
@@ -192,8 +197,8 @@ CREATE TABLE IF NOT EXISTS sys_log (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='系统日志表';
 
 -- 插入初始管理员用户
-INSERT INTO sys_user (username, password, real_name, phone, email, role, status) VALUES
-('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '系统管理员', '13800138000', 'admin@example.com', 'ADMIN', 1);
+INSERT INTO sys_user (username, password, real_name, employee_no, phone, email, department_id, role_id, avatar, status, last_login_time, login_count) VALUES
+('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '系统管理员', NULL, '13800138000', 'admin@example.com', NULL, NULL, NULL, 1, NULL, 0);
 
 -- 插入初始耗材分类
 INSERT INTO material_category (name, code, description, parent_id, sort_order, status) VALUES

@@ -1,4 +1,44 @@
 -------------------------------------------------------------------------------
 Test set: com.material.system.SysUserIntegrationTest
 -------------------------------------------------------------------------------
-Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.372 s -- in com.material.system.SysUserIntegrationTest
+Tests run: 3, Failures: 0, Errors: 3, Skipped: 0, Time elapsed: 0.366 s <<< FAILURE! -- in com.material.system.SysUserIntegrationTest
+com.material.system.SysUserIntegrationTest.health_shouldReturnUp -- Time elapsed: 0 s <<< ERROR!
+java.lang.ExceptionInInitializerError
+	at java.base/jdk.internal.misc.Unsafe.ensureClassInitialized0(Native Method)
+	at java.base/jdk.internal.misc.Unsafe.ensureClassInitialized(Unsafe.java:1160)
+	at java.base/java.lang.reflect.Constructor.acquireConstructorAccessor(Constructor.java:547)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:497)
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:484)
+	at java.base/java.util.Optional.orElseGet(Optional.java:364)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+Caused by: org.opentest4j.TestAbortedException: Assumption failed: Docker is not available, skipping MySQL container tests
+	at com.material.system.AbstractMySQLTest.<clinit>(AbstractMySQLTest.java:15)
+	... 8 more
+
+com.material.system.SysUserIntegrationTest.user_full_lifecycle_via_api -- Time elapsed: 0 s <<< ERROR!
+java.lang.NoClassDefFoundError: Could not initialize class com.material.system.SysUserIntegrationTest
+	at java.base/jdk.internal.misc.Unsafe.ensureClassInitialized0(Native Method)
+	at java.base/jdk.internal.misc.Unsafe.ensureClassInitialized(Unsafe.java:1160)
+	at java.base/java.lang.reflect.Constructor.acquireConstructorAccessor(Constructor.java:547)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:497)
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:484)
+	at java.base/java.util.Optional.orElseGet(Optional.java:364)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+Caused by: java.lang.ExceptionInInitializerError: Exception java.lang.ExceptionInInitializerError [in thread "main"]
+	... 8 more
+
+com.material.system.SysUserIntegrationTest.admin_canLogin_and_getToken -- Time elapsed: 0.016 s <<< ERROR!
+java.lang.NoClassDefFoundError: Could not initialize class com.material.system.SysUserIntegrationTest
+	at java.base/jdk.internal.misc.Unsafe.ensureClassInitialized0(Native Method)
+	at java.base/jdk.internal.misc.Unsafe.ensureClassInitialized(Unsafe.java:1160)
+	at java.base/java.lang.reflect.Constructor.acquireConstructorAccessor(Constructor.java:547)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:497)
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:484)
+	at java.base/java.util.Optional.orElseGet(Optional.java:364)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+Caused by: java.lang.ExceptionInInitializerError: Exception java.lang.ExceptionInInitializerError [in thread "main"]
+	... 8 more
+

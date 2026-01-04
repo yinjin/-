@@ -26,6 +26,7 @@ C:\workplace\cangku\backend\src\main\java\com\material\system\controller\Materia
 C:\workplace\cangku\backend\src\main\java\com\material\system\entity\MaterialInfo.java
 C:\workplace\cangku\backend\src\main\java\com\material\system\mapper\WarehouseMapper.java
 C:\workplace\cangku\backend\src\main\java\com\material\system\config\OpenApiConfig.java
+C:\workplace\cangku\backend\src\main\java\com\material\system\config\DatabaseInitializer.java
 C:\workplace\cangku\backend\src\main\java\com\material\system\mapper\MaterialCategoryMapper.java
 C:\workplace\cangku\backend\src\main\java\com\material\system\dto\MaterialInfoCreateDTO.java
 C:\workplace\cangku\backend\src\main\java\com\material\system\common\Result.java

@@ -1,5 +1,6 @@
 package com.material.system;
 
+import org.junit.jupiter.api.Assumptions;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.DockerClientFactory;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -7,27 +8,26 @@ import org.springframework.test.context.DynamicPropertySource;
 
 public abstract class AbstractMySQLTest {
 
-    // Do not auto-start container; start only when Docker is available to allow local H2 fallback.
     private static MySQLContainer<?> mysql;
+
+    static {
+        // Assume Docker is available; if not, skip tests
+        Assumptions.assumeTrue(DockerClientFactory.instance().isDockerAvailable(), "Docker is not available, skipping MySQL container tests");
+
+        // Use MySQL 8.0 for compatibility with production
+        mysql = new MySQLContainer<>("mysql:8.0")
+            .withDatabaseName("testdb")
+            .withUsername("test")
+            .withPassword("test");
+        mysql.start();
+    }
 
     @DynamicPropertySource
     static void mysqlProperties(DynamicPropertyRegistry registry) {
-        // If Docker is available, start a MySQL container and override datasource properties.
-        if (DockerClientFactory.instance().isDockerAvailable()) {
-                // Use MySQL 5.7 for CI compatibility with Flyway
-                mysql = new MySQLContainer<>("mysql:5.7.40")
-                    .withDatabaseName("testdb")
-                    .withUsername("test")
-                    .withPassword("test");
-            mysql.start();
-
-            registry.add("spring.datasource.url", mysql::getJdbcUrl);
-            registry.add("spring.datasource.username", mysql::getUsername);
-            registry.add("spring.datasource.password", mysql::getPassword);
-            registry.add("spring.datasource.driver-class-name", mysql::getDriverClassName);
-            registry.add("spring.flyway.enabled", () -> "true");
-        }
-        // If Docker isn't available, do nothing and allow existing test profile (H2) to be used.
+        registry.add("spring.datasource.url", mysql::getJdbcUrl);
+        registry.add("spring.datasource.username", mysql::getUsername);
+        registry.add("spring.datasource.password", mysql::getPassword);
+        registry.add("spring.datasource.driver-class-name", mysql::getDriverClassName);
     }
 }
 
