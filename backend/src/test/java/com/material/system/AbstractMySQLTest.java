@@ -14,7 +14,8 @@ public abstract class AbstractMySQLTest {
     static void mysqlProperties(DynamicPropertyRegistry registry) {
         // If Docker is available, start a MySQL container and override datasource properties.
         if (DockerClientFactory.instance().isDockerAvailable()) {
-            mysql = new MySQLContainer<>("mysql:8.0.33")
+                // Use MySQL 5.7 for CI compatibility with Flyway
+                mysql = new MySQLContainer<>("mysql:5.7.40")
                     .withDatabaseName("testdb")
                     .withUsername("test")
                     .withPassword("test");
