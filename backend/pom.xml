@@ -170,6 +170,7 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
+            <version>10.8.1</version>
         </dependency>
         
         <!-- Testcontainers for integration testing with MySQL in CI -->
@@ -208,7 +209,7 @@
             <plugin>
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-maven-plugin</artifactId>
-                <version>9.22.0</version>
+                <version>10.8.1</version>
                 <configuration>
                     <schemas>
                         <schema>public</schema>
