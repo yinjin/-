@@ -197,10 +197,10 @@ INSERT INTO sys_user (username, password, real_name, employee_no, phone, email, 
 
 -- 插入初始耗材分类
 INSERT INTO material_category (name, code, description, parent_id, sort_order, status) VALUES
-('电子元器件', 'ELEC', '各类电子元器件', 0, 1, 1),
-('机械零件', 'MECH', '各类机械零件', 0, 2, 1),
-('工具耗材', 'TOOL', '各类工具和耗材', 0, 3, 1),
-('实验材料', 'LAB', '各类实验材料', 0, 4, 1);
+('Electronic Components', 'ELEC', 'Various electronic components', 0, 1, 1),
+('Mechanical Parts', 'MECH', 'Various mechanical parts', 0, 2, 1),
+('Tool Consumables', 'TOOL', 'Various tools and consumables', 0, 3, 1),
+('Laboratory Materials', 'LAB', 'Various laboratory materials', 0, 4, 1);
 
 -- 仓库表
 CREATE TABLE IF NOT EXISTS warehouse (
@@ -280,10 +280,10 @@ CREATE TABLE IF NOT EXISTS material_outbound (
 
 -- 插入初始供应商
 INSERT INTO supplier (name, code, contact_person, contact_phone, address, email, description, status) VALUES
-('电子科技有限公司', 'SUP001', '张三', '13800138001', '北京市海淀区', 'zhangsan@elec.com', '专业电子元器件供应商', 1),
-('机械制造有限公司', 'SUP002', '李四', '13800138002', '上海市浦东新区', 'lisi@mech.com', '专业机械零件供应商', 1);
+('Electronic Technology Co., Ltd.', 'SUP001', 'Zhang San', '13800138001', 'Haidian District, Beijing', 'zhangsan@elec.com', 'Professional electronic component supplier', 1),
+('Mechanical Manufacturing Co., Ltd.', 'SUP002', 'Li Si', '13800138002', 'Pudong New Area, Shanghai', 'lisi@mech.com', 'Professional mechanical parts supplier', 1);
 
 -- 插入初始仓库
 INSERT INTO warehouse (name, code, address, manager, contact_phone, description, status) VALUES
-('主仓库', 'WH001', '北京市海淀区学院路100号', '王五', '13800138003', '学院主仓库，存放各类耗材', 1),
-('实训楼仓库', 'WH002', '北京市海淀区学院路100号实训楼', '赵六', '13800138004', '实训楼专用仓库', 1);
+('Main Warehouse', 'WH001', 'Xueyuan Road 100, Haidian District, Beijing', 'Wang Wu', '13800138003', 'Main warehouse of the college, storing various materials', 1),
+('Training Building Warehouse', 'WH002', 'Training Building, Xueyuan Road 100, Haidian District, Beijing', 'Zhao Liu', '13800138004', 'Dedicated warehouse for training building', 1);
