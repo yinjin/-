@@ -2,9 +2,12 @@ name: CI
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main, master, feature/rbac-ci ]
   pull_request:
     branches: [ main, master ]
+
+  # allow manual runs from Actions UI
+  workflow_dispatch:
 
 jobs:
   build:
