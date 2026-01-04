@@ -16,7 +16,7 @@ public abstract class AbstractMySQLTest {
 
         // Use MySQL 8.0 for compatibility with production
         mysql = new MySQLContainer<>("mysql:8.0")
-            .withDatabaseName("testdb")
+            .withDatabaseName("material_system")
             .withUsername("test")
             .withPassword("test");
         mysql.start();

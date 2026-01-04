@@ -1,8 +1,6 @@
 -- 高职人工智能学院实训耗材管理系统数据库初始化脚本
 -- 创建时间: 2026-01-04
 
-USE material_system;
-
 -- 用户表
 CREATE TABLE IF NOT EXISTS sys_user (
     id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '用户ID',
