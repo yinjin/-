@@ -60,6 +60,10 @@ public class DatabaseInitializer implements ApplicationRunner {
             initSql = initSql.replaceAll("(?is)insert\\s+into\\s+sys_user[^;]*;", "");
         }
 
+        // For all databases (including MySQL in tests), remove pre-inserted admin user to let tests create it
+        schemaSql = schemaSql.replaceAll("(?is)insert\\s+into\\s+sys_user[^;]*;", "");
+        initSql = initSql.replaceAll("(?is)insert\\s+into\\s+sys_user[^;]*;", "");
+
         ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
         if (schemaSql != null && !schemaSql.trim().isEmpty()) {
             populator.addScript(new ByteArrayResource(schemaSql.getBytes(StandardCharsets.UTF_8)));
