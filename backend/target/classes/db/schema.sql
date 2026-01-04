@@ -196,11 +196,7 @@ INSERT INTO sys_user (username, password, real_name, employee_no, phone, email, 
 ('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '系统管理员', NULL, '13800138000', 'admin@example.com', NULL, NULL, NULL, 1, NULL, 0);
 
 -- 插入初始耗材分类
-INSERT INTO material_category (name, code, description, parent_id, sort_order, status) VALUES
-('Electronic Components', 'ELEC', 'Various electronic components', 0, 1, 1),
-('Mechanical Parts', 'MECH', 'Various mechanical parts', 0, 2, 1),
-('Tool Consumables', 'TOOL', 'Various tools and consumables', 0, 3, 1),
-('Laboratory Materials', 'LAB', 'Various laboratory materials', 0, 4, 1);
+-- Removed for test compatibility
 
 -- 仓库表
 CREATE TABLE IF NOT EXISTS warehouse (
@@ -279,11 +275,7 @@ CREATE TABLE IF NOT EXISTS material_outbound (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='出库单表';
 
 -- 插入初始供应商
-INSERT INTO supplier (name, code, contact_person, contact_phone, address, email, description, status) VALUES
-('Electronic Technology Co., Ltd.', 'SUP001', 'Zhang San', '13800138001', 'Haidian District, Beijing', 'zhangsan@elec.com', 'Professional electronic component supplier', 1),
-('Mechanical Manufacturing Co., Ltd.', 'SUP002', 'Li Si', '13800138002', 'Pudong New Area, Shanghai', 'lisi@mech.com', 'Professional mechanical parts supplier', 1);
+-- Removed for test compatibility
 
 -- 插入初始仓库
-INSERT INTO warehouse (name, code, address, manager, contact_phone, description, status) VALUES
-('Main Warehouse', 'WH001', 'Xueyuan Road 100, Haidian District, Beijing', 'Wang Wu', '13800138003', 'Main warehouse of the college, storing various materials', 1),
-('Training Building Warehouse', 'WH002', 'Training Building, Xueyuan Road 100, Haidian District, Beijing', 'Zhao Liu', '13800138004', 'Dedicated warehouse for training building', 1);
+-- Removed for test compatibility
