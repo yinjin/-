@@ -31,15 +31,20 @@
 - [x] 编译测试通过 ✅
 - [x] 创建开发教程文档 ✅
 
-#### 1.2 用户数据访问层（预计1小时）
-- [ ] 创建用户Mapper接口 `SysUserMapper`
-  - 继承BaseMapper获得基础CRUD方法
-  - 自定义查询方法：根据用户名查询、根据状态查询、分页查询
-  - 配置MyBatis-Plus注解
-- [ ] 创建用户Repository接口 `SysUserRepository`
-  - 继承JpaRepository获得JPA方法
-  - 自定义查询方法：根据用户名查找、根据邮箱查找
-- [ ] 配置数据访问层异常处理
+#### 1.2 用户数据访问层（预计1小时）✅ 已完成
+- [x] 创建用户Mapper接口 `SysUserMapper`
+  - 继承BaseMapper获得基础CRUD方法 ✅
+  - 自定义查询方法：根据用户名查询、根据状态查询、分页查询 ✅
+  - 配置MyBatis-Plus注解 ✅
+- [x] 创建用户Repository接口 `SysUserRepository`
+  - 继承JpaRepository获得JPA方法 ✅
+  - 自定义查询方法：根据用户名查找、根据邮箱查找 ✅
+- [x] 配置数据访问层异常处理 ✅
+  - 创建全局异常处理器GlobalExceptionHandler ✅
+  - 创建业务异常类BusinessException ✅
+  - 统一异常处理和错误响应格式 ✅
+- [x] 编译测试通过 ✅
+- [x] 创建开发教程文档 ✅
 
 #### 1.3 用户业务逻辑层（预计1.5小时）
 - [ ] 创建用户Service接口 `ISysUserService`
