@@ -133,9 +133,16 @@ public class BusinessException extends RuntimeException {
     }
 
     /**
-     * 并发修改异常
+     * 用户已被锁定异常
      */
-    public static BusinessException concurrentModification() {
-        return new BusinessException(1013, "数据已被其他用户修改，请刷新后重试");
+    public static BusinessException userLocked() {
+        return new BusinessException(1014, "用户已被锁定");
+    }
+
+    /**
+     * 操作失败异常
+     */
+    public static BusinessException operationFailed(String message) {
+        return new BusinessException(1015, message);
     }
 }

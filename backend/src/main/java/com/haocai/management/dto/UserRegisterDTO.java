@@ -81,6 +81,13 @@ public class UserRegisterDTO {
     private Long departmentId;
 
     /**
+     * 用户头像URL
+     * 用户头像的网络地址
+     * 可选字段，新注册用户可以使用默认头像
+     */
+    private String avatar;
+
+    /**
      * 验证码
      * 邮箱或短信验证码，用于验证邮箱或手机号真实性
      */
