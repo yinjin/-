@@ -109,7 +109,7 @@ const handleLogin = async () => {
       rememberMe: loginForm.rememberMe
     })
     
-    ElMessage.success('登录成功')
+     ElMessage.success('登录成功')
     
     // 如果记住用户名，保存到localStorage
     if (loginForm.rememberMe) {
@@ -118,8 +118,9 @@ const handleLogin = async () => {
       localStorage.removeItem('rememberedUsername')
     }
     
-    // 跳转到首页
-    router.push('/')
+    // 获取重定向路径，如果没有则跳转到首页
+    const redirect = (router.currentRoute.value.query.redirect as string) || '/'
+    router.push(redirect)
   } catch (error: any) {
     if (error.message) {
       ElMessage.error(error.message)

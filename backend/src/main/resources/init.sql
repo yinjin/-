@@ -12,22 +12,46 @@ CREATE TABLE sys_user (
     id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '用户ID',
     username VARCHAR(50) NOT NULL UNIQUE COMMENT '用户名',
     password VARCHAR(255) NOT NULL COMMENT '密码',
-    name VARCHAR(100) NOT NULL COMMENT '姓名',
-    email VARCHAR(100) COMMENT '邮箱',
-    phone VARCHAR(20) COMMENT '手机号',
+    name VARCHAR(50) NOT NULL COMMENT '真实姓名',
+    email VARCHAR(100) NOT NULL COMMENT '邮箱地址',
+    phone VARCHAR(20) NOT NULL COMMENT '手机号码',
+    avatar VARCHAR(255) COMMENT '头像URL',
+    status VARCHAR(20) NOT NULL DEFAULT 'NORMAL' COMMENT '用户状态：NORMAL-正常，DISABLED-禁用，LOCKED-锁定',
     department_id BIGINT COMMENT '部门ID',
-    role VARCHAR(50) NOT NULL DEFAULT 'student' COMMENT '角色：admin/teacher/student',
-    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE' COMMENT '状态：ACTIVE/INACTIVE',
-    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除：0未删除 1已删除',
+    last_login_time DATETIME COMMENT '最后登录时间',
     create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     create_by BIGINT COMMENT '创建人ID',
     update_by BIGINT COMMENT '更新人ID',
+    remark VARCHAR(500) COMMENT '备注信息',
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除：0未删除 1已删除',
     INDEX idx_username (username),
+    INDEX idx_email (email),
+    INDEX idx_phone (phone),
     INDEX idx_department (department_id),
     INDEX idx_status (status),
-    INDEX idx_deleted (deleted)
+    INDEX idx_deleted (deleted),
+    INDEX idx_create_time (create_time)
 ) COMMENT '用户表';
+
+-- 用户登录日志表
+CREATE TABLE sys_user_login_log (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '日志ID',
+    user_id BIGINT NOT NULL COMMENT '用户ID',
+    username VARCHAR(50) COMMENT '用户名（冗余字段，便于查询）',
+    login_ip VARCHAR(50) COMMENT '登录IP地址',
+    login_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '登录时间',
+    login_success TINYINT NOT NULL COMMENT '登录结果：1-成功，0-失败',
+    fail_reason VARCHAR(255) COMMENT '失败原因（登录失败时填写）',
+    user_agent VARCHAR(500) COMMENT '用户代理信息（浏览器、设备等）',
+    location VARCHAR(255) COMMENT '地理位置信息（可选）',
+    session_id VARCHAR(100) COMMENT '会话ID（可选，用于关联同一登录会话的多次操作）',
+    INDEX idx_user_id (user_id),
+    INDEX idx_username (username),
+    INDEX idx_login_time (login_time),
+    INDEX idx_login_success (login_success),
+    INDEX idx_login_ip (login_ip)
+) COMMENT '用户登录日志表';
 
 -- 部门表
 CREATE TABLE sys_department (
@@ -102,8 +126,8 @@ CREATE TABLE sys_user_role (
 
 -- 插入初始数据
 -- 默认管理员用户
-INSERT INTO sys_user (username, password, name, role, status, deleted) VALUES
-('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lbdxp7jyxv5QD0yRK', '系统管理员', 'admin', 'ACTIVE', 0);
+INSERT INTO sys_user (username, password, name, email, phone, status, deleted) VALUES
+('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lbdxp7jyxv5QD0yRK', '系统管理员', 'admin@haocai.com', '13800138000', 'NORMAL', 0);
 
 -- 默认角色
 INSERT INTO sys_role (name, code, description, status) VALUES
