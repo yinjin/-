@@ -9,22 +9,27 @@
 
 ### 1. 后端用户管理模块开发（预计4小时）
 
-#### 1.1 用户实体类设计（预计1小时）
-- [ ] 创建用户实体类 `SysUser`
-  - 用户基本信息字段：id、username、password、realName、email、phone、avatar
-  - 用户状态字段：status（正常/禁用）、createTime、updateTime、lastLoginTime
-  - 用户关联字段：departmentId、roleIds（多角色支持）
-  - 使用Lombok注解简化代码
-  - 配置JPA注解和表映射
-- [ ] 创建用户DTO类
-  - `UserLoginDTO`：登录请求
-  - `UserRegisterDTO`：注册请求
-  - `UserUpdateDTO`：用户信息更新
-  - `UserVO`：用户信息响应
-- [ ] 配置实体类验证注解
-  - 用户名长度验证
-  - 邮箱格式验证
-  - 手机号格式验证
+#### 1.1 用户实体类设计（预计1小时）✅ 已完成
+- [x] 创建用户实体类 `SysUser`
+  - 用户基本信息字段：id、username、password、realName、email、phone、avatar ✅
+  - 用户状态字段：status（正常/禁用/锁定）、createTime、updateTime、lastLoginTime ✅
+  - 用户关联字段：departmentId ✅
+  - 使用Lombok注解简化代码 ✅
+  - 配置JPA注解和表映射 ✅
+- [x] 创建用户DTO类
+  - `UserLoginDTO`：登录请求 ✅
+  - `UserRegisterDTO`：注册请求 ✅
+  - `UserUpdateDTO`：用户信息更新 ✅
+  - `UserVO`：用户信息响应 ✅
+- [x] 配置实体类验证注解
+  - 用户名长度验证 ✅
+  - 邮箱格式验证 ✅
+  - 手机号格式验证 ✅
+- [x] 创建UserStatus枚举类
+  - 定义用户状态枚举 ✅
+  - 提供状态转换方法 ✅
+- [x] 编译测试通过 ✅
+- [x] 创建开发教程文档 ✅
 
 #### 1.2 用户数据访问层（预计1小时）
 - [ ] 创建用户Mapper接口 `SysUserMapper`
