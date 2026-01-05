@@ -14,20 +14,12 @@ spring:
     username: root
     password: root
 
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
-
-  redis:
-    host: localhost
-    port: 6379
-    password: 123456
-    database: 0
-    timeout: 2000ms
+  # redis:
+  #   host: localhost
+  #   port: 6379
+  #   password: 123456
+  #   database: 0
+  #   timeout: 2000ms
 
 logging:
   level:
@@ -39,6 +31,17 @@ logging:
 jwt:
   secret: haocai-management-secret-key-2024
   expiration: 86400000  # 24小时
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: false
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
 
 management:
   endpoints:

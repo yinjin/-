@@ -16,12 +16,13 @@
 ## 技术栈
 
 ### 后端技术栈
-- **框架**：Spring Boot 3.2.2
-- **ORM**：MyBatis-Plus 3.5.5 + Spring Data JPA
-- **数据库**：MySQL 8.0.35
+- **框架**：Spring Boot 3.1.6
+- **ORM**：MyBatis-Plus 3.5.7 + Spring Data JPA
+- **数据库**：MySQL 8.0.33
 - **缓存**：Redis 7.2.4
-- **安全**：Spring Security 6.2 + JWT
+- **安全**：Spring Security 6.2 + JWT 0.12.3
 - **文档**：SpringDoc OpenAPI 2.3.0
+- **工具库**：Hutool 5.8.24
 
 ### 前端技术栈
 - **框架**：Vue 3.4.15 + TypeScript 5.3.3

@@ -56,6 +56,80 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
 }
 ```
 
+#### ⚠️ 重要：字段映射配置
+
+**问题背景：**
+在测试过程中发现，当实体类字段名与数据库列名不一致时，MyBatis-Plus无法自动映射，导致查询结果为null或插入失败。
+
+**解决方案：**
+
+**1. 使用 @TableField 注解明确指定映射关系**
+
+在实体类中，对于不符合驼峰命名规范的字段，必须使用 `@TableField` 注解：
+
+```java
+@TableField("department_id")
+private Long departmentId;
+```
+
+**2. 字段命名规范**
+
+- **Java实体类字段**：使用驼峰命名法（camelCase）
+  - 示例：`departmentId`, `createTime`, `updateTime`
+  
+- **数据库列名**：使用下划线命名法（snake_case）
+  - 示例：`department_id`, `create_time`, `update_time`
+
+**3. 自动映射规则**
+
+MyBatis-Plus默认开启驼峰转下划线的自动映射：
+- `departmentId` → `department_id` ✅ 自动映射
+- `realName` → `real_name` ✅ 自动映射
+- `department_id` → `department_id` ❌ 需要手动指定
+
+**4. 常见字段映射示例**
+
+```java
+public class SysUser {
+    private Long id;                    // id → id (自动映射)
+    
+    private String username;            // username → username (自动映射)
+    
+    @TableField("department_id")        // 必须指定
+    private Long departmentId;
+    
+    @TableField("real_name")            // 如果数据库列名是 real_name
+    private String name;                // Java字段名是 name
+    
+    private LocalDateTime createTime;   // create_time → create_time (自动映射)
+    
+    private LocalDateTime updateTime;   // update_time → update_time (自动映射)
+}
+```
+
+**5. 配置文件设置**
+
+在 `application.yml` 中确保开启驼峰转下划线：
+
+```yaml
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true  # 开启驼峰转下划线
+```
+
+**6. 测试验证**
+
+在开发完成后，务必进行字段映射测试：
+
+```java
+@Test
+void testFieldMapping() {
+    SysUser user = userMapper.selectById(1L);
+    assertNotNull(user.getDepartmentId(), "departmentId字段映射失败");
+    assertNotNull(user.getName(), "name字段映射失败");
+}
+```
+
 #### 技术要点详解：
 
 **1. BaseMapper继承的优势：**
@@ -107,6 +181,108 @@ int updateStatusBatch(@Param("userIds") List<Long> userIds,
 ```
 - **批量处理**：支持一次更新多个记录
 - **参数传递**：使用List传递批量参数
+
+#### ⚠️ 重要：批量操作异常处理
+
+**问题背景：**
+在批量更新用户状态时，如果用户ID列表中包含不存在的用户ID，会导致整个批量操作失败。
+
+**解决方案：**
+
+**1. 在Service层添加异常捕获**
+
+```java
+@Override
+@Transactional
+public void updateStatusBatch(List<Long> userIds, Integer status, Long updateBy) {
+    if (userIds == null || userIds.isEmpty()) {
+        throw new BusinessException(400, "用户ID列表不能为空");
+    }
+    
+    int successCount = 0;
+    int failCount = 0;
+    
+    for (Long userId : userIds) {
+        try {
+            SysUser user = userMapper.selectById(userId);
+            if (user == null) {
+                log.warn("用户不存在，跳过更新: userId={}", userId);
+                failCount++;
+                continue;
+            }
+            
+            user.setStatus(status);
+            user.setUpdateBy(updateBy);
+            user.setUpdateTime(LocalDateTime.now());
+            
+            int result = userMapper.updateById(user);
+            if (result > 0) {
+                successCount++;
+            } else {
+                failCount++;
+            }
+        } catch (Exception e) {
+            log.error("更新用户状态失败: userId={}, error={}", userId, e.getMessage());
+            failCount++;
+        }
+    }
+    
+    log.info("批量更新用户状态完成: 成功={}, 失败={}", successCount, failCount);
+    
+    if (successCount == 0) {
+        throw new BusinessException(400, "批量更新失败，所有用户都不存在");
+    }
+}
+```
+
+**2. 使用MyBatis-Plus的批量更新**
+
+```java
+@Override
+@Transactional
+public void updateStatusBatch(List<Long> userIds, Integer status, Long updateBy) {
+    if (userIds == null || userIds.isEmpty()) {
+        throw new BusinessException(400, "用户ID列表不能为空");
+    }
+    
+    // 先查询存在的用户
+    List<SysUser> users = userMapper.selectBatchIds(userIds);
+    
+    if (users.isEmpty()) {
+        throw new BusinessException(400, "批量更新失败，所有用户都不存在");
+    }
+    
+    // 过滤出实际存在的用户ID
+    List<Long> existingUserIds = users.stream()
+            .map(SysUser::getId)
+            .collect(Collectors.toList());
+    
+    // 批量更新存在的用户
+    users.forEach(user -> {
+        user.setStatus(status);
+        user.setUpdateBy(updateBy);
+        user.setUpdateTime(LocalDateTime.now());
+    });
+    
+    // 使用批量更新
+    boolean success = this.updateBatchById(users);
+    
+    if (!success) {
+        throw new BusinessException(500, "批量更新失败");
+    }
+    
+    log.info("批量更新用户状态成功: 总数={}, 成功={}, 跳过={}", 
+             userIds.size(), existingUserIds.size(), userIds.size() - existingUserIds.size());
+}
+```
+
+**3. 最佳实践总结**
+
+- **先查询后更新**：避免直接更新不存在的记录
+- **异常捕获**：捕获单个记录的异常，不影响其他记录
+- **日志记录**：记录成功和失败的详细信息
+- **事务管理**：使用 `@Transactional` 确保数据一致性
+- **用户反馈**：返回操作结果，告知用户成功和失败的数量
 
 #### 设计模式应用：
 
@@ -254,6 +430,134 @@ public class GlobalExceptionHandler {
 }
 ```
 
+#### ⚠️ 重要：类型转换异常处理
+
+**问题背景：**
+在测试过程中发现，当数据库中存储的 `status` 字段为字符串类型（如 "ACTIVE"），而实体类中定义为枚举类型时，会导致类型转换异常。
+
+**解决方案：**
+
+**1. 创建类型转换器**
+
+```java
+package com.haocai.management.config;
+
+import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
+import com.haocai.management.entity.UserStatus;
+import org.apache.ibatis.type.BaseTypeHandler;
+import org.apache.ibatis.type.JdbcType;
+import org.apache.ibatis.type.MappedTypes;
+
+import java.sql.CallableStatement;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * 用户状态类型转换器
+ * 用于在数据库字符串和Java枚举之间进行转换
+ */
+@MappedTypes(UserStatus.class)
+public class UserStatusConverter extends BaseTypeHandler<UserStatus> {
+
+    @Override
+    public void setNonNullParameter(PreparedStatement ps, int i, UserStatus parameter, JdbcType jdbcType) throws SQLException {
+        ps.setString(i, parameter.name());
+    }
+
+    @Override
+    public UserStatus getNullableResult(ResultSet rs, String columnName) throws SQLException {
+        String value = rs.getString(columnName);
+        return value == null ? null : UserStatus.valueOf(value);
+    }
+
+    @Override
+    public UserStatus getNullableResult(ResultSet rs, int columnIndex) throws SQLException {
+        String value = rs.getString(columnIndex);
+        return value == null ? null : UserStatus.valueOf(value);
+    }
+
+    @Override
+    public UserStatus getNullableResult(CallableStatement cs, int columnIndex) throws SQLException {
+        String value = cs.getString(columnIndex);
+        return value == null ? null : UserStatus.valueOf(value);
+    }
+}
+```
+
+**2. 在实体类中指定类型转换器**
+
+```java
+@TableField(value = "status", typeHandler = UserStatusConverter.class)
+private UserStatus status;
+```
+
+**3. 在全局异常处理器中添加类型转换异常处理**
+
+```java
+@ExceptionHandler(IllegalArgumentException.class)
+public ResponseEntity<Map<String, Object>> handleIllegalArgumentException(IllegalArgumentException e) {
+    log.error("参数异常", e);
+
+    Map<String, Object> result = new HashMap<>();
+    result.put("code", 400);
+    result.put("message", "参数错误: " + e.getMessage());
+    result.put("data", null);
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+}
+
+@ExceptionHandler(SQLException.class)
+public ResponseEntity<Map<String, Object>> handleSQLException(SQLException e) {
+    log.error("SQL异常", e);
+
+    Map<String, Object> result = new HashMap<>();
+    result.put("code", 500);
+    result.put("message", "数据库操作失败: " + e.getMessage());
+    result.put("data", null);
+
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
+}
+```
+
+**4. 配置WebMvcConfig注册转换器**
+
+```java
+package com.haocai.management.config;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.format.FormatterRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+/**
+ * Web MVC配置
+ */
+@Configuration
+public class WebMvcConfig implements WebMvcConfigurer {
+
+    @Override
+    public void addFormatters(FormatterRegistry registry) {
+        // 注册自定义类型转换器
+        registry.addConverter(new UserStatusConverter());
+    }
+}
+```
+
+**5. 测试验证**
+
+```java
+@Test
+void testUserStatusConversion() {
+    // 测试字符串转枚举
+    UserStatus status = UserStatus.valueOf("ACTIVE");
+    assertEquals(UserStatus.ACTIVE, status);
+    
+    // 测试枚举转字符串
+    String statusStr = status.name();
+    assertEquals("ACTIVE", statusStr);
+}
+```
+
 #### 异常处理策略详解：
 
 **1. 数据访问异常处理：**
@@ -355,6 +659,138 @@ public class BusinessException extends RuntimeException {
     // 更多工厂方法...
 }
 ```
+
+#### ⚠️ 重要：字段自动填充配置
+
+**问题背景：**
+在测试过程中发现，创建和更新用户时，`createTime`、`updateTime`、`createBy`、`updateBy` 等字段需要手动设置，容易遗漏导致数据不一致。
+
+**解决方案：**
+
+**1. 创建字段自动填充处理器**
+
+```java
+package com.haocai.management.config;
+
+import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.reflection.MetaObject;
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
+
+/**
+ * MyBatis-Plus字段自动填充处理器
+ * 自动填充创建时间、更新时间、创建人、更新人等字段
+ */
+@Slf4j
+@Component
+public class MyMetaObjectHandler implements MetaObjectHandler {
+
+    @Override
+    public void insertFill(MetaObject metaObject) {
+        log.debug("开始插入填充...");
+        
+        // 自动填充创建时间
+        this.strictInsertFill(metaObject, "createTime", LocalDateTime.class, LocalDateTime.now());
+        
+        // 自动填充更新时间
+        this.strictInsertFill(metaObject, "updateTime", LocalDateTime.class, LocalDateTime.now());
+        
+        // 自动填充创建人（从当前登录用户获取）
+        // 注意：这里需要根据实际的认证框架获取当前用户ID
+        Long currentUserId = getCurrentUserId();
+        if (currentUserId != null) {
+            this.strictInsertFill(metaObject, "createBy", Long.class, currentUserId);
+            this.strictInsertFill(metaObject, "updateBy", Long.class, currentUserId);
+        }
+    }
+
+    @Override
+    public void updateFill(MetaObject metaObject) {
+        log.debug("开始更新填充...");
+        
+        // 自动填充更新时间
+        this.strictUpdateFill(metaObject, "updateTime", LocalDateTime.class, LocalDateTime.now());
+        
+        // 自动填充更新人
+        Long currentUserId = getCurrentUserId();
+        if (currentUserId != null) {
+            this.strictUpdateFill(metaObject, "updateBy", Long.class, currentUserId);
+        }
+    }
+    
+    /**
+     * 获取当前登录用户ID
+     * 注意：需要根据实际的认证框架实现
+     */
+    private Long getCurrentUserId() {
+        // TODO: 从SecurityContext或Session中获取当前用户ID
+        // 示例代码：
+        // Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        // if (authentication != null && authentication.isAuthenticated()) {
+        //     return ((UserDetails) authentication.getPrincipal()).getId();
+        // }
+        return null;
+    }
+}
+```
+
+**2. 在实体类中添加自动填充注解**
+
+```java
+public class SysUser {
+    
+    @TableField(fill = FieldFill.INSERT)
+    private LocalDateTime createTime;
+    
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private LocalDateTime updateTime;
+    
+    @TableField(fill = FieldFill.INSERT)
+    private Long createBy;
+    
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private Long updateBy;
+}
+```
+
+**3. 配置MyBatis-Plus启用自动填充**
+
+在 `application.yml` 中配置：
+
+```yaml
+mybatis-plus:
+  global-config:
+    db-config:
+      # 逻辑删除配置
+      logic-delete-field: deleted  # 逻辑删除字段名
+      logic-delete-value: 1        # 逻辑删除值（已删除）
+      logic-not-delete-value: 0     # 逻辑未删除值（未删除）
+```
+
+**4. 测试验证**
+
+```java
+@Test
+void testAutoFill() {
+    SysUser user = new SysUser();
+    user.setUsername("testuser");
+    user.setPassword("password");
+    
+    userMapper.insert(user);
+    
+    assertNotNull(user.getCreateTime(), "createTime应该自动填充");
+    assertNotNull(user.getUpdateTime(), "updateTime应该自动填充");
+}
+```
+
+**5. 最佳实践总结**
+
+- **自动填充**：避免手动设置时间字段，减少遗漏
+- **审计追踪**：记录创建人和更新人，便于数据追溯
+- **事务管理**：确保自动填充在事务中正确执行
+- **日志记录**：记录填充过程，便于调试
 
 #### 设计要点：
 

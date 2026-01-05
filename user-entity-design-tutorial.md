@@ -119,7 +119,7 @@ private String password;  // 密码，加密存储
 @NotBlank
 @Size(max = 50)
 @Column(nullable = false, length = 50)
-private String realName;  // 真实姓名
+private String name;  // 真实姓名（注意：数据库字段名为name，而非realName）
 
 @NotBlank
 @Email
@@ -133,6 +133,12 @@ private String email;  // 邮箱，唯一
 private String phone;  // 手机号，唯一
 ```
 
+**⚠️ 重要提示：字段命名规范**
+- **Java字段名**：使用驼峰命名法，如 `name`, `departmentId`
+- **数据库字段名**：使用下划线命名法，如 `name`, `department_id`
+- **字段映射**：当Java字段名与数据库字段名不一致时，必须使用 `@TableField` 注解明确指定
+- **实际案例**：在测试中发现 `realName` 字段与数据库 `name` 字段不匹配，已统一改为 `name`
+
 **扩展字段：**
 ```java
 @Column(length = 500)
@@ -142,9 +148,15 @@ private String avatar;  // 头像URL
 @Column(nullable = false)
 private UserStatus status = UserStatus.NORMAL;  // 用户状态
 
+@TableField("department_id")  // ⚠️ 重要：明确指定数据库字段名
 @Column
 private Long departmentId;  // 部门ID
 ```
+
+**⚠️ 重要提示：字段映射规范**
+- **驼峰转下划线**：MyBatis-Plus默认将 `departmentId` 映射到 `department_id`
+- **显式映射**：对于复杂字段，建议使用 `@TableField` 注解明确指定数据库字段名
+- **测试验证**：在测试中发现 `departmentId` 字段映射问题，已添加 `@TableField("department_id")` 注解
 
 **审计字段：**
 ```java

@@ -4,8 +4,10 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.haocai.management.entity.SysUser;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -17,6 +19,7 @@ import java.util.List;
  * @author 系统开发团队
  * @since 2026-01-07
  */
+@Mapper
 public interface SysUserMapper extends BaseMapper<SysUser> {
 
     /**
@@ -65,7 +68,7 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
      *
      * @param page 分页对象
      * @param username 用户名关键词（可选）
-     * @param realName 真实姓名关键词（可选）
+     * @param name 真实姓名关键词（可选）
      * @param status 用户状态（可选）
      * @param departmentId 部门ID（可选）
      * @return 分页结果
@@ -73,14 +76,14 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
     @Select("<script>" +
             "SELECT * FROM sys_user WHERE deleted = 0" +
             "<if test='username != null and username != \"\"'> AND username LIKE CONCAT('%', #{username}, '%')</if>" +
-            "<if test='realName != null and realName != \"\"'> AND real_name LIKE CONCAT('%', #{realName}, '%')</if>" +
+            "<if test='name != null and name != \"\"'> AND name LIKE CONCAT('%', #{name}, '%')</if>" +
             "<if test='status != null'> AND status = #{status}</if>" +
             "<if test='departmentId != null'> AND department_id = #{departmentId}</if>" +
             " ORDER BY create_time DESC" +
             "</script>")
     IPage<SysUser> selectUserPage(Page<SysUser> page,
                                   @Param("username") String username,
-                                  @Param("realName") String realName,
+                                  @Param("name") String name,
                                   @Param("status") Integer status,
                                   @Param("departmentId") Long departmentId);
 
@@ -154,6 +157,14 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
      * @param updateBy 操作者ID
      * @return 影响行数
      */
+    @Update("<script>" +
+            "UPDATE sys_user SET status = #{status}, update_time = NOW(), update_by = #{updateBy} " +
+            "WHERE id IN " +
+            "<foreach collection='userIds' item='id' open='(' separator=',' close=')'>" +
+            "#{id}" +
+            "</foreach>" +
+            " AND deleted = 0" +
+            "</script>")
     int updateStatusBatch(@Param("userIds") List<Long> userIds,
                          @Param("status") Integer status,
                          @Param("updateBy") Long updateBy);

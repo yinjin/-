@@ -68,64 +68,102 @@
 - [x] 编译测试通过 ✅
 - [x] 创建开发教程文档 ✅
 
-#### 1.4 用户控制层（预计0.5小时）
-- [ ] 创建用户Controller `SysUserController`
-  - 用户注册接口 `/api/user/register`
-  - 用户登录接口 `/api/user/login`
-  - 获取用户信息接口 `/api/user/info`
-  - 更新用户信息接口 `/api/user/update`
-  - 用户列表接口 `/api/user/list`
-  - 用户状态切换接口 `/api/user/status`
-- [ ] 配置接口权限注解
+#### 1.4 用户控制层（预计0.5小时）✅ 已完成
+- [x] 创建用户Controller `SysUserController`
+  - 用户注册接口 `/api/user/register` ✅
+  - 用户登录接口 `/api/user/login` ✅
+  - 获取用户信息接口 `/api/user/info` ✅
+  - 更新用户信息接口 `/api/user/update` ✅
+  - 用户列表接口 `/api/user/list` ✅
+  - 用户状态切换接口 `/api/user/status` ✅
+  - 批量状态更新接口 `/api/user/batch/status` ✅
+  - 用户删除接口 `/api/user/delete` ✅
+  - 批量删除接口 `/api/user/batch/delete` ✅
+  - 数据验证接口（用户名/邮箱/手机号检查）✅
+- [x] 统一响应格式封装 `ApiResponse<T>`
+  - 泛型响应包装类 ✅
+  - 统一JSON格式：{code, message, data, timestamp} ✅
+  - 静态工厂方法：success()、error() ✅
+- [ ] 配置接口权限注解（待后续JWT认证完成后配置）
   - 登录接口公开访问
   - 其他接口需要认证
-- [ ] 统一响应格式封装
+- [x] 集成Swagger API文档 ✅
+- [x] 参数验证和异常处理 ✅
+- [x] 编译测试通过 ✅
 
 ### 2. JWT认证机制实现（预计2小时）
 
-#### 2.1 JWT工具类开发（预计1小时）
-- [ ] 创建JWT工具类 `JwtUtils`
-  - 生成JWT token方法
-  - 解析JWT token方法
-  - 验证token有效性方法
-  - 刷新token方法
-  - 从token中提取用户信息
-- [ ] 配置JWT参数
-  - 密钥配置
-  - token过期时间配置
-  - 刷新token过期时间配置
+#### 2.1 JWT工具类开发（预计1小时）✅ 已完成
+- [x] 创建JWT工具类 `JwtUtils`
+  - [x] 生成JWT token方法
+  - [x] 解析JWT token方法
+  - [x] 验证token有效性方法
+  - [x] 刷新token方法
+  - [x] 从token中提取用户信息
+- [x] 配置JWT参数
+  - [x] 密钥配置
+  - [x] token过期时间配置
+  - [x] 刷新token过期时间配置
+- [x] 编写测试用例
+  - [x] 正常功能测试
+  - [x] 边界测试
+  - [x] 异常测试
+- [x] 创建开发文档
+  - [x] 开发过程记录
+  - [x] 使用指南
+  - [x] 规范更新建议
 
-#### 2.2 Spring Security配置（预计1小时）
-- [ ] 创建安全配置类 `SecurityConfig`
-  - 配置密码编码器
-  - 配置认证管理器
-  - 配置JWT过滤器
-  - 配置跨域访问
-  - 配置请求授权规则
-- [ ] 创建JWT认证过滤器 `JwtAuthenticationFilter`
-  - 拦截请求验证token
-  - 设置认证上下文
-  - 处理token过期
-- [ ] 创建自定义认证提供者
-  - 实现用户名密码认证
-  - 集成JWT token验证
+#### 2.2 Spring Security配置（预计1小时）✅ 已完成
+- [x] 创建安全配置类 `SecurityConfig`
+  - [x] 配置密码编码器（BCrypt）
+  - [x] 配置认证管理器
+  - [x] 配置JWT过滤器
+  - [x] 配置跨域访问
+  - [x] 配置请求授权规则
+- [x] 创建JWT认证过滤器 `JwtAuthenticationFilter`
+  - [x] 拦截请求验证token
+  - [x] 设置认证上下文
+  - [x] 处理token过期
+- [x] 创建认证入口点 `JwtAuthenticationEntryPoint`
+  - [x] 处理认证失败（401）
+  - [x] 统一错误响应格式
+  - [x] 记录安全日志
+- [x] 创建访问拒绝处理器 `JwtAccessDeniedHandler`
+  - [x] 处理权限不足（403）
+  - [x] 统一错误响应格式
+  - [x] 记录访问拒绝日志
+- [x] 创建用户详情服务 `UserDetailsServiceImpl`
+  - [x] 实现UserDetailsService接口
+  - [x] 从数据库加载用户信息
+  - [x] 验证用户状态
+- [x] 编写测试用例 `SecurityConfigTest`
+  - [x] 密码编码器测试
+  - [x] Security配置加载测试
+- [x] 创建开发文档
+  - [x] 开发过程记录
+  - [x] 使用指南
+  - [x] 规范更新建议
 
 ### 3. 前端用户管理页面开发（预计3小时）
 
-#### 3.1 登录页面开发（预计1小时）
-- [ ] 创建登录页面组件 `LoginView.vue`
-  - 用户名密码输入框
-  - 登录按钮和加载状态
-  - 表单验证（必填、格式验证）
-  - 错误提示显示
-  - 记住密码功能
-- [ ] 配置登录路由
-  - 登录页面路由配置
-  - 未登录重定向处理
-- [ ] 实现登录逻辑
-  - 调用后端登录接口
-  - token存储到localStorage
-  - 登录成功跳转到首页
+#### 3.1 登录页面开发（预计1小时）✅ 已完成
+- [x] 创建登录页面组件 `LoginView.vue`
+  - 用户名密码输入框 ✅
+  - 登录按钮和加载状态 ✅
+  - 表单验证（必填、格式验证）✅
+  - 错误提示显示 ✅
+  - 记住密码功能 ✅
+- [x] 配置登录路由
+  - 登录页面路由配置 ✅
+  - 未登录重定向处理 ✅
+- [x] 实现登录逻辑
+  - 调用后端登录接口 ✅
+  - token存储到localStorage ✅
+  - 登录成功跳转到首页 ✅
+- [x] 创建开发文档
+  - 开发过程记录 ✅
+  - 使用指南 ✅
+  - 规范更新建议 ✅
 
 #### 3.2 用户管理页面开发（预计1.5小时）
 - [ ] 创建用户管理页面 `UserManage.vue`

@@ -1,5 +1,6 @@
 package com.haocai.management.entity;
 
+import com.baomidou.mybatisplus.annotation.EnumValue;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -36,7 +37,9 @@ public enum UserStatus {
 
     /**
      * 状态码
+     * 使用@EnumValue注解标记，MyBatis-Plus会将此值存入数据库
      */
+    @EnumValue
     private final Integer code;
 
     /**

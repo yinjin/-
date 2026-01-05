@@ -28,7 +28,7 @@ public class UserVO {
     /**
      * 真实姓名
      */
-    private String realName;
+    private String name;
 
     /**
      * 邮箱地址

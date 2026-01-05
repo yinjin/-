@@ -11,18 +11,25 @@ import com.haocai.management.entity.UserStatus;
 import com.haocai.management.exception.BusinessException;
 import com.haocai.management.mapper.SysUserLoginLogMapper;
 import com.haocai.management.mapper.SysUserMapper;
-import com.haocai.management.mapper.SysUserRepository;
+import com.haocai.management.mapper.SysUserMapper;
 import com.haocai.management.service.ISysUserService;
+import com.haocai.management.utils.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
 /**
  * 用户业务逻辑实现类
@@ -34,9 +41,11 @@ import java.util.Optional;
 public class SysUserServiceImpl implements ISysUserService {
 
     private final SysUserMapper sysUserMapper;
-    private final SysUserRepository sysUserRepository;
     private final SysUserLoginLogMapper loginLogMapper;
     private final PasswordEncoder passwordEncoder;
+    @Lazy
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtils jwtUtils;
 
     @Override
     @Transactional
@@ -62,7 +71,7 @@ public class SysUserServiceImpl implements ISysUserService {
         SysUser user = new SysUser();
         user.setUsername(registerDTO.getUsername());
         user.setPassword(passwordEncoder.encode(registerDTO.getPassword())); // 密码加密
-        user.setRealName(registerDTO.getRealName());
+        user.setName(registerDTO.getName());
         user.setEmail(registerDTO.getEmail());
         user.setPhone(registerDTO.getPhone());
         user.setAvatar(registerDTO.getAvatar());
@@ -87,45 +96,83 @@ public class SysUserServiceImpl implements ISysUserService {
     public String login(UserLoginDTO loginDTO) {
         log.info("开始用户登录，用户名: {}", loginDTO.getUsername());
 
-        // 1. 根据用户名查找用户
-        SysUser user = findByUsername(loginDTO.getUsername());
-        if (user == null) {
-            log.warn("用户登录失败，用户不存在，用户名: {}", loginDTO.getUsername());
-            recordLoginLog(null, loginDTO.getIpAddress(), false, "用户不存在");
-            throw BusinessException.userNotFound();
-        }
+        try {
+            // 遵循：安全规范-使用AuthenticationManager进行认证
+            // 1. 使用Spring Security的AuthenticationManager进行认证
+            // 这会自动调用UserDetailsServiceImpl加载用户信息并验证密码
+            Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                    loginDTO.getUsername(),
+                    loginDTO.getPassword()
+                )
+            );
 
-        // 2. 检查用户状态
-        if (user.getStatus() == UserStatus.DISABLED) {
-            log.warn("用户登录失败，用户已被禁用，用户名: {}", loginDTO.getUsername());
-            recordLoginLog(user.getId(), loginDTO.getIpAddress(), false, "用户已被禁用");
-            throw BusinessException.userDisabled();
-        }
+            // 2. 认证成功后，从Authentication对象中获取用户信息
+            // 注意：这里使用的是Spring Security的UserDetails，不是我们的SysUser
+            Object principal = authentication.getPrincipal();
+            log.debug("认证成功，principal类型: {}", principal.getClass().getName());
 
-        if (user.getStatus() == UserStatus.LOCKED) {
-            log.warn("用户登录失败，用户已被锁定，用户名: {}", loginDTO.getUsername());
-            recordLoginLog(user.getId(), loginDTO.getIpAddress(), false, "用户已被锁定");
-            throw BusinessException.userLocked();
-        }
+            // 3. 重新查询用户信息以获取完整的SysUser对象
+            SysUser user = findByUsername(loginDTO.getUsername());
+            if (user == null) {
+                log.error("认证成功但未找到用户信息，用户名: {}", loginDTO.getUsername());
+                throw BusinessException.userNotFound();
+            }
 
-        // 3. 验证密码
-        if (!passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())) {
-            log.warn("用户登录失败，密码错误，用户名: {}", loginDTO.getUsername());
-            recordLoginLog(user.getId(), loginDTO.getIpAddress(), false, "密码错误");
+            // 4. 检查用户状态（虽然AuthenticationManager已经检查过，但再次确认）
+            if (user.getStatus() == UserStatus.DISABLED) {
+                log.warn("用户登录失败，用户已被禁用，用户名: {}", loginDTO.getUsername());
+                recordLoginLog(user.getId(), loginDTO.getIpAddress(), false, "用户已被禁用");
+                throw BusinessException.userDisabled();
+            }
+
+            if (user.getStatus() == UserStatus.LOCKED) {
+                log.warn("用户登录失败，用户已被锁定，用户名: {}", loginDTO.getUsername());
+                recordLoginLog(user.getId(), loginDTO.getIpAddress(), false, "用户已被锁定");
+                throw BusinessException.userLocked();
+            }
+
+            // 5. 更新最后登录时间
+            updateLastLoginTime(user.getId());
+
+            // 6. 记录登录成功日志
+            recordLoginLog(user.getId(), loginDTO.getIpAddress(), true, null);
+
+            // 7. 生成JWT token
+            // 遵循：安全规范-使用JWT工具类生成token
+            // 遵循：配置规范-从配置文件读取过期时间
+            Map<String, Object> claims = new HashMap<>();
+            claims.put("userId", user.getId());
+            claims.put("username", user.getUsername());
+            claims.put("name", user.getName());
+            
+            String token = jwtUtils.generateToken(claims, null);
+            
+            log.info("用户登录成功，用户名: {}, 用户ID: {}", user.getUsername(), user.getId());
+            return token;
+
+        } catch (AuthenticationException e) {
+            // 遵循：异常处理规范-完善的异常处理
+            // 认证失败（用户名或密码错误）
+            log.warn("用户登录失败，认证失败，用户名: {}, 原因: {}", 
+                    loginDTO.getUsername(), e.getMessage());
+            
+            // 尝试获取用户ID以记录日志
+            SysUser user = findByUsername(loginDTO.getUsername());
+            Long userId = user != null ? user.getId() : null;
+            
+            recordLoginLog(userId, loginDTO.getIpAddress(), false, "用户名或密码错误");
             throw BusinessException.passwordError();
+            
+        } catch (BusinessException e) {
+            // 业务异常直接抛出
+            throw e;
+            
+        } catch (Exception e) {
+            // 其他异常
+            log.error("用户登录失败，系统异常，用户名: {}", loginDTO.getUsername(), e);
+            throw BusinessException.operationFailed("登录失败: " + e.getMessage());
         }
-
-        // 4. 更新最后登录时间
-        updateLastLoginTime(user.getId());
-
-        // 5. 记录登录成功日志
-        recordLoginLog(user.getId(), loginDTO.getIpAddress(), true, null);
-
-        // 6. 生成JWT token (暂时返回简单token，后续完善)
-        String token = "temp-token-" + user.getId() + "-" + System.currentTimeMillis();
-        log.info("用户登录成功，用户名: {}, 用户ID: {}", user.getUsername(), user.getId());
-
-        return token;
     }
 
     @Override
@@ -166,7 +213,7 @@ public class SysUserServiceImpl implements ISysUserService {
         // 4. 更新用户信息
         SysUser updateUser = new SysUser();
         updateUser.setId(userId);
-        updateUser.setRealName(updateDTO.getRealName());
+        updateUser.setName(updateDTO.getName());
         updateUser.setEmail(updateDTO.getEmail());
         updateUser.setPhone(updateDTO.getPhone());
         updateUser.setAvatar(updateDTO.getAvatar());
@@ -196,8 +243,18 @@ public class SysUserServiceImpl implements ISysUserService {
             throw BusinessException.userNotFound();
         }
 
-        // 2. 更新状态
-        int result = sysUserMapper.updateStatusBatch(List.of(userId), status.getCode(), updateBy);
+        // 2. 使用MyBatis-Plus的UpdateWrapper更新状态
+        SysUser updateUser = new SysUser();
+        updateUser.setStatus(status);
+        updateUser.setUpdateTime(LocalDateTime.now());
+        updateUser.setUpdateBy(updateBy);
+
+        com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper<SysUser> updateWrapper = 
+            new com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper<>();
+        updateWrapper.eq("id", userId);
+        updateWrapper.eq("deleted", 0);
+
+        int result = sysUserMapper.update(updateUser, updateWrapper);
         if (result <= 0) {
             log.error("更新用户状态失败，用户ID: {}", userId);
             return false;
@@ -208,9 +265,9 @@ public class SysUserServiceImpl implements ISysUserService {
     }
 
     @Override
-    public IPage<SysUser> findUserPage(Page<SysUser> page, String username, String realName,
+    public IPage<SysUser> findUserPage(Page<SysUser> page, String username, String name,
                                      UserStatus status, Long departmentId) {
-        return sysUserMapper.selectUserPage(page, username, realName,
+        return sysUserMapper.selectUserPage(page, username, name,
                                           status != null ? status.getCode() : null, departmentId);
     }
 
@@ -223,7 +280,18 @@ public class SysUserServiceImpl implements ISysUserService {
             return 0;
         }
 
-        int result = sysUserMapper.updateStatusBatch(userIds, status.getCode(), updateBy);
+        // 使用MyBatis-Plus的UpdateWrapper批量更新状态
+        SysUser updateUser = new SysUser();
+        updateUser.setStatus(status);
+        updateUser.setUpdateTime(LocalDateTime.now());
+        updateUser.setUpdateBy(updateBy);
+
+        com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper<SysUser> updateWrapper = 
+            new com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper<>();
+        updateWrapper.in("id", userIds);
+        updateWrapper.eq("deleted", 0);
+
+        int result = sysUserMapper.update(updateUser, updateWrapper);
         log.info("批量更新用户状态完成，影响用户数量: {}", result);
         return result;
     }
@@ -239,13 +307,8 @@ public class SysUserServiceImpl implements ISysUserService {
             throw BusinessException.userNotFound();
         }
 
-        // 2. 逻辑删除用户
-        SysUser deleteUser = new SysUser();
-        deleteUser.setId(userId);
-        deleteUser.setDeleted(1); // 标记为已删除
-        deleteUser.setUpdateTime(LocalDateTime.now());
-
-        int result = sysUserMapper.updateById(deleteUser);
+        // 2. 使用MyBatis-Plus的逻辑删除方法
+        int result = sysUserMapper.deleteById(userId);
         if (result <= 0) {
             log.error("删除用户失败，用户ID: {}", userId);
             return false;
@@ -266,8 +329,13 @@ public class SysUserServiceImpl implements ISysUserService {
 
         int count = 0;
         for (Long userId : userIds) {
-            if (deleteUser(userId, deleteBy)) {
-                count++;
+            try {
+                if (deleteUser(userId, deleteBy)) {
+                    count++;
+                }
+            } catch (BusinessException e) {
+                // 跳过不存在的用户，继续处理其他用户
+                log.warn("批量删除用户时跳过不存在的用户ID: {}", userId);
             }
         }
 
@@ -282,34 +350,37 @@ public class SysUserServiceImpl implements ISysUserService {
 
     @Override
     public boolean existsByEmail(String email, Long excludeUserId) {
-        Optional<SysUser> userOpt = sysUserRepository.findByEmailAndDeleted(email, 0);
-        if (!userOpt.isPresent()) {
+        SysUser user = sysUserMapper.selectByEmail(email);
+        if (user == null) {
             return false;
         }
-        SysUser user = userOpt.get();
         return excludeUserId == null || !user.getId().equals(excludeUserId);
     }
 
     @Override
     public boolean existsByPhone(String phone, Long excludeUserId) {
-        Optional<SysUser> userOpt = sysUserRepository.findByPhoneAndDeleted(phone, 0);
-        if (!userOpt.isPresent()) {
+        SysUser user = sysUserMapper.selectByPhone(phone);
+        if (user == null) {
             return false;
         }
-        SysUser user = userOpt.get();
         return excludeUserId == null || !user.getId().equals(excludeUserId);
     }
 
     @Override
     public void recordLoginLog(Long userId, String loginIp, boolean success, String failReason) {
         try {
+            // 如果userId为null，说明用户不存在，不记录登录日志
+            if (userId == null) {
+                log.warn("用户ID为null，跳过记录登录日志");
+                return;
+            }
+            
             SysUserLoginLog loginLog = new SysUserLoginLog();
             loginLog.setUserId(userId);
-            if (userId != null) {
-                SysUser user = findById(userId);
-                if (user != null) {
-                    loginLog.setUsername(user.getUsername());
-                }
+            
+            SysUser user = findById(userId);
+            if (user != null) {
+                loginLog.setUsername(user.getUsername());
             }
             loginLog.setLoginIp(loginIp);
             loginLog.setLoginTime(LocalDateTime.now());

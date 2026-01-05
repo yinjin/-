@@ -17,12 +17,16 @@ CREATE TABLE sys_user (
     phone VARCHAR(20) COMMENT '手机号',
     department_id BIGINT COMMENT '部门ID',
     role VARCHAR(50) NOT NULL DEFAULT 'student' COMMENT '角色：admin/teacher/student',
-    status TINYINT NOT NULL DEFAULT 1 COMMENT '状态：1正常 0禁用',
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE' COMMENT '状态：ACTIVE/INACTIVE',
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除：0未删除 1已删除',
     create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    create_by BIGINT COMMENT '创建人ID',
+    update_by BIGINT COMMENT '更新人ID',
     INDEX idx_username (username),
     INDEX idx_department (department_id),
-    INDEX idx_status (status)
+    INDEX idx_status (status),
+    INDEX idx_deleted (deleted)
 ) COMMENT '用户表';
 
 -- 部门表
@@ -98,8 +102,8 @@ CREATE TABLE sys_user_role (
 
 -- 插入初始数据
 -- 默认管理员用户
-INSERT INTO sys_user (username, password, name, role, status) VALUES
-('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lbdxp7jyxv5QD0yRK', '系统管理员', 'admin', 1);
+INSERT INTO sys_user (username, password, name, role, status, deleted) VALUES
+('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lbdxp7jyxv5QD0yRK', '系统管理员', 'admin', 'ACTIVE', 0);
 
 -- 默认角色
 INSERT INTO sys_role (name, code, description, status) VALUES

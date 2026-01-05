@@ -65,12 +65,12 @@ public interface ISysUserService {
      * 分页查询用户列表
      * @param page 分页参数
      * @param username 用户名关键词（可选）
-     * @param realName 真实姓名关键词（可选）
+     * @param name 真实姓名关键词（可选）
      * @param status 用户状态（可选）
      * @param departmentId 部门ID（可选）
      * @return 分页结果
      */
-    IPage<SysUser> findUserPage(Page<SysUser> page, String username, String realName,
+    IPage<SysUser> findUserPage(Page<SysUser> page, String username, String name,
                                UserStatus status, Long departmentId);
 
     /**

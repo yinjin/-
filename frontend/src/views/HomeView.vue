@@ -1,49 +1,201 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useMainStore } from '@/store'
+import { useRouter } from 'vue-router'
+import { useUserStore } from '@/store/user'
+import { ElMessage } from 'element-plus'
 
-const store = useMainStore()
-const count = ref(0)
+const router = useRouter()
+const userStore = useUserStore()
 
-const increment = () => {
-  count.value++
-  store.increment()
+// 退出登录
+const handleLogout = async () => {
+  try {
+    await userStore.logout()
+    ElMessage.success('退出登录成功')
+    router.push('/login')
+  } catch (error: any) {
+    ElMessage.error(error.message || '退出登录失败')
+  }
+}
+
+// 跳转到用户管理页面
+const goToUserManage = () => {
+  router.push('/users')
 }
 </script>
 
 <template>
   <div class="home">
-    <h1>高职人工智能学院实训耗材管理系统</h1>
-    <p>欢迎使用耗材管理系统</p>
+    <el-container>
+      <el-header>
+        <div class="header-content">
+          <h1>高职人工智能学院实训耗材管理系统</h1>
+          <div class="user-info">
+            <span>欢迎，{{ userStore.userInfo?.name || '用户' }}</span>
+            <el-button type="primary" @click="handleLogout">退出登录</el-button>
+          </div>
+        </div>
+      </el-header>
+      
+      <el-main>
+        <el-card class="welcome-card">
+          <h2>欢迎使用耗材管理系统</h2>
+          <p>本系统提供完整的实训耗材管理功能，包括用户管理、耗材管理、库存管理、领用管理等模块。</p>
+        </el-card>
 
-    <div class="counter">
-      <button @click="increment">count is {{ count }}</button>
-      <p>Store count: {{ store.counter }}</p>
-      <p>Double count: {{ store.doubleCount }}</p>
-    </div>
+        <el-row :gutter="20" class="menu-cards">
+          <el-col :span="8">
+            <el-card class="menu-card" shadow="hover" @click="goToUserManage">
+              <div class="card-content">
+                <el-icon :size="40" color="#409EFF"><User /></el-icon>
+                <h3>用户管理</h3>
+                <p>管理系统用户，包括新增、编辑、删除用户，以及用户状态管理</p>
+              </div>
+            </el-card>
+          </el-col>
+          
+          <el-col :span="8">
+            <el-card class="menu-card" shadow="hover">
+              <div class="card-content">
+                <el-icon :size="40" color="#67C23A"><Box /></el-icon>
+                <h3>耗材管理</h3>
+                <p>管理实训耗材信息，包括耗材分类、规格、库存等</p>
+              </div>
+            </el-card>
+          </el-col>
+          
+          <el-col :span="8">
+            <el-card class="menu-card" shadow="hover">
+              <div class="card-content">
+                <el-icon :size="40" color="#E6A23C"><Document /></el-icon>
+                <h3>领用管理</h3>
+                <p>管理耗材领用申请，包括申请审批、领用记录等</p>
+              </div>
+            </el-card>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="20" class="menu-cards">
+          <el-col :span="8">
+            <el-card class="menu-card" shadow="hover">
+              <div class="card-content">
+                <el-icon :size="40" color="#F56C6C"><DataLine /></el-icon>
+                <h3>库存管理</h3>
+                <p>管理耗材库存，包括入库、出库、库存盘点等</p>
+              </div>
+            </el-card>
+          </el-col>
+          
+          <el-col :span="8">
+            <el-card class="menu-card" shadow="hover">
+              <div class="card-content">
+                <el-icon :size="40" color="#909399"><Setting /></el-icon>
+                <h3>系统设置</h3>
+                <p>系统配置管理，包括参数设置、权限管理等</p>
+              </div>
+            </el-card>
+          </el-col>
+          
+          <el-col :span="8">
+            <el-card class="menu-card" shadow="hover">
+              <div class="card-content">
+                <el-icon :size="40" color="#409EFF"><TrendCharts /></el-icon>
+                <h3>统计分析</h3>
+                <p>耗材使用统计分析，包括领用统计、库存分析等</p>
+              </div>
+            </el-card>
+          </el-col>
+        </el-row>
+      </el-main>
+    </el-container>
   </div>
 </template>
 
 <style scoped>
 .home {
-  text-align: center;
-  padding: 2rem;
+  min-height: 100vh;
+  background: #f5f7fa;
 }
 
-.counter {
-  margin-top: 2rem;
-}
-
-button {
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+.el-header {
   background: #fff;
-  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
 }
 
-button:hover {
-  background: #f0f0f0;
+.header-content {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-content h1 {
+  margin: 0;
+  font-size: 24px;
+  color: #303133;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.user-info span {
+  font-size: 14px;
+  color: #606266;
+}
+
+.el-main {
+  padding: 20px;
+}
+
+.welcome-card {
+  margin-bottom: 30px;
+}
+
+.welcome-card h2 {
+  margin: 0 0 15px 0;
+  color: #303133;
+}
+
+.welcome-card p {
+  margin: 0;
+  color: #606266;
+  line-height: 1.6;
+}
+
+.menu-cards {
+  margin-bottom: 20px;
+}
+
+.menu-card {
+  cursor: pointer;
+  transition: transform 0.3s;
+  height: 200px;
+}
+
+.menu-card:hover {
+  transform: translateY(-5px);
+}
+
+.card-content {
+  text-align: center;
+  padding: 20px;
+}
+
+.card-content h3 {
+  margin: 15px 0 10px 0;
+  color: #303133;
+}
+
+.card-content p {
+  margin: 0;
+  color: #909399;
+  font-size: 14px;
+  line-height: 1.5;
 }
 </style>

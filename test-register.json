@@ -1,0 +1,9 @@
+{
+  "username": "testuser3",
+  "password": "Test@1234",
+  "confirmPassword": "Test@1234",
+  "name": "李四",
+  "email": "test3@example.com",
+  "phone": "13800138003",
+  "verificationCode": "1234"
+}

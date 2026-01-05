@@ -52,7 +52,7 @@ public class UserRegisterDTO {
     @NotBlank(message = "真实姓名不能为空")
     @Size(max = 50, message = "真实姓名长度不能超过50个字符")
     @Pattern(regexp = "^[\\u4e00-\\u9fa5a-zA-Z\\s]+$", message = "真实姓名只能包含中文、英文和空格")
-    private String realName;
+    private String name;
 
     /**
      * 邮箱地址
