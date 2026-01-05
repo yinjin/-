@@ -1,8 +1,12 @@
+D:\developer_project\cangku\backend\src\main\java\com\haocai\management\exception\BusinessException.java
 D:\developer_project\cangku\backend\src\main\java\com\haocai\management\dto\UserRegisterDTO.java
 D:\developer_project\cangku\backend\src\main\java\com\haocai\management\entity\SysUser.java
 D:\developer_project\cangku\backend\src\main\java\com\haocai\management\HaocaiManagementApplication.java
 D:\developer_project\cangku\backend\src\main\java\com\haocai\management\dto\UserVO.java
+D:\developer_project\cangku\backend\src\main\java\com\haocai\management\mapper\SysUserRepository.java
 D:\developer_project\cangku\backend\src\main\java\com\haocai\management\entity\UserStatus.java
+D:\developer_project\cangku\backend\src\main\java\com\haocai\management\mapper\SysUserMapper.java
 D:\developer_project\cangku\backend\src\main\java\com\haocai\management\dto\UserLoginDTO.java
 D:\developer_project\cangku\backend\src\main\java\com\haocai\management\dto\UserUpdateDTO.java
 D:\developer_project\cangku\backend\src\main\java\com\haocai\management\controller\TestController.java
+D:\developer_project\cangku\backend\src\main\java\com\haocai\management\config\GlobalExceptionHandler.java
