@@ -2,12 +2,13 @@ package com.material.system;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 
 /**
  * Material Management System Backend Application
  * Main entry point for the Spring Boot application
  */
-@SpringBootApplication
+@SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
 public class MaterialSystemApplication {
 
     public static void main(String[] args) {

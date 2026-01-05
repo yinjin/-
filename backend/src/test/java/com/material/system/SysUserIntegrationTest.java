@@ -7,9 +7,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.material.system.dto.UserCreateDTO;
-import com.material.system.service.SysUserService;
+import com.material.system.entity.SysUser;
 import com.material.system.exception.BusinessException;
+import com.material.system.service.SysUserService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Map;
 
@@ -27,6 +30,9 @@ public class SysUserIntegrationTest extends AbstractMySQLTest {
     @Autowired
     private SysUserService userService;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Test
     void health_shouldReturnUp() {
         String url = "http://localhost:" + port + "/api/health";
@@ -38,26 +44,57 @@ public class SysUserIntegrationTest extends AbstractMySQLTest {
 
     @Test
     void admin_canLogin_and_getToken() {
-        // create admin user in H2 database via service
-        UserCreateDTO create = new UserCreateDTO();
-        create.setUsername("admin");
-        create.setPassword("admin123");
-        create.setRealName("系统管理员");
-        create.setPhone("13800138000");
-        create.setEmail("admin@example.com");
+        // Clean up any existing admin user first and ensure we have one with known password
         try {
-            userService.createUser(create);
-        } catch (BusinessException ignored) {
-            // already exists from previous setup, ignore for idempotency
+            // Try to find existing admin user
+            LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(SysUser::getUsername, "admin");
+            SysUser existingUser = userService.getOne(wrapper);
+            if (existingUser != null) {
+                // Update the password to ensure it's what we expect
+                existingUser.setPassword(passwordEncoder.encode("admin123"));
+                userService.updateById(existingUser);
+            } else {
+                // create admin user in MySQL database via service
+                UserCreateDTO create = new UserCreateDTO();
+                create.setUsername("admin");
+                create.setPassword("admin123");
+                create.setRealName("系统管理员");
+                create.setPhone("13800138000");
+                create.setEmail("admin@example.com");
+                userService.createUser(create);
+            }
+        } catch (Exception e) {
+            // If update fails, try to delete and recreate
+            try {
+                LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<>();
+                wrapper.eq(SysUser::getUsername, "admin");
+                SysUser existingUser = userService.getOne(wrapper);
+                if (existingUser != null) {
+                    userService.deleteUser(existingUser.getId());
+                }
+                // create admin user in MySQL database via service
+                UserCreateDTO create = new UserCreateDTO();
+                create.setUsername("admin");
+                create.setPassword("admin123");
+                create.setRealName("系统管理员");
+                create.setPhone("13800138000");
+                create.setEmail("admin@example.com");
+                userService.createUser(create);
+            } catch (BusinessException ignored) {
+                // already exists from previous setup, ignore for idempotency
+            }
         }
 
-        String url = "http://localhost:" + port + "/api/api/user/login";
+        String url = "http://localhost:" + port + "/api/user/login";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         String body = "{\"username\":\"admin\",\"password\":\"admin123\"}";
         HttpEntity<String> req = new HttpEntity<>(body, headers);
 
         ResponseEntity<JsonNode> resp = restTemplate.postForEntity(url, req, JsonNode.class);
+        System.out.println("Login response status: " + resp.getStatusCode());
+        System.out.println("Login response body: " + resp.getBody());
         assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
         JsonNode root = resp.getBody();
         assertThat(root).isNotNull();
@@ -67,21 +104,42 @@ public class SysUserIntegrationTest extends AbstractMySQLTest {
 
     @Test
     void user_full_lifecycle_via_api() {
-        // create admin via service for auth
-        UserCreateDTO admin = new UserCreateDTO();
-        admin.setUsername("admin");
-        admin.setPassword("admin123");
-        admin.setRealName("系统管理员");
-        admin.setPhone("13800138000");
-        admin.setEmail("admin@example.com");
+        // Ensure admin user exists with correct password
         try {
-            userService.createUser(admin);
-        } catch (BusinessException ignored) {
-            // ignore if already exists
+            LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(SysUser::getUsername, "admin");
+            SysUser existingUser = userService.getOne(wrapper);
+            if (existingUser != null) {
+                // Update the password to ensure it's what we expect
+                existingUser.setPassword(passwordEncoder.encode("admin123"));
+                userService.updateById(existingUser);
+            } else {
+                // create admin via service for auth
+                UserCreateDTO admin = new UserCreateDTO();
+                admin.setUsername("admin");
+                admin.setPassword("admin123");
+                admin.setRealName("系统管理员");
+                admin.setPhone("13800138000");
+                admin.setEmail("admin@example.com");
+                userService.createUser(admin);
+            }
+        } catch (Exception e) {
+            // If update fails, try to create
+            try {
+                UserCreateDTO admin = new UserCreateDTO();
+                admin.setUsername("admin");
+                admin.setPassword("admin123");
+                admin.setRealName("系统管理员");
+                admin.setPhone("13800138000");
+                admin.setEmail("admin@example.com");
+                userService.createUser(admin);
+            } catch (BusinessException ignored) {
+                // ignore if already exists
+            }
         }
 
         // login to obtain token
-        String loginUrl = "http://localhost:" + port + "/api/api/user/login";
+        String loginUrl = "http://localhost:" + port + "/api/user/login";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         String loginBody = "{\"username\":\"admin\",\"password\":\"admin123\"}";

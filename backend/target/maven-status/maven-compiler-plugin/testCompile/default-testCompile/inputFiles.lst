@@ -1,2 +1,6 @@
-C:\workplace\cangku\backend\src\test\java\com\material\system\AbstractMySQLTest.java
-C:\workplace\cangku\backend\src\test\java\com\material\system\SysUserIntegrationTest.java
+D:\developer_project\cangku\backend\src\test\java\com\material\system\SysRoleControllerTest.java
+D:\developer_project\cangku\backend\src\test\java\com\material\system\SysRoleServiceTest.java
+D:\developer_project\cangku\backend\src\test\java\com\material\system\SysUserIntegrationTest.java
+D:\developer_project\cangku\backend\src\test\java\com\material\system\SysPermissionControllerTest.java
+D:\developer_project\cangku\backend\src\test\java\com\material\system\AbstractMySQLTest.java
+D:\developer_project\cangku\backend\src\test\java\com\material\system\SysPermissionServiceTest.java

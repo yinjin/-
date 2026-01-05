@@ -138,7 +138,32 @@ public enum ResultCode {
     /**
      * 用户名已存在
      */
-    USERNAME_ALREADY_EXIST(10016, "用户名已存在");
+    USERNAME_ALREADY_EXIST(10016, "用户名已存在"),
+
+    /**
+     * 角色不存在
+     */
+    ROLE_NOT_EXIST(10017, "角色不存在"),
+
+    /**
+     * 角色编码已存在
+     */
+    ROLE_CODE_ALREADY_EXIST(10018, "角色编码已存在"),
+
+    /**
+     * 权限不存在
+     */
+    PERMISSION_NOT_EXIST(10019, "权限不存在"),
+
+    /**
+     * 权限编码已存在
+     */
+    PERMISSION_CODE_ALREADY_EXIST(10020, "权限编码已存在"),
+
+    /**
+     * 权限存在子权限
+     */
+    PERMISSION_HAS_CHILDREN(10021, "权限存在子权限，无法删除");
 
     /**
      * 状态码

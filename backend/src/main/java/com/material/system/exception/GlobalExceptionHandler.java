@@ -13,6 +13,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.stream.Collectors;
 
+import org.springframework.http.ResponseEntity;
+
+import org.springframework.security.access.AccessDeniedException;
+
 /**
  * 全局异常处理器
  */
@@ -21,13 +25,51 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
     /**
+     * 权限不足异常处理
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Result<?>> handleAccessDeniedException(AccessDeniedException e) {
+        log.warn("权限不足: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Result.error(403, "权限不足"));
+    }
+
+    /**
      * 业务异常处理
      */
     @ExceptionHandler(BusinessException.class)
-    @ResponseStatus(HttpStatus.OK)
-    public Result<?> handleBusinessException(BusinessException e) {
+    public ResponseEntity<Result<?>> handleBusinessException(BusinessException e) {
         log.error("业务异常: {}", e.getMessage(), e);
-        return Result.error(e.getCode(), e.getMessage());
+        // 根据错误码返回不同的HTTP状态码
+        HttpStatus status = getHttpStatusFromResultCode(e.getCode());
+        return ResponseEntity.status(status).body(Result.error(e.getCode(), e.getMessage()));
+    }
+
+    /**
+     * 根据ResultCode获取HTTP状态码
+     */
+    private HttpStatus getHttpStatusFromResultCode(Integer code) {
+        if (code >= 10000) {
+            // 业务错误码使用400 Bad Request
+            return HttpStatus.BAD_REQUEST;
+        }
+        switch (code) {
+            case 401:
+                return HttpStatus.UNAUTHORIZED;
+            case 403:
+                return HttpStatus.FORBIDDEN;
+            case 404:
+                return HttpStatus.NOT_FOUND;
+            case 405:
+                return HttpStatus.METHOD_NOT_ALLOWED;
+            case 408:
+                return HttpStatus.REQUEST_TIMEOUT;
+            case 500:
+                return HttpStatus.INTERNAL_SERVER_ERROR;
+            case 503:
+                return HttpStatus.SERVICE_UNAVAILABLE;
+            default:
+                return HttpStatus.BAD_REQUEST;
+        }
     }
 
     /**

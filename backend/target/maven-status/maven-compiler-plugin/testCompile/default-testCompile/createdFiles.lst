@@ -1,2 +1,6 @@
-com\material\system\SysUserIntegrationTest.class
+com\material\system\SysPermissionServiceTest.class
+com\material\system\SysRoleServiceTest.class
 com\material\system\AbstractMySQLTest.class
+com\material\system\SysPermissionControllerTest.class
+com\material\system\SysRoleControllerTest.class
+com\material\system\SysUserIntegrationTest.class

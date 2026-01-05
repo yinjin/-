@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @Tag(name = "用户管理", description = "用户管理相关接口")
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/user")
 @RequiredArgsConstructor
 @Validated
 public class SysUserController {
@@ -130,5 +130,37 @@ public class SysUserController {
             @Parameter(description = "状态") @RequestParam Integer status) {
         userService.updateUserStatus(id, status);
         return Result.success();
+    }
+    
+    /**
+     * 分配角色
+     */
+    @Operation(summary = "分配角色")
+    @PostMapping("/{id}/role")
+    public Result<Void> assignRole(
+            @Parameter(description = "用户ID") @PathVariable Long id,
+            @Parameter(description = "角色ID") @RequestParam Long roleId) {
+        userService.assignRole(id, roleId);
+        return Result.success();
+    }
+    
+    /**
+     * 移除角色
+     */
+    @Operation(summary = "移除角色")
+    @DeleteMapping("/{id}/role")
+    public Result<Void> removeRole(@Parameter(description = "用户ID") @PathVariable Long id) {
+        userService.removeRole(id);
+        return Result.success();
+    }
+    
+    /**
+     * 获取用户角色ID列表
+     */
+    @Operation(summary = "获取用户角色ID列表")
+    @GetMapping("/{id}/roles")
+    public Result<java.util.List<Long>> getUserRoleIds(@Parameter(description = "用户ID") @PathVariable Long id) {
+        java.util.List<Long> roleIds = userService.getUserRoleIds(id);
+        return Result.success(roleIds);
     }
 }

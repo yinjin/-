@@ -7,9 +7,12 @@ import com.material.system.common.ResultCode;
 import com.material.system.dto.UserCreateDTO;
 import com.material.system.dto.UserLoginDTO;
 import com.material.system.dto.UserUpdateDTO;
+import com.material.system.entity.SysRole;
 import com.material.system.entity.SysUser;
+import com.material.system.entity.SysUserRole;
 import com.material.system.exception.BusinessException;
 import com.material.system.mapper.SysUserMapper;
+import com.material.system.service.SysRoleService;
 import com.material.system.service.SysUserService;
 import com.material.system.util.JwtUtil;
 import com.material.system.util.PasswordUtil;
@@ -17,9 +20,12 @@ import com.material.system.vo.UserVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 用户服务实现类
@@ -29,6 +35,8 @@ import java.time.LocalDateTime;
 public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> implements SysUserService {
     
     private final JwtUtil jwtUtil;
+    private final com.material.system.mapper.SysUserRoleMapper sysUserRoleMapper;
+    private final SysRoleService sysRoleService;
     
     @Override
     public String login(UserLoginDTO loginDTO) {
@@ -131,9 +139,16 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         UserVO userVO = new UserVO();
         BeanUtils.copyProperties(user, userVO);
         
-        // TODO: 查询部门名称和角色名称
+        // 查询角色名称
+        if (user.getRoleId() != null) {
+            SysRole role = sysRoleService.getById(user.getRoleId());
+            if (role != null) {
+                userVO.setRoleName(role.getRoleName());
+            }
+        }
+        
+        // TODO: 查询部门名称
         userVO.setDepartmentName("默认部门");
-        userVO.setRoleName("默认角色");
         
         return userVO;
     }
@@ -170,9 +185,18 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         voPage.setRecords(page.getRecords().stream().map(user -> {
             UserVO userVO = new UserVO();
             BeanUtils.copyProperties(user, userVO);
-            // TODO: 查询部门名称和角色名称
+            
+            // 查询角色名称
+            if (user.getRoleId() != null) {
+                SysRole role = sysRoleService.getById(user.getRoleId());
+                if (role != null) {
+                    userVO.setRoleName(role.getRoleName());
+                }
+            }
+            
+            // TODO: 查询部门名称
             userVO.setDepartmentName("默认部门");
-            userVO.setRoleName("默认角色");
+            
             return userVO;
         }).toList());
         
@@ -221,5 +245,73 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         // 更新状态
         user.setStatus(status);
         updateById(user);
+    }
+    
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void assignRole(Long userId, Long roleId) {
+        // 检查用户是否存在
+        SysUser user = getById(userId);
+        if (user == null) {
+            throw new BusinessException(ResultCode.USER_NOT_EXIST);
+        }
+        
+        // 检查角色是否存在
+        SysRole role = sysRoleService.getById(roleId);
+        if (role == null) {
+            throw new BusinessException(ResultCode.ROLE_NOT_EXIST);
+        }
+        
+        // 删除用户原有的角色关联
+        LambdaQueryWrapper<SysUserRole> deleteWrapper = new LambdaQueryWrapper<>();
+        deleteWrapper.eq(SysUserRole::getUserId, userId);
+        sysUserRoleMapper.delete(deleteWrapper);
+        
+        // 创建新的角色关联
+        SysUserRole userRole = new SysUserRole();
+        userRole.setUserId(userId);
+        userRole.setRoleId(roleId);
+        sysUserRoleMapper.insert(userRole);
+        
+        // 更新用户的角色ID
+        user.setRoleId(roleId);
+        updateById(user);
+    }
+    
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void removeRole(Long userId) {
+        // 检查用户是否存在
+        SysUser user = getById(userId);
+        if (user == null) {
+            throw new BusinessException(ResultCode.USER_NOT_EXIST);
+        }
+        
+        // 删除用户角色关联
+        LambdaQueryWrapper<SysUserRole> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(SysUserRole::getUserId, userId);
+        sysUserRoleMapper.delete(wrapper);
+        
+        // 清空用户的角色ID
+        user.setRoleId(null);
+        updateById(user);
+    }
+    
+    @Override
+    public List<Long> getUserRoleIds(Long userId) {
+        // 检查用户是否存在
+        SysUser user = getById(userId);
+        if (user == null) {
+            throw new BusinessException(ResultCode.USER_NOT_EXIST);
+        }
+        
+        // 查询用户的角色ID列表
+        LambdaQueryWrapper<SysUserRole> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(SysUserRole::getUserId, userId);
+        List<SysUserRole> userRoles = sysUserRoleMapper.selectList(wrapper);
+        
+        return userRoles.stream()
+                .map(SysUserRole::getRoleId)
+                .collect(Collectors.toList());
     }
 }

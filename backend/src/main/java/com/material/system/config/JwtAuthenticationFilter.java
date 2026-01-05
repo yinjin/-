@@ -33,6 +33,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+        String requestURI = request.getRequestURI();
+        String method = request.getMethod();
+
+        // Debug logging for login requests
+        if (requestURI.contains("/login")) {
+            System.out.println("JWT Filter: Processing login request: " + method + " " + requestURI);
+        }
+
         String authHeader = request.getHeader(header);
         if (authHeader != null && authHeader.startsWith(prefix)) {
             String token = authHeader.substring(prefix.length()).trim();
@@ -44,10 +52,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             new UsernamePasswordAuthenticationToken(username, null,
                                     Collections.singletonList(new SimpleGrantedAuthority("USER")));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
+                    if (requestURI.contains("/login")) {
+                        System.out.println("JWT Filter: Set authentication for user: " + username);
+                    }
                 }
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                if (requestURI.contains("/login")) {
+                    System.out.println("JWT Filter: Token validation failed: " + e.getMessage());
+                }
                 // if token invalid just continue without authentication
             }
+        } else {
+            if (requestURI.contains("/login")) {
+                System.out.println("JWT Filter: No auth header found, proceeding without authentication");
+            }
+        }
+
+        if (requestURI.contains("/login")) {
+            System.out.println("JWT Filter: Continuing to next filter in chain");
         }
         filterChain.doFilter(request, response);
     }

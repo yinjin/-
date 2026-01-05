@@ -79,4 +79,24 @@ public interface SysUserService extends IService<SysUser> {
      * @param status 状态：1正常 0禁用
      */
     void updateUserStatus(Long userId, Integer status);
+    
+    /**
+     * 为用户分配角色
+     * @param userId 用户ID
+     * @param roleId 角色ID
+     */
+    void assignRole(Long userId, Long roleId);
+    
+    /**
+     * 移除用户角色
+     * @param userId 用户ID
+     */
+    void removeRole(Long userId);
+    
+    /**
+     * 获取用户的角色ID列表
+     * @param userId 用户ID
+     * @return 角色ID列表
+     */
+    java.util.List<Long> getUserRoleIds(Long userId);
 }

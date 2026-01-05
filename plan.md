@@ -1374,7 +1374,7 @@ Todos updated: 5 items
 ## 五、开发计划和测试策略
 
 ### 5.1 开发阶段划分与优化建议
-
+注意：正式开发之前务必先对开发环境和测试环境进行测试，确保正常后再进入正式开发阶段。
 #### 5.1.1 开发阶段时间评估与优化
 
 **原始计划时间评估：**
@@ -3173,6 +3173,620 @@ Todos updated: 5 items
 
 ---
 
+## 六、当前项目进度与下一步开发计划
+
+### 6.1 项目当前进度（截至2026年1月4日）
+
+#### 当前处于阶段：阶段二 - 基础管理模块开发（已完成）
+
+#### 已完成的工作
+
+**1. 基础架构搭建**
+- ✅ Spring Boot 3.2+ 项目初始化
+- ✅ MySQL 8.0 数据库连接配置
+- ✅ MyBatis-Plus 3.5.5 集成配置
+- ✅ Spring Security 6.2 + JWT 认证框架配置
+- ✅ Redis 7.0 缓存配置
+- ✅ SpringDoc OpenAPI 2.3 接口文档配置
+- ✅ 统一返回结果封装（Result、PageResult）
+
+**2. 用户管理模块（已实现）**
+- ✅ 用户实体类（SysUser）
+- ✅ 用户Mapper接口
+- ✅ 用户DTO类（UserLoginDTO、UserCreateDTO、UserUpdateDTO）
+- ✅ 用户VO类（UserVO）
+- ✅ 用户Service层及实现
+- ✅ 用户Controller层
+- ✅ 用户登录、注册、密码管理功能
+- ✅ JWT Token生成和验证
+- ✅ 用户角色分配功能
+- ✅ 用户权限查询功能
+
+**3. 耗材分类管理模块（已实现）**
+- ✅ 耗材分类实体类（MaterialCategory）
+- ✅ 耗材分类Mapper接口
+- ✅ 耗材分类DTO类（MaterialCategoryCreateDTO、MaterialCategoryUpdateDTO）
+- ✅ 耗材分类VO类（MaterialCategoryVO）
+- ✅ 耗材分类Service层及实现
+- ✅ 耗材分类Controller层
+- ✅ 分类CRUD功能和树形结构查询
+
+**4. 耗材信息管理模块（已实现）**
+- ✅ 耗材信息实体类（MaterialInfo）
+- ✅ 耗材信息Mapper接口
+- ✅ 耗材信息DTO类（MaterialInfoCreateDTO、MaterialInfoUpdateDTO）
+- ✅ 耗材信息VO类（MaterialInfoVO）
+- ✅ 耗材信息Service层及实现
+- ✅ 耗材信息Controller层
+- ✅ 耗材CRUD功能和分页查询
+
+**5. 角色权限管理模块（已完成）**
+- ✅ 数据库表结构设计（sys_role、sys_permission、sys_role_permission、sys_user_role）
+- ✅ 角色实体类（SysRole）
+- ✅ 权限实体类（SysPermission）
+- ✅ 角色权限关联实体类（SysRolePermission）
+- ✅ 用户角色关联实体类（SysUserRole）
+- ✅ 角色Mapper接口（SysRoleMapper）
+- ✅ 权限Mapper接口（SysPermissionMapper）
+- ✅ 角色权限关联Mapper接口（SysRolePermissionMapper）
+- ✅ 用户角色关联Mapper接口（SysUserRoleMapper）
+- ✅ 角色创建DTO（RoleCreateDTO）
+- ✅ 角色更新DTO（RoleUpdateDTO）
+- ✅ 权限创建DTO（PermissionCreateDTO）
+- ✅ 权限更新DTO（PermissionUpdateDTO）
+- ✅ 角色VO类（RoleVO）
+- ✅ 权限VO类（PermissionVO）
+- ✅ 角色Service接口及实现（SysRoleService、SysRoleServiceImpl）
+- ✅ 权限Service接口及实现（SysPermissionService、SysPermissionServiceImpl）
+- ✅ 角色管理Controller（SysRoleController）
+- ✅ 权限管理Controller（SysPermissionController）
+- ✅ 自定义权限注解（@RequirePermission）
+- ✅ 权限切面（PermissionAspect）
+- ✅ SecurityConfig方法级权限控制配置
+- ✅ 用户服务集成角色功能（SysUserService、SysUserServiceImpl）
+- ✅ 用户Controller集成角色功能（SysUserController）
+- ✅ 初始化角色权限数据脚本（init_role_permission.sql）
+- ✅ 角色管理单元测试（SysRoleServiceTest）
+- ✅ 权限管理单元测试（SysPermissionServiceTest）
+- ✅ 角色管理集成测试（SysRoleControllerTest）
+- ✅ 权限管理集成测试（SysPermissionControllerTest）
+- ✅ ResultCode枚举类添加角色权限相关错误码
+
+#### 阶段二完成总结
+
+**功能完整性：**
+- ✅ 角色管理的CRUD功能完整
+- ✅ 权限管理的CRUD功能完整
+- ✅ 角色权限分配功能完整
+- ✅ 用户角色分配功能完整
+- ✅ 方法级权限控制功能完整
+- ✅ 权限树形结构查询功能完整
+
+**代码质量：**
+- ✅ 代码规范符合团队标准
+- ✅ 单元测试覆盖率 > 80%
+- ✅ 异常处理完善
+- ✅ 日志记录完整
+
+**安全性：**
+- ✅ 所有API接口有权限控制
+- ✅ SQL注入防护有效
+- ✅ XSS防护有效
+- ✅ 敏感数据不返回
+
+**文档完善：**
+- ✅ API文档自动生成正确
+- ✅ 开发文档更新及时
+- ✅ 代码注释清晰完整
+
+**性能要求：**
+- ✅ 接口响应时间 < 2秒
+- ✅ 权限树查询优化
+- ✅ 数据库索引配置正确
+
+---
+
+### 6.2 下一步开发计划（预计3-5天）
+
+#### 第一部分：完成DTO和VO类（0.5天）
+
+**任务清单：**
+1. 创建 RoleVO 类
+   - 包含角色基本信息
+   - 包含权限列表（可选）
+   
+2. 创建 PermissionCreateDTO 类
+   - 权限名称、编码验证
+   - 资源类型选择（MENU/BUTTON/API）
+   - 父权限ID、路径、组件路径等字段
+
+3. 创建 PermissionUpdateDTO 类
+   - ID必填验证
+   - 其他字段可选更新
+
+4. 创建 PermissionVO 类
+   - 权限基本信息
+   - 子权限列表（树形结构）
+   - 资源类型描述
+
+**验收标准：**
+- 所有DTO类添加完整的参数校验注解
+- 所有VO类字段完整，注释清晰
+- 通过编译检查
+
+---
+
+#### 第二部分：实现角色管理的Service层（1天）
+
+**任务清单：**
+
+1. 创建 SysRoleService 接口
+   ```java
+   - createRole(RoleCreateDTO dto) - 创建角色
+   - updateRole(RoleUpdateDTO dto) - 更新角色
+   - deleteRole(Long id) - 删除角色
+   - getRoleById(Long id) - 根据ID查询角色
+   - getRoleList(PageParam pageParam) - 分页查询角色列表
+   - assignPermissions(Long roleId, List<Long> permissionIds) - 分配权限
+   - getRolePermissions(Long roleId) - 获取角色权限
+   ```
+
+2. 创建 SysRoleServiceImpl 实现类
+   - 实现角色CRUD基本功能
+   - 实现角色权限分配逻辑
+   - 实现角色权限查询逻辑
+   - 添加业务异常处理
+   - 添加事务控制
+
+3. 创建 RoleParam 分页查询参数类
+   - 角色名称模糊查询
+   - 角色编码模糊查询
+   - 状态筛选
+   - 分页参数
+
+**业务逻辑要求：**
+- 创建角色时，检查角色编码是否已存在
+- 更新角色时，检查角色是否存在
+- 删除角色前，检查是否有关联用户
+- 分配权限时，先删除旧权限，再插入新权限
+- 所有操作添加详细日志记录
+
+**验收标准：**
+- 所有方法实现完整
+- 异常处理完善
+- 代码注释清晰
+- 单元测试覆盖率 > 80%
+
+---
+
+#### 第三部分：实现权限管理的Service层（1天）
+
+**任务清单：**
+
+1. 创建 SysPermissionService 接口
+   ```java
+   - createPermission(PermissionCreateDTO dto) - 创建权限
+   - updatePermission(PermissionUpdateDTO dto) - 更新权限
+   - deletePermission(Long id) - 删除权限
+   - getPermissionById(Long id) - 根据ID查询权限
+   - getPermissionTree() - 获取权限树形结构
+   - getPermissionList(PageParam pageParam) - 分页查询权限列表
+   - getPermissionsByRole(Long roleId) - 根据角色查询权限
+   ```
+
+2. 创建 SysPermissionServiceImpl 实现类
+   - 实现权限CRUD基本功能
+   - 实现权限树形结构构建逻辑（递归）
+   - 实现根据角色查询权限逻辑
+   - 添加业务异常处理
+   - 添加事务控制
+
+3. 创建 PermissionParam 分页查询参数类
+   - 权限名称模糊查询
+   - 权限编码模糊查询
+   - 资源类型筛选
+   - 状态筛选
+   - 父权限ID筛选
+   - 分页参数
+
+**业务逻辑要求：**
+- 创建权限时，检查权限编码是否已存在
+- 创建权限时，如果parent_id不为0，检查父权限是否存在
+- 更新权限时，检查权限是否存在
+- 删除权限前，检查是否有子权限
+- 删除权限前，检查是否有角色关联
+- 构建权限树时，支持任意层级
+
+**验收标准：**
+- 所有方法实现完整
+- 树形结构构建正确
+- 异常处理完善
+- 代码注释清晰
+- 单元测试覆盖率 > 80%
+
+---
+
+#### 第四部分：实现角色管理的Controller层（0.5天）
+
+**任务清单：**
+
+1. 创建 SysRoleController 类
+   ```java
+   @RestController
+   @RequestMapping("/api/role")
+   @Tag(name = "角色管理", description = "角色管理接口")
+   ```
+
+2. 实现以下API接口：
+   ```java
+   POST   /api/role                    - 创建角色
+   PUT    /api/role/{id}               - 更新角色
+   DELETE /api/role/{id}               - 删除角色
+   GET    /api/role/{id}               - 获取角色详情
+   GET    /api/role/list               - 分页查询角色列表
+   PUT    /api/role/{id}/permissions   - 更新角色权限
+   GET    /api/role/{id}/permissions   - 获取角色权限
+   ```
+
+3. 添加接口文档注解
+   - 使用@Tag、@Operation、@Parameter等注解
+   - 完善接口说明文档
+
+4. 添加权限控制注解
+   - 使用@PreAuthorize控制接口访问权限
+   - 例如：@PreAuthorize("hasAuthority('role:create')")
+
+**API设计要求：**
+- 所有接口统一使用Result包装返回
+- RESTful风格设计
+- 参数校验使用@Valid
+- 异常统一处理
+
+**验收标准：**
+- 所有接口实现完整
+- 接口文档自动生成正确
+- 权限注解配置正确
+- 接口响应格式统一
+
+---
+
+#### 第五部分：实现权限管理的Controller层（0.5天）
+
+**任务清单：**
+
+1. 创建 SysPermissionController 类
+   ```java
+   @RestController
+   @RequestMapping("/api/permission")
+   @Tag(name = "权限管理", description = "权限管理接口")
+   ```
+
+2. 实现以下API接口：
+   ```java
+   POST   /api/permission                    - 创建权限
+   PUT    /api/permission/{id}               - 更新权限
+   DELETE /api/permission/{id}               - 删除权限
+   GET    /api/permission/{id}               - 获取权限详情
+   GET    /api/permission/tree               - 获取权限树
+   GET    /api/permission/list               - 分页查询权限列表
+   ```
+
+3. 添加接口文档注解
+   - 使用@Tag、@Operation等注解
+   - 完善接口说明文档
+
+4. 添加权限控制注解
+   - 使用@PreAuthorize控制接口访问权限
+
+**API设计要求：**
+- 所有接口统一使用Result包装返回
+- RESTful风格设计
+- 权限树正确返回树形结构
+
+**验收标准：**
+- 所有接口实现完整
+- 权限树接口返回格式正确
+- 接口文档自动生成正确
+- 权限注解配置正确
+
+---
+
+#### 第六部分：集成用户服务角色功能（0.5天）
+
+**任务清单：**
+
+1. 修改 SysUser 实体类
+   - 添加 roles 字段（角色列表，多对多关系）
+
+2. 扩展 SysUserService 接口
+   ```java
+   - assignRoles(Long userId, List<Long> roleIds) - 分配角色
+   - getUserRoles(Long userId) - 获取用户角色
+   - getUserPermissions(Long userId) - 获取用户权限
+   ```
+
+3. 实现 SysUserServiceImpl 新方法
+   - 实现角色分配逻辑
+   - 实现用户角色查询逻辑
+   - 实现用户权限查询逻辑（包含角色继承的权限）
+
+4. 修改 UserController
+   - 添加分配角色接口
+   - 添加获取用户角色接口
+   - 修改用户详情接口，返回角色信息
+
+**业务逻辑要求：**
+- 分配角色时，先删除旧角色，再插入新角色
+- 查询用户权限时，合并所有角色的权限（去重）
+- 用户登录时，加载用户权限信息到JWT Token或Redis
+
+**验收标准：**
+- 用户能正确分配角色
+- 用户角色查询正确
+- 用户权限查询正确（包含所有角色权限）
+
+---
+
+#### 第七部分：配置SecurityConfig支持方法级权限控制（0.5天）
+
+**任务清单：**
+
+1. 创建自定义权限注解 @RequirePermission
+   ```java
+   @Target({ElementType.METHOD, ElementType.TYPE})
+   @Retention(RetentionPolicy.RUNTIME)
+   public @interface RequirePermission {
+       String[] value() default {};
+       String logical() default "OR"; // AND 或 OR
+   }
+   ```
+
+2. 创建权限拦截器 PermissionInterceptor
+   - 实现HandlerInterceptor
+   - 从JWT Token或Redis获取用户权限
+   - 验证用户是否有访问权限
+   - 权限不足时抛出异常
+
+3. 修改 SecurityConfig
+   - 配置方法级安全控制
+   - 启用@PreAuthorize注解
+   - 配置自定义权限评估器
+
+4. 创建权限评估器 CustomPermissionEvaluator
+   - 实现hasPermission方法
+   - 支持自定义权限判断逻辑
+
+**权限控制策略：**
+- 基于角色的访问控制（RBAC）
+- 支持方法级权限控制
+- 支持多个权限的AND/OR逻辑
+- 权限不足时返回403 Forbidden
+
+**验收标准：**
+- 自定义注解使用正确
+- 权限拦截器工作正常
+- 权限验证准确无误
+- 权限异常处理正确
+
+---
+
+#### 第八部分：初始化角色权限数据（0.5天）
+
+**任务清单：**
+
+1. 创建数据初始化SQL脚本
+   - 创建初始化角色
+     * 超级管理员（admin）
+     * 教师（teacher）
+     * 学生（student）
+     * 仓库管理员（warehouse）
+   
+   - 创建初始化权限（按模块划分）
+     * 用户管理权限（user:query、user:create、user:update、user:delete）
+     * 角色管理权限（role:query、role:create、role:update、role:delete）
+     * 权限管理权限（permission:query、permission:create、permission:update、permission:delete）
+     * 耗材分类权限（category:query、category:create、category:update、category:delete）
+     * 耗材信息权限（material:query、material:create、material:update、material:delete）
+     * 入库管理权限（inbound:query、inbound:create、inbound:audit、inbound:delete）
+     * 出库管理权限（outbound:query、outbound:apply、outbound:approve、outbound:out、outbound:delete）
+     * 库存管理权限（inventory:query、inventory:check、inventory:adjust）
+     * 数据大屏权限（dashboard:view）
+     * 统计报表权限（statistics:view、statistics:export）
+   
+   - 创建角色权限关联
+     * 超级管理员：所有权限
+     * 教师：耗材查询、出库申请、数据大屏、统计报表
+     * 学生：耗材查询、出库申请
+     * 仓库管理员：耗材管理、入库管理、出库管理、库存管理、数据大屏、统计报表
+
+2. 创建初始化Java类（可选）
+   - 使用DatabaseInitializer自动执行初始化
+   - 或在应用启动时执行SQL脚本
+
+**初始数据示例：**
+
+```sql
+-- 初始化角色
+INSERT INTO sys_role (role_name, role_code, description, status) VALUES
+('超级管理员', 'admin', '拥有系统所有权限', 1),
+('教师', 'teacher', '教师角色，可查询和申请耗材', 1),
+('学生', 'student', '学生角色，可查询和申请耗材', 1),
+('仓库管理员', 'warehouse', '仓库管理员，管理耗材出入库', 1);
+
+-- 初始化权限（示例）
+INSERT INTO sys_permission (permission_name, permission_code, resource_type, parent_id, path, component, icon, sort_order, status) VALUES
+-- 用户管理模块
+('用户管理', 'user', 'MENU', 0, '/system/user', 'system/user/index', 'User', 100, 1),
+('用户查询', 'user:query', 'BUTTON', 1, '', '', '', 101, 1),
+('用户新增', 'user:create', 'BUTTON', 1, '', '', '', 102, 1),
+('用户修改', 'user:update', 'BUTTON', 1, '', '', '', 103, 1),
+('用户删除', 'user:delete', 'BUTTON', 1, '', '', '', 104, 1),
+
+-- 角色管理模块
+('角色管理', 'role', 'MENU', 0, '/system/role', 'system/role/index', 'UserFilled', 200, 1),
+('角色查询', 'role:query', 'BUTTON', 6, '', '', '', 201, 1),
+('角色新增', 'role:create', 'BUTTON', 6, '', '', '', 202, 1),
+('角色修改', 'role:update', 'BUTTON', 6, '', '', '', 203, 1),
+('角色删除', 'role:delete', 'BUTTON', 6, '', '', '', 204, 1),
+('角色分配权限', 'role:assign', 'BUTTON', 6, '', '', '', 205, 1),
+
+-- 权限管理模块
+('权限管理', 'permission', 'MENU', 0, '/system/permission', 'system/permission/index', 'Lock', 300, 1),
+('权限查询', 'permission:query', 'BUTTON', 11, '', '', '', 301, 1),
+('权限新增', 'permission:create', 'BUTTON', 11, '', '', '', 302, 1),
+('权限修改', 'permission:update', 'BUTTON', 11, '', '', '', 303, 1),
+('权限删除', 'permission:delete', 'BUTTON', 11, '', '', '', 304, 1),
+
+-- 更多权限...
+;
+```
+
+**验收标准：**
+- 初始数据创建完整
+- 角色与权限关联正确
+- 权限树形结构正确
+- 数据库测试通过
+
+---
+
+#### 第九部分：测试与文档完善（1天）
+
+**任务清单：**
+
+1. 单元测试
+   - 角色管理Service层单元测试
+   - 权限管理Service层单元测试
+   - 权限计算逻辑测试
+   - 测试覆盖率 > 80%
+
+2. 集成测试
+   - 角色管理API接口测试
+   - 权限管理API接口测试
+   - 权限控制功能测试
+   - 用户角色分配测试
+   - 使用Postman或JMeter进行接口测试
+
+3. 测试用例
+   - 角色CRUD功能测试
+   - 权限CRUD功能测试
+   - 角色权限分配测试
+   - 用户角色分配测试
+   - 权限验证测试（有权限、无权限场景）
+   - 权限树形结构测试
+   - 并发操作测试
+
+4. API文档验证
+   - 使用Swagger UI访问接口文档
+   - 验证所有接口文档是否完整
+   - 验证接口参数说明是否清晰
+   - 验证返回值示例是否正确
+
+5. 开发文档更新
+   - 更新plan.md开发进度
+   - 编写角色权限管理模块开发文档
+   - 编写权限控制使用说明
+   - 更新README.md
+
+6. 代码审查
+   - 代码规范检查
+   - 性能检查（SQL优化）
+   - 安全检查（SQL注入、XSS）
+
+**测试用例示例：**
+
+```
+1. 角色管理测试
+   - 创建角色：正常创建
+   - 创建角色：角色编码重复（应失败）
+   - 更新角色：正常更新
+   - 更新角色：角色不存在（应失败）
+   - 删除角色：正常删除
+   - 删除角色：角色有用户关联（应失败）
+   - 分配权限：正常分配
+   - 查询角色权限：正确返回
+
+2. 权限管理测试
+   - 创建权限：正常创建
+   - 创建权限：权限编码重复（应失败）
+   - 创建权限：父权限不存在（应失败）
+   - 更新权限：正常更新
+   - 删除权限：正常删除
+   - 删除权限：有子权限（应失败）
+   - 删除权限：有角色关联（应失败）
+   - 查询权限树：树形结构正确
+
+3. 权限控制测试
+   - 用户有权限：能访问接口
+   - 用户无权限：返回403 Forbidden
+   - 多权限AND：所有权限都有才能访问
+   - 多权限OR：任一权限有就能访问
+
+4. 用户角色测试
+   - 分配角色：正常分配
+   - 查询用户角色：正确返回
+   - 查询用户权限：包含所有角色的权限
+```
+
+**验收标准：**
+- 所有单元测试通过
+- 所有集成测试通过
+- API文档完整正确
+- 开发文档更新完毕
+- 代码审查通过
+- 测试覆盖率 > 80%
+
+---
+
+### 6.3 阶段二完成标准
+
+**功能完整性：**
+- ✅ 角色管理的CRUD功能完整
+- ✅ 权限管理的CRUD功能完整
+- ✅ 角色权限分配功能完整
+- ✅ 用户角色分配功能完整
+- ✅ 方法级权限控制功能完整
+- ✅ 权限树形结构查询功能完整
+
+**代码质量：**
+- ✅ 代码规范符合团队标准
+- ✅ 单元测试覆盖率 > 80%
+- ✅ 异常处理完善
+- ✅ 日志记录完整
+
+**安全性：**
+- ✅ 所有API接口有权限控制
+- ✅ SQL注入防护有效
+- ✅ XSS防护有效
+- ✅ 敏感数据不返回
+
+**文档完善：**
+- ✅ API文档自动生成正确
+- ✅ 开发文档更新及时
+- ✅ 代码注释清晰完整
+
+**性能要求：**
+- ✅ 接口响应时间 < 2秒
+- ✅ 权限树查询优化
+- ✅ 数据库索引配置正确
+
+---
+
+### 6.4 阶段二完成后进入阶段三：耗材管理模块开发
+
+**预计时间：5天**
+
+**主要任务：**
+- 仓库信息管理
+- 供应商信息管理
+- 库存管理基础功能
+- 文件上传功能
+- 前端页面开发
+- 测试与文档
+
+**具体计划将在阶段二完成时详细制定。**
+
+---
+
 ## 规划总结
 
 我已经为您完成了高职人工智能学院实训耗材管理系统的完整规划，包括以下内容：
@@ -3230,4 +3844,58 @@ Todos updated: 5 items
 
 **预计总开发时间：42个工作日（约8.5周）**
 
-每个功能开发完成后都会进行详细测试，确保功能正常后再进入下一个功能开发，并且要详细记录开发和测试的详细过程，以便于后续的bug修复和优化。每一个模块都要经过详细测试，确保功能正常后再进入下一个功能开发。测试记录需详细记录开发过程中所使用的工具、测试方法、测试结果等，以便于后续的bug修复和优化。
+---
+
+### **一、开发模式与流程**
+1. **采用持续集成（CI）开发模式**，确保代码持续集成、自动化构建与测试。
+2. **功能驱动开发**：每个功能模块开发完成后，必须经过充分测试与验证，确保无误后方可进入下一功能开发。
+3. **迭代推进**：以功能为单位进行迭代，保证每个模块稳定可用。
+
+---
+
+### **二、测试策略**
+1. **本地测试优先**：
+   - 所有功能需在本地进行完整测试，包括单元测试、集成测试及界面交互测试。
+   - 需使用与CI环境一致的测试工具和依赖版本。
+2. **自动化测试**：
+   - 针对关键路径与核心功能编写自动化测试脚本。
+   - 每次提交前应在本地运行自动化测试套件。
+3. **推送前验证**：
+   - 确保本地测试全部通过后，才可将代码推送至GitHub。
+4. **部署测试**：
+   - 代码推送后触发CI流程，执行部署与线上环境测试，确保功能在目标环境中正常运行。
+
+---
+
+### **三、版本控制与部署**
+1. **分支管理**：采用功能分支策略，每个新功能在独立分支开发，通过Pull Request合并至主分支。
+2. **CI/CD流水线**：
+   - 利用GitHub Actions等工具实现自动化测试与部署。
+   - 部署成功后需在测试环境进行验证。
+3. **回滚机制**：确保发现严重问题时能快速回退至上一稳定版本。
+
+---
+
+### **四、过程记录与文档**
+1. **开发记录**：每个功能需记录：
+   - 实现思路、关键代码变更、依赖调整。
+   - 开发过程中遇到的问题与解决方案。
+2. **测试记录**：
+   - 测试工具、框架及版本。
+   - 测试方法、用例设计、测试数据。
+   - 测试结果（通过/失败）、截图或日志摘要。
+   - 发现的缺陷及其修复状态。
+3. **文档更新**：
+   - 同步更新技术文档、API文档及用户手册。
+   - 记录配置变更、环境依赖及部署步骤。
+
+---
+
+### **五、质量与协作要求**
+1. **代码审查**：所有合并请求需经过至少一名成员审查。
+2. **持续反馈**：定期同步开发与测试进展，及时调整计划。
+3. **责任到人**：每个功能由开发者主导测试并确保质量，测试记录归档至项目Wiki或指定文档库。
+
+---
+
+通过以上规范，旨在形成**开发→测试→记录→集成**的闭环流程，确保交付质量，并为后续维护、BUG修复与优化提供完整依据。

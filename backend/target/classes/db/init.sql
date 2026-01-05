@@ -267,10 +267,6 @@ CREATE TABLE IF NOT EXISTS material_outbound (
     FOREIGN KEY (warehouse_id) REFERENCES warehouse(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='出库单表';
 
--- 插入初始管理员用户
-INSERT INTO sys_user (username, password, real_name, employee_no, phone, email, department_id, role_id, avatar, status, last_login_time, login_count) VALUES
-('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '系统管理员', NULL, '13800138000', 'admin@example.com', NULL, NULL, NULL, 1, NULL, 0);
-
 -- 插入初始耗材分类
 INSERT INTO material_category (name, code, description, parent_id, sort_order, status) VALUES
 ('电子元器件', 'ELEC', '各类电子元器件', 0, 1, 1),

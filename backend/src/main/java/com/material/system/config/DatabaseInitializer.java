@@ -27,8 +27,20 @@ public class DatabaseInitializer implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
+        System.out.println("DatabaseInitializer.run() called");
+        
+        // Check if we're running in Docker MySQL environment
+        String dbUrl = env.getProperty("spring.datasource.url");
+        boolean isDockerMySQL = dbUrl != null && dbUrl.contains("localhost:3307");
+        
+        if (isDockerMySQL) {
+            System.out.println("Skipping database initialization for Docker MySQL environment - schema already loaded by container");
+            return;
+        }
+
         // Read SQL files
-        String schemaSql = readResourceAsString("db/schema.sql");
+        String schemaSql = readResourceAsString("db/01_schema.sql");
+        String rolePermissionSchemaSql = readResourceAsString("db/role_permission_schema.sql");
         String initSql = readResourceAsString("db/init.sql");
 
         boolean isH2 = false;
@@ -50,6 +62,7 @@ public class DatabaseInitializer implements ApplicationRunner {
         // If H2, strip statements unsupported by H2 (e.g. CREATE DATABASE, USE)
         if (isH2) {
             schemaSql = stripUnsupportedForH2(schemaSql);
+            rolePermissionSchemaSql = stripUnsupportedForH2(rolePermissionSchemaSql);
             initSql = stripUnsupportedForH2(initSql);
             // If init script also contains CREATE TABLE statements (duplicate), remove them and keep only data inserts
             initSql = initSql.replaceAll("(?is)create\\s+table.*?;", "");
@@ -57,16 +70,21 @@ public class DatabaseInitializer implements ApplicationRunner {
             initSql = removeDuplicateInserts(schemaSql, initSql);
             // Ensure we don't pre-insert admin/user data in H2 tests - let tests create users via service
             schemaSql = schemaSql.replaceAll("(?is)insert\\s+into\\s+sys_user[^;]*;", "");
+            rolePermissionSchemaSql = rolePermissionSchemaSql.replaceAll("(?is)insert\\s+into\\s+sys_user[^;]*;", "");
             initSql = initSql.replaceAll("(?is)insert\\s+into\\s+sys_user[^;]*;", "");
         }
 
         // For all databases (including MySQL in tests), remove pre-inserted admin user to let tests create it
         schemaSql = schemaSql.replaceAll("(?is)insert\\s+into\\s+sys_user[^;]*;", "");
+        rolePermissionSchemaSql = rolePermissionSchemaSql.replaceAll("(?is)insert\\s+into\\s+sys_user[^;]*;", "");
         initSql = initSql.replaceAll("(?is)insert\\s+into\\s+sys_user[^;]*;", "");
 
         ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
         if (schemaSql != null && !schemaSql.trim().isEmpty()) {
             populator.addScript(new ByteArrayResource(schemaSql.getBytes(StandardCharsets.UTF_8)));
+        }
+        if (rolePermissionSchemaSql != null && !rolePermissionSchemaSql.trim().isEmpty()) {
+            populator.addScript(new ByteArrayResource(rolePermissionSchemaSql.getBytes(StandardCharsets.UTF_8)));
         }
         if (initSql != null && !initSql.trim().isEmpty()) {
             populator.addScript(new ByteArrayResource(initSql.getBytes(StandardCharsets.UTF_8)));
