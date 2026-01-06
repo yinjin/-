@@ -1,0 +1,76 @@
+package com.haocai.management.entity;
+
+import com.baomidou.mybatisplus.annotation.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import jakarta.validation.constraints.NotNull;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+/**
+ * 角色权限关联实体类
+ * 
+ * 遵循规范：
+ * - 数据库字段命名规范：下划线命名法
+ * - Java实体类字段命名规范：驼峰命名法
+ * - 字段映射规范：使用@TableField注解明确指定映射关系
+ * - 审计字段规范：create_time、create_by、deleted
+ * - 字段自动填充规范：实现MetaObjectHandler
+ * - 逻辑删除规范：使用@TableLogic注解
+ * - 唯一约束规范：role_id + permission_id
+ * 
+ * @author haocai
+ * @since 2026-01-06
+ */
+@Data
+@EqualsAndHashCode(callSuper = false)
+@TableName("sys_role_permission")
+public class SysRolePermission implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * 关联ID
+     */
+    @TableId(value = "id", type = IdType.AUTO)
+    private Long id;
+
+    /**
+     * 角色ID
+     * 遵循：参数验证规范-第2条（数值范围验证）
+     */
+    @NotNull(message = "角色ID不能为空")
+    @TableField("role_id")
+    private Long roleId;
+
+    /**
+     * 权限ID
+     * 遵循：参数验证规范-第2条（数值范围验证）
+     */
+    @NotNull(message = "权限ID不能为空")
+    @TableField("permission_id")
+    private Long permissionId;
+
+    /**
+     * 创建时间
+     * 遵循：审计字段规范-第1条（创建时间自动填充）
+     */
+    @TableField(value = "create_time", fill = FieldFill.INSERT)
+    private LocalDateTime createTime;
+
+    /**
+     * 创建人ID
+     * 遵循：审计字段规范-第3条（创建人自动填充）
+     */
+    @TableField(value = "create_by", fill = FieldFill.INSERT)
+    private Long createBy;
+
+    /**
+     * 逻辑删除：0未删除 1已删除
+     * 遵循：逻辑删除规范-第1条（使用@TableLogic注解）
+     */
+    @TableLogic
+    @TableField("deleted")
+    private Integer deleted;
+}
