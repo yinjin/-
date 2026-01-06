@@ -156,6 +156,9 @@ public class SecurityConfig {
                 // 健康检查接口
                 .requestMatchers("/actuator/**", "/api/test/**").permitAll()
                 
+                // 调试接口（仅开发环境使用）
+                .requestMatchers("/api/debug/**").permitAll()
+                
                 // 错误页面
                 .requestMatchers("/error").permitAll()
                 

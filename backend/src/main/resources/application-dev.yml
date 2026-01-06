@@ -3,6 +3,12 @@ spring:
     url: jdbc:mysql://localhost:3306/haocai_management?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: root
     password: root
+  # SQL初始化配置（开发环境）
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:init.sql
+      continue-on-error: true
   # 禁用Spring Security自动配置（开发环境）
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration

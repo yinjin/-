@@ -51,9 +51,10 @@
         </el-form-item>
       </el-form>
       
-      <div class="login-footer">
+      <!-- 注册功能待开发，暂时移除注册链接 -->
+      <!-- <div class="login-footer">
         <router-link to="/register">还没有账号？立即注册</router-link>
-      </div>
+      </div> -->
     </el-card>
   </div>
 </template>
