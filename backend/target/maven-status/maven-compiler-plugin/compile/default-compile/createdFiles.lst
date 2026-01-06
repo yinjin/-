@@ -14,6 +14,7 @@ com\haocai\management\mapper\SysUserLoginLogMapper.class
 com\haocai\management\mapper\SysUserMapper.class
 com\haocai\management\service\impl\SysUserServiceImpl.class
 com\haocai\management\dto\UserLoginDTO.class
+com\haocai\management\controller\DebugController.class
 com\haocai\management\config\MyBatisPlusConfig.class
 com\haocai\management\entity\SysUserLoginLog.class
 com\haocai\management\entity\SysUser.class
@@ -25,5 +26,6 @@ com\haocai\management\exception\BusinessException.class
 com\haocai\management\mapper\SysUserMapper$UserDepartmentStats.class
 com\haocai\management\HaocaiManagementApplication.class
 com\haocai\management\controller\DatabaseFixController.class
+com\haocai\management\util\DatabaseInitializer.class
 com\haocai\management\utils\JwtUtils.class
 com\haocai\management\config\UserStatusConverter.class

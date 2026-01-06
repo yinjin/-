@@ -1,11 +1,7 @@
 -- 高职人工智能学院实训耗材管理系统数据库初始化脚本
 -- 数据库：haocai_management
 -- 创建时间：2026年1月6日
-
--- 创建数据库
-CREATE DATABASE IF NOT EXISTS haocai_management DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
-USE haocai_management;
+-- 注意：此脚本由Spring Boot自动执行，假设数据库haocai_management已存在
 
 -- 用户表
 CREATE TABLE sys_user (
@@ -16,7 +12,7 @@ CREATE TABLE sys_user (
     email VARCHAR(100) NOT NULL COMMENT '邮箱地址',
     phone VARCHAR(20) NOT NULL COMMENT '手机号码',
     avatar VARCHAR(255) COMMENT '头像URL',
-    status VARCHAR(20) NOT NULL DEFAULT 'NORMAL' COMMENT '用户状态：NORMAL-正常，DISABLED-禁用，LOCKED-锁定',
+    status TINYINT NOT NULL DEFAULT 0 COMMENT '用户状态：0-正常，1-禁用，2-锁定',
     department_id BIGINT COMMENT '部门ID',
     last_login_time DATETIME COMMENT '最后登录时间',
     create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -127,7 +123,7 @@ CREATE TABLE sys_user_role (
 -- 插入初始数据
 -- 默认管理员用户
 INSERT INTO sys_user (username, password, name, email, phone, status, deleted) VALUES
-('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lbdxp7jyxv5QD0yRK', '系统管理员', 'admin@haocai.com', '13800138000', 'NORMAL', 0);
+('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lbdxp7jyxv5QD0yRK', '系统管理员', 'admin@haocai.com', '13800138000', 0, 0);
 
 -- 默认角色
 INSERT INTO sys_role (name, code, description, status) VALUES

@@ -7,6 +7,7 @@ D:\developer_project\cangku\backend\src\main\java\com\haocai\management\config\U
 D:\developer_project\cangku\backend\src\main\java\com\haocai\management\config\MyBatisPlusConfig.java
 D:\developer_project\cangku\backend\src\main\java\com\haocai\management\dto\UserVO.java
 D:\developer_project\cangku\backend\src\main\java\com\haocai\management\entity\UserStatus.java
+D:\developer_project\cangku\backend\src\main\java\com\haocai\management\controller\DebugController.java
 D:\developer_project\cangku\backend\src\main\java\com\haocai\management\config\WebMvcConfig.java
 D:\developer_project\cangku\backend\src\main\java\com\haocai\management\service\impl\SysUserServiceImpl.java
 D:\developer_project\cangku\backend\src\main\java\com\haocai\management\dto\UserRegisterDTO.java
@@ -14,6 +15,7 @@ D:\developer_project\cangku\backend\src\main\java\com\haocai\management\entity\S
 D:\developer_project\cangku\backend\src\main\java\com\haocai\management\HaocaiManagementApplication.java
 D:\developer_project\cangku\backend\src\main\java\com\haocai\management\security\JwtAccessDeniedHandler.java
 D:\developer_project\cangku\backend\src\main\java\com\haocai\management\dto\UserUpdateDTO.java
+D:\developer_project\cangku\backend\src\main\java\com\haocai\management\util\DatabaseInitializer.java
 D:\developer_project\cangku\backend\src\main\java\com\haocai\management\controller\DatabaseFixController.java
 D:\developer_project\cangku\backend\src\main\java\com\haocai\management\controller\SysUserController.java
 D:\developer_project\cangku\backend\src\main\java\com\haocai\management\config\SecurityConfig.java
