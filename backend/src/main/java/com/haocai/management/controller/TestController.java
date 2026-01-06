@@ -37,7 +37,7 @@ public class TestController {
      * @return 健康状态
      */
     @GetMapping("/health")
-    public ApiResponse<String> health() {
+    public ApiResponse<Void> health() {
         return ApiResponse.success("Backend service is running normally");
     }
 }

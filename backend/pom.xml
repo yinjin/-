@@ -39,6 +39,12 @@
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
+        <!-- AOP依赖（用于权限切面） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+
         <!-- 校验依赖 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -78,12 +84,12 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- OpenAPI（暂时移除） -->
-        <!-- <dependency>
+        <!-- OpenAPI（Swagger文档） -->
+        <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>${springdoc.version}</version>
-        </dependency> -->
+        </dependency>
 
         <!-- 工具类（保留） -->
         <dependency>

@@ -135,4 +135,11 @@ public class SysPermission implements Serializable {
     @TableLogic
     @TableField("deleted")
     private Integer deleted;
+
+    /**
+     * 子权限列表（非数据库字段，用于树形结构）
+     * 遵循：树形结构规范-使用transient标记非持久化字段
+     */
+    @TableField(exist = false)
+    private java.util.List<SysPermission> children;
 }

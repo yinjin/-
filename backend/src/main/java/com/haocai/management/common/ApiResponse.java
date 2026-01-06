@@ -60,12 +60,34 @@ public class ApiResponse<T> {
     }
 
     /**
+     * 创建成功的响应（带消息）
+     *
+     * @param data 响应数据
+     * @param message 成功消息
+     * @param <T> 数据类型
+     * @return ApiResponse实例
+     */
+    public static <T> ApiResponse<T> success(T data, String message) {
+        return new ApiResponse<>(200, message, data, LocalDateTime.now(), null);
+    }
+
+    /**
      * 创建成功的响应（无数据）
      *
      * @return ApiResponse实例
      */
     public static ApiResponse<Void> success() {
         return new ApiResponse<>(200, "success", null, LocalDateTime.now(), null);
+    }
+
+    /**
+     * 创建成功的响应（无数据，带消息）
+     *
+     * @param message 成功消息
+     * @return ApiResponse实例
+     */
+    public static ApiResponse<Void> success(String message) {
+        return new ApiResponse<>(200, message, null, LocalDateTime.now(), null);
     }
 
     /**
@@ -87,6 +109,19 @@ public class ApiResponse<T> {
      */
     public static <T> ApiResponse<T> error(String message) {
         return new ApiResponse<>(500, message, null, LocalDateTime.now(), null);
+    }
+
+    /**
+     * 创建失败的响应（带数据）
+     *
+     * @param code 错误码
+     * @param message 错误信息
+     * @param data 错误详情数据
+     * @param <T> 数据类型
+     * @return ApiResponse实例
+     */
+    public static <T> ApiResponse<T> error(Integer code, String message, T data) {
+        return new ApiResponse<>(code, message, data, LocalDateTime.now(), null);
     }
 
     /**
