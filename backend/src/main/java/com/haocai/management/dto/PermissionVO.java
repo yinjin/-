@@ -3,6 +3,7 @@ package com.haocai.management.dto;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 权限视图对象
@@ -80,4 +81,9 @@ public class PermissionVO {
      * 更新人
      */
     private String updateBy;
+    
+    /**
+     * 子权限列表（用于树形结构）
+     */
+    private List<PermissionVO> children;
 }

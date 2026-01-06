@@ -42,34 +42,34 @@
 - [x] 编译测试通过
 - [x] 创建开发教程文档
 
-#### 1.2 角色权限数据访问层（预计1小时）
-- [ ] 创建角色Mapper接口 `SysRoleMapper`
+#### 1.2 角色权限数据访问层（预计1小时）✅ 已完成
+- [x] 创建角色Mapper接口 `SysRoleMapper`
   - 继承BaseMapper获得基础CRUD方法
   - 自定义查询方法：根据角色编码查询、根据状态查询、分页查询
   - 配置MyBatis-Plus注解
-- [ ] 创建权限Mapper接口 `SysPermissionMapper`
+- [x] 创建权限Mapper接口 `SysPermissionMapper`
   - 继承BaseMapper获得基础CRUD方法
   - 自定义查询方法：根据权限编码查询、根据父权限查询、树形结构查询
   - 配置MyBatis-Plus注解
-- [ ] 创建角色权限关联Mapper接口 `SysRolePermissionMapper`
+- [x] 创建角色权限关联Mapper接口 `SysRolePermissionMapper`
   - 继承BaseMapper获得基础CRUD方法
   - 自定义查询方法：根据角色ID查询权限列表、根据权限ID查询角色列表
-- [ ] 创建用户角色关联Mapper接口 `SysUserRoleMapper`
+- [x] 创建用户角色关联Mapper接口 `SysUserRoleMapper`
   - 继承BaseMapper获得基础CRUD方法
   - 自定义查询方法：根据用户ID查询角色列表、根据角色ID查询用户列表
-- [ ] 配置数据访问层异常处理
+- [x] 配置数据访问层异常处理
   - 角色编码重复异常
   - 权限编码重复异常
   - 关联数据删除异常
-- [ ] 编译测试通过
-- [ ] 创建开发教程文档
+- [x] 编译测试通过
+- [x] 创建开发教程文档
 
-#### 1.3 角色权限业务逻辑层（预计2小时）
-- [ ] 创建角色Service接口 `ISysRoleService`
+#### 1.3 角色权限业务逻辑层（预计2小时）✅ 已完成
+- [x] 创建角色Service接口 `ISysRoleService`
   - 定义角色CRUD业务方法接口
   - 定义角色权限分配方法接口
   - 定义角色权限查询方法接口
-- [ ] 创建角色Service实现类 `SysRoleServiceImpl`
+- [x] 创建角色Service实现类 `SysRoleServiceImpl`
   - 角色创建逻辑（角色编码唯一性检查）
   - 角色更新逻辑（角色存在性检查）
   - 角色删除逻辑（检查是否有关联用户）
@@ -77,11 +77,11 @@
   - 角色权限查询逻辑（查询角色拥有的所有权限）
   - 添加业务异常处理
   - 添加事务控制
-- [ ] 创建权限Service接口 `ISysPermissionService`
+- [x] 创建权限Service接口 `ISysPermissionService`
   - 定义权限CRUD业务方法接口
   - 定义权限树形结构查询方法接口
   - 定义根据角色查询权限方法接口
-- [ ] 创建权限Service实现类 `SysPermissionServiceImpl`
+- [x] 创建权限Service实现类 `SysPermissionServiceImpl`
   - 权限创建逻辑（权限编码唯一性检查、父权限存在性检查）
   - 权限更新逻辑（权限存在性检查）
   - 权限删除逻辑（检查是否有子权限、检查是否有角色关联）
@@ -89,16 +89,16 @@
   - 根据角色查询权限逻辑（查询角色拥有的所有权限）
   - 添加业务异常处理
   - 添加事务控制
-- [ ] 创建用户角色Service接口扩展
+- [x] 创建用户角色Service接口扩展
   - `assignRoles(Long userId, List<Long> roleIds)` - 分配角色
   - `getUserRoles(Long userId)` - 获取用户角色
   - `getUserPermissions(Long userId)` - 获取用户权限
-- [ ] 实现用户角色Service方法
+- [x] 实现用户角色Service方法
   - 角色分配逻辑（先删除旧角色，再插入新角色）
   - 用户角色查询逻辑
   - 用户权限查询逻辑（合并所有角色的权限，去重）
-- [ ] 编译测试通过
-- [ ] 创建开发教程文档
+- [x] 编译测试通过
+- [x] 创建开发教程文档
 
 #### 1.4 角色权限控制层（预计1小时）
 - [ ] 创建角色Controller `SysRoleController`

@@ -135,4 +135,34 @@ public interface ISysUserService {
      * @param userId 用户ID
      */
     void updateLastLoginTime(Long userId);
+
+    /**
+     * 给用户分配角色
+     * @param userId 用户ID
+     * @param roleIds 角色ID列表
+     * @param operatorId 操作人ID
+     */
+    void assignRolesToUser(Long userId, List<Long> roleIds, Long operatorId);
+
+    /**
+     * 移除用户的角色
+     * @param userId 用户ID
+     * @param roleIds 角色ID列表
+     * @param operatorId 操作人ID
+     */
+    void removeRolesFromUser(Long userId, List<Long> roleIds, Long operatorId);
+
+    /**
+     * 获取用户的角色ID列表
+     * @param userId 用户ID
+     * @return 角色ID列表
+     */
+    List<Long> getRoleIdsByUserId(Long userId);
+
+    /**
+     * 获取用户的角色列表
+     * @param userId 用户ID
+     * @return 角色列表
+     */
+    List<com.haocai.management.entity.SysRole> getRolesByUserId(Long userId);
 }

@@ -9,9 +9,12 @@ import com.haocai.management.entity.SysUser;
 import com.haocai.management.entity.SysUserLoginLog;
 import com.haocai.management.entity.UserStatus;
 import com.haocai.management.exception.BusinessException;
+import com.haocai.management.entity.SysRole;
+import com.haocai.management.entity.SysUserRole;
+import com.haocai.management.mapper.SysRoleMapper;
 import com.haocai.management.mapper.SysUserLoginLogMapper;
 import com.haocai.management.mapper.SysUserMapper;
-import com.haocai.management.mapper.SysUserMapper;
+import com.haocai.management.mapper.SysUserRoleMapper;
 import com.haocai.management.service.ISysUserService;
 import com.haocai.management.utils.JwtUtils;
 import lombok.RequiredArgsConstructor;
@@ -24,12 +27,15 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 用户业务逻辑实现类
@@ -42,6 +48,8 @@ public class SysUserServiceImpl implements ISysUserService {
 
     private final SysUserMapper sysUserMapper;
     private final SysUserLoginLogMapper loginLogMapper;
+    private final SysUserRoleMapper userRoleMapper;
+    private final SysRoleMapper roleMapper;
     private final PasswordEncoder passwordEncoder;
     @Lazy
     private final AuthenticationManager authenticationManager;
@@ -407,5 +415,116 @@ public class SysUserServiceImpl implements ISysUserService {
             log.error("更新用户最后登录时间失败，用户ID: {}", userId, e);
             // 更新登录时间失败不应该影响登录流程
         }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void assignRolesToUser(Long userId, List<Long> roleIds, Long operatorId) {
+        // 遵循：开发规范-第6条（参数校验）
+        if (userId == null) {
+            throw new BusinessException(1009, "用户ID不能为空");
+        }
+        if (CollectionUtils.isEmpty(roleIds)) {
+            throw new BusinessException(1009, "角色ID列表不能为空");
+        }
+        
+        // 检查用户是否存在
+        SysUser user = findById(userId);
+        if (user == null) {
+            throw new BusinessException(1010, "用户不存在，ID：" + userId);
+        }
+        
+        // 检查所有角色是否存在
+        List<SysRole> roles = roleMapper.selectBatchIds(roleIds);
+        if (roles.size() != roleIds.size()) {
+            throw new BusinessException(1010, "部分角色不存在");
+        }
+        
+        // 删除用户原有的所有角色
+        com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<SysUserRole> deleteWrapper = 
+            new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<>();
+        deleteWrapper.eq(SysUserRole::getUserId, userId);
+        userRoleMapper.delete(deleteWrapper);
+        
+        // 批量插入新的用户角色关联
+        List<SysUserRole> userRoles = new ArrayList<>();
+        for (Long roleId : roleIds) {
+            SysUserRole userRole = new SysUserRole();
+            userRole.setUserId(userId);
+            userRole.setRoleId(roleId);
+            userRole.setCreateBy(operatorId);
+            userRoles.add(userRole);
+        }
+        
+        for (SysUserRole userRole : userRoles) {
+            userRoleMapper.insert(userRole);
+        }
+        
+        log.info("给用户分配角色成功，用户ID：{}，角色数量：{}", userId, roleIds.size());
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void removeRolesFromUser(Long userId, List<Long> roleIds, Long operatorId) {
+        // 遵循：开发规范-第6条（参数校验）
+        if (userId == null) {
+            throw new BusinessException(1009, "用户ID不能为空");
+        }
+        if (CollectionUtils.isEmpty(roleIds)) {
+            throw new BusinessException(1009, "角色ID列表不能为空");
+        }
+        
+        // 检查用户是否存在
+        SysUser user = findById(userId);
+        if (user == null) {
+            throw new BusinessException(1010, "用户不存在，ID：" + userId);
+        }
+        
+        // 删除指定的用户角色关联
+        com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<SysUserRole> deleteWrapper = 
+            new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<>();
+        deleteWrapper.eq(SysUserRole::getUserId, userId);
+        deleteWrapper.in(SysUserRole::getRoleId, roleIds);
+        
+        int count = userRoleMapper.delete(deleteWrapper);
+        
+        log.info("移除用户角色成功，用户ID：{}，移除角色数量：{}", userId, count);
+    }
+
+    @Override
+    public List<Long> getRoleIdsByUserId(Long userId) {
+        // 遵循：开发规范-第6条（参数校验）
+        if (userId == null) {
+            throw new BusinessException(1009, "用户ID不能为空");
+        }
+        
+        // 查询用户角色关联
+        com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<SysUserRole> wrapper = 
+            new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<>();
+        wrapper.eq(SysUserRole::getUserId, userId);
+        
+        List<SysUserRole> userRoles = userRoleMapper.selectList(wrapper);
+        
+        return userRoles.stream()
+                .map(SysUserRole::getRoleId)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<SysRole> getRolesByUserId(Long userId) {
+        // 遵循：开发规范-第6条（参数校验）
+        if (userId == null) {
+            throw new BusinessException(1009, "用户ID不能为空");
+        }
+        
+        // 获取用户的角色ID列表
+        List<Long> roleIds = getRoleIdsByUserId(userId);
+        
+        if (CollectionUtils.isEmpty(roleIds)) {
+            return new ArrayList<>();
+        }
+        
+        // 批量查询角色信息
+        return roleMapper.selectBatchIds(roleIds);
     }
 }

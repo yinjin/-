@@ -41,7 +41,7 @@ public class SysPermission implements Serializable {
      * 遵循：参数验证规范-第1条（必填字段验证）
      */
     @NotBlank(message = "权限名称不能为空")
-    @TableField("name")
+    @TableField("permission_name")
     private String name;
 
     /**
@@ -49,7 +49,7 @@ public class SysPermission implements Serializable {
      * 遵循：参数验证规范-第1条（必填字段验证）
      */
     @NotBlank(message = "权限编码不能为空")
-    @TableField("code")
+    @TableField("permission_code")
     private String code;
 
     /**
