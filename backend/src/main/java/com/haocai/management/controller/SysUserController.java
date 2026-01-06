@@ -51,19 +51,23 @@ public class SysUserController {
      */
     @PostMapping("/register")
     public ApiResponse<UserVO> register(@Valid @RequestBody UserRegisterDTO registerDTO) {
-        log.info("用户注册请求: username={}", registerDTO.getUsername());
+        log.info("用户注册请求: username={}, name={}, email={}, phone={}", 
+            registerDTO.getUsername(), registerDTO.getName(), registerDTO.getEmail(), registerDTO.getPhone());
+        log.info("密码长度: {}, 确认密码: {}", registerDTO.getPassword().length(), registerDTO.getConfirmPassword());
         
         // 密码确认校验
         if (!registerDTO.getPassword().equals(registerDTO.getConfirmPassword())) {
+            log.error("密码不一致: password != confirmPassword");
             return ApiResponse.error(400, "两次输入的密码不一致");
         }
         
         try {
             SysUser user = userService.register(registerDTO);
             UserVO userVO = convertToUserVO(user);
+            log.info("用户注册成功: userId={}", user.getId());
             return ApiResponse.success(userVO);
         } catch (Exception e) {
-            log.error("用户注册失败", e);
+            log.error("用户注册失败: username={}", registerDTO.getUsername(), e);
             return ApiResponse.error(500, "用户注册失败: " + e.getMessage());
         }
     }
@@ -174,13 +178,16 @@ public class SysUserController {
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(required = false) String username,
             @RequestParam(required = false) String name,
-            @RequestParam(required = false) UserStatus status,
+            @RequestParam(required = false) Integer status,
             @RequestParam(required = false) Long departmentId) {
         
         try {
+            // 将Integer转换为UserStatus枚举
+            UserStatus userStatus = status != null ? UserStatus.getByCode(status) : null;
+            
             Page<SysUser> pageParam = new Page<>(page, size);
             IPage<SysUser> userPage = userService.findUserPage(
-                pageParam, username, name, status, departmentId);
+                pageParam, username, name, userStatus, departmentId);
             
             Map<String, Object> result = new HashMap<>();
             result.put("records", userPage.getRecords().stream().map(this::convertToUserVO).toList());
@@ -258,22 +265,28 @@ public class SysUserController {
      * 使用@PreAuthorize("isAuthenticated()")确保用户已认证
      *
      * @param id     用户ID
-     * @param status 新状态
+     * @param status 新状态（0-正常，1-禁用，2-锁定）
      * @return 更新结果
      */
     @PatchMapping("/{id}/status")
     @PreAuthorize("isAuthenticated()")
     public ApiResponse<Void> updateUserStatus(
             @PathVariable Long id,
-            @RequestParam UserStatus status,
+            @RequestParam Integer status,
             HttpServletRequest request) {
         log.info("更新用户状态: userId={}, status={}", id, status);
         
         try {
+            // 将Integer转换为UserStatus枚举
+            UserStatus userStatus = UserStatus.getByCode(status);
+            if (userStatus == null) {
+                return ApiResponse.error(400, "无效的状态值");
+            }
+            
             // TODO: 从JWT token中获取操作人ID
             Long updateBy = 1L;
             
-            boolean success = userService.updateUserStatus(id, status, updateBy);
+            boolean success = userService.updateUserStatus(id, userStatus, updateBy);
             if (success) {
                 return ApiResponse.success();
             } else {
@@ -293,22 +306,28 @@ public class SysUserController {
      * 使用@PreAuthorize("isAuthenticated()")确保用户已认证
      *
      * @param userIds 用户ID列表
-     * @param status  新状态
+     * @param status  新状态（0-正常，1-禁用，2-锁定）
      * @return 更新结果
      */
     @PatchMapping("/batch/status")
     @PreAuthorize("isAuthenticated()")
     public ApiResponse<Map<String, Integer>> batchUpdateStatus(
             @RequestBody List<Long> userIds,
-            @RequestParam UserStatus status,
+            @RequestParam Integer status,
             HttpServletRequest request) {
         log.info("批量更新用户状态: userIds={}, status={}", userIds, status);
         
         try {
+            // 将Integer转换为UserStatus枚举
+            UserStatus userStatus = UserStatus.getByCode(status);
+            if (userStatus == null) {
+                return ApiResponse.error(400, "无效的状态值");
+            }
+            
             // TODO: 从JWT token中获取操作人ID
             Long updateBy = 1L;
             
-            int count = userService.batchUpdateStatus(userIds, status, updateBy);
+            int count = userService.batchUpdateStatus(userIds, userStatus, updateBy);
             
             Map<String, Integer> result = new HashMap<>();
             result.put("count", count);

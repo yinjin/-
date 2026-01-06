@@ -26,9 +26,9 @@
             clearable
             @clear="handleSearch"
           >
-            <el-option label="正常" value="ACTIVE" />
-            <el-option label="禁用" value="INACTIVE" />
-            <el-option label="锁定" value="LOCKED" />
+            <el-option label="正常" :value="0" />
+            <el-option label="禁用" :value="1" />
+            <el-option label="锁定" :value="2" />
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -86,11 +86,11 @@
               编辑
             </el-button>
             <el-button
-              :type="row.status === 'ACTIVE' ? 'warning' : 'success'"
+              :type="row.status === 0 ? 'warning' : 'success'"
               size="small"
               @click="handleToggleStatus(row)"
             >
-              {{ row.status === 'ACTIVE' ? '禁用' : '启用' }}
+              {{ row.status === 0 ? '禁用' : '启用' }}
             </el-button>
             <el-button
               type="danger"
@@ -172,9 +172,9 @@
         </el-form-item>
         <el-form-item label="状态" prop="status" v-if="isEdit">
           <el-select v-model="userForm.status" placeholder="请选择状态">
-            <el-option label="正常" value="ACTIVE" />
-            <el-option label="禁用" value="INACTIVE" />
-            <el-option label="锁定" value="LOCKED" />
+            <el-option label="正常" :value="0" />
+            <el-option label="禁用" :value="1" />
+            <el-option label="锁定" :value="2" />
           </el-select>
         </el-form-item>
       </el-form>
@@ -203,7 +203,7 @@ const loading = ref(false)
 const searchForm = reactive<UserListRequest>({
   username: '',
   name: '',
-  status: ''
+  status: undefined
 })
 
 // 分页参数
@@ -231,18 +231,25 @@ const userForm = reactive<CreateUserRequest & UpdateUserRequest & { confirmPassw
   name: '',
   email: '',
   phone: '',
-  status: 'ACTIVE'
+  agreeToTerms: true,
+  status: 0
 })
 
 // 表单验证规则
 const userRules: FormRules = {
   username: [
     { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 3, max: 20, message: '用户名长度在 3 到 20 个字符', trigger: 'blur' }
+    { min: 3, max: 20, message: '用户名长度在 3 到 20 个字符', trigger: 'blur' },
+    { pattern: /^[a-zA-Z0-9_]+$/, message: '用户名只能包含字母、数字和下划线', trigger: 'blur' }
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, message: '密码长度至少 6 个字符', trigger: 'blur' }
+    { 
+      pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/, 
+      message: '密码必须包含至少一个大写字母、小写字母、数字和特殊字符', 
+      trigger: 'blur' 
+    },
+    { min: 8, max: 20, message: '密码长度必须在 8 到 20 个字符之间', trigger: 'blur' }
   ],
   confirmPassword: [
     { required: true, message: '请再次输入密码', trigger: 'blur' },
@@ -258,7 +265,8 @@ const userRules: FormRules = {
     }
   ],
   name: [
-    { required: true, message: '请输入姓名', trigger: 'blur' }
+    { required: true, message: '请输入姓名', trigger: 'blur' },
+    { pattern: /^[\u4e00-\u9fa5a-zA-Z0-9\s]+$/, message: '姓名只能包含中文、英文、数字和空格', trigger: 'blur' }
   ],
   email: [
     { required: true, message: '请输入邮箱', trigger: 'blur' },
@@ -305,7 +313,7 @@ const handleSearch = () => {
 const handleReset = () => {
   searchForm.username = ''
   searchForm.name = ''
-  searchForm.status = ''
+  searchForm.status = undefined
   pagination.page = 1
   fetchUserList()
 }
@@ -407,8 +415,8 @@ const handleBatchDelete = async () => {
 
 // 切换用户状态
 const handleToggleStatus = async (row: UserInfo) => {
-  const newStatus = row.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
-  const action = newStatus === 'ACTIVE' ? '启用' : '禁用'
+  const newStatus = row.status === 0 ? 1 : 0
+  const action = newStatus === 0 ? '启用' : '禁用'
   
   try {
     await ElMessageBox.confirm(
@@ -473,9 +481,11 @@ const handleSubmit = async () => {
       const createData: CreateUserRequest = {
         username: userForm.username,
         password: userForm.password,
+        confirmPassword: userForm.confirmPassword,
         name: userForm.name,
         email: userForm.email,
-        phone: userForm.phone
+        phone: userForm.phone,
+        agreeToTerms: true
       }
       
       const response = await createUser(createData)
@@ -509,26 +519,26 @@ const resetUserForm = () => {
   userForm.name = ''
   userForm.email = ''
   userForm.phone = ''
-  userForm.status = 'ACTIVE'
+  userForm.status = 0
   userFormRef.value?.resetFields()
 }
 
 // 获取状态类型
-const getStatusType = (status: string) => {
-  const typeMap: Record<string, any> = {
-    ACTIVE: 'success',
-    INACTIVE: 'warning',
-    LOCKED: 'danger'
+const getStatusType = (status: number) => {
+  const typeMap: Record<number, any> = {
+    0: 'success',
+    1: 'warning',
+    2: 'danger'
   }
   return typeMap[status] || 'info'
 }
 
 // 获取状态文本
-const getStatusText = (status: string) => {
-  const textMap: Record<string, string> = {
-    ACTIVE: '正常',
-    INACTIVE: '禁用',
-    LOCKED: '锁定'
+const getStatusText = (status: number) => {
+  const textMap: Record<number, string> = {
+    0: '正常',
+    1: '禁用',
+    2: '锁定'
   }
   return textMap[status] || '未知'
 }

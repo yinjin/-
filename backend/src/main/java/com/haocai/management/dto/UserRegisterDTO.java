@@ -51,7 +51,7 @@ public class UserRegisterDTO {
      */
     @NotBlank(message = "真实姓名不能为空")
     @Size(max = 50, message = "真实姓名长度不能超过50个字符")
-    @Pattern(regexp = "^[\\u4e00-\\u9fa5a-zA-Z\\s]+$", message = "真实姓名只能包含中文、英文和空格")
+    @Pattern(regexp = "^[\\u4e00-\\u9fa5a-zA-Z0-9\\s]+$", message = "真实姓名只能包含中文、英文、数字和空格")
     private String name;
 
     /**
@@ -90,8 +90,8 @@ public class UserRegisterDTO {
     /**
      * 验证码
      * 邮箱或短信验证码，用于验证邮箱或手机号真实性
+     * 可选字段，管理员创建用户时不需要验证码
      */
-    @NotBlank(message = "验证码不能为空")
     @Size(min = 4, max = 6, message = "验证码长度必须在4-6个字符之间")
     private String verificationCode;
 

@@ -7,7 +7,7 @@ export interface UserInfo {
   name: string
   email: string
   phone: string
-  status: string
+  status: number  // 0-正常，1-禁用，2-锁定
   createTime: string
   updateTime: string
 }
@@ -40,7 +40,7 @@ export interface UpdateUserRequest {
   name?: string
   email?: string
   phone?: string
-  status?: string
+  status?: number
 }
 
 // 用户列表查询请求类型
@@ -49,16 +49,18 @@ export interface UserListRequest {
   size?: number
   username?: string
   name?: string
-  status?: string
+  status?: number
 }
 
 // 创建用户请求类型
 export interface CreateUserRequest {
   username: string
   password: string
+  confirmPassword: string
   name: string
   email: string
   phone: string
+  agreeToTerms: boolean
 }
 
 // 分页响应类型
@@ -116,7 +118,7 @@ export const userApi = {
 
   // 创建用户
   createUser: (data: CreateUserRequest): Promise<ApiResponse<UserInfo>> => {
-    return request.post('/users', data)
+    return request.post('/users/register', data)
   },
 
   // 更新用户信息
@@ -125,13 +127,13 @@ export const userApi = {
   },
 
   // 更新用户状态
-  updateUserStatus: (id: number, status: string): Promise<ApiResponse<void>> => {
-    return request.patch(`/users/${id}/status`, { status })
+  updateUserStatus: (id: number, status: number): Promise<ApiResponse<void>> => {
+    return request.patch(`/users/${id}/status`, null, { params: { status } })
   },
 
   // 批量更新用户状态
-  batchUpdateStatus: (ids: number[], status: string): Promise<ApiResponse<void>> => {
-    return request.patch('/users/batch/status', { ids, status })
+  batchUpdateStatus: (ids: number[], status: number): Promise<ApiResponse<void>> => {
+    return request.patch('/users/batch/status', ids, { params: { status } })
   },
 
   // 删除用户
@@ -141,7 +143,7 @@ export const userApi = {
 
   // 批量删除用户
   batchDeleteUsers: (ids: number[]): Promise<ApiResponse<void>> => {
-    return request.delete('/users/batch', { data: { ids } })
+    return request.delete('/users/batch', { data: ids })
   }
 }
 
