@@ -3,6 +3,7 @@ package com.haocai.management.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.haocai.management.common.ApiResponse;
+import com.haocai.management.dto.DepartmentVO;
 import com.haocai.management.dto.UserLoginDTO;
 import com.haocai.management.dto.UserRegisterDTO;
 import com.haocai.management.dto.UserUpdateDTO;
@@ -475,7 +476,8 @@ public class SysUserController {
 
     /**
      * 将SysUser实体转换为UserVO
-     * 隐藏敏感信息，转换状态枚举
+     * 隐藏敏感信息，转换状态枚举，构建部门对象
+     * 遵循：前端类型规范-与后端DTO/VO保持一致
      *
      * @param user 用户实体
      * @return 用户VO
@@ -491,6 +493,19 @@ public class SysUserController {
         // 转换状态枚举
         if (user.getStatus() != null) {
             userVO.setStatus(user.getStatus().ordinal());
+        }
+        
+        // 构建部门对象
+        if (user.getDepartmentId() != null) {
+            DepartmentVO departmentVO = new DepartmentVO();
+            departmentVO.setId(user.getDepartmentId());
+            departmentVO.setName(user.getDeptName());
+            departmentVO.setCode(user.getDeptCode());
+            departmentVO.setParentId(user.getDeptParentId());
+            departmentVO.setLeaderName(user.getDeptLeader());
+            departmentVO.setContactInfo(user.getDeptPhone());
+            departmentVO.setDescription(user.getDeptDescription());
+            userVO.setDepartment(departmentVO);
         }
         
         return userVO;
