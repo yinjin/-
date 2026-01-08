@@ -29,7 +29,7 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
      * @param username 用户名
      * @return 用户对象，不存在则返回null
      */
-    @Select("SELECT * FROM sys_user WHERE username = #{username} AND deleted = 0")
+    @Select("SELECT id,username,password,real_name AS name,email,phone,avatar,department_id,status,create_time,update_time,last_login_time,create_by,update_by,remark,deleted FROM sys_user WHERE username = #{username} AND deleted = 0")
     SysUser selectByUsername(@Param("username") String username);
 
     /**
@@ -39,7 +39,7 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
      * @param email 邮箱地址
      * @return 用户对象，不存在则返回null
      */
-    @Select("SELECT * FROM sys_user WHERE email = #{email} AND deleted = 0")
+    @Select("SELECT id,username,password,real_name AS name,email,phone,avatar,department_id,status,create_time,update_time,last_login_time,create_by,update_by,remark,deleted FROM sys_user WHERE email = #{email} AND deleted = 0")
     SysUser selectByEmail(@Param("email") String email);
 
     /**
@@ -49,7 +49,7 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
      * @param phone 手机号
      * @return 用户对象，不存在则返回null
      */
-    @Select("SELECT * FROM sys_user WHERE phone = #{phone} AND deleted = 0")
+    @Select("SELECT id,username,password,real_name AS name,email,phone,avatar,department_id,status,create_time,update_time,last_login_time,create_by,update_by,remark,deleted FROM sys_user WHERE phone = #{phone} AND deleted = 0")
     SysUser selectByPhone(@Param("phone") String phone);
 
     /**
@@ -59,7 +59,7 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
      * @param departmentId 部门ID
      * @return 用户列表
      */
-    @Select("SELECT * FROM sys_user WHERE department_id = #{departmentId} AND deleted = 0 ORDER BY create_time DESC")
+    @Select("SELECT id,username,password,real_name AS name,email,phone,avatar,department_id,status,create_time,update_time,last_login_time,create_by,update_by,remark,deleted FROM sys_user WHERE department_id = #{departmentId} AND deleted = 0 ORDER BY create_time DESC")
     List<SysUser> selectByDepartmentId(@Param("departmentId") Long departmentId);
 
     /**
@@ -74,9 +74,9 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
      * @return 分页结果
      */
     @Select("<script>" +
-            "SELECT * FROM sys_user WHERE deleted = 0" +
+            "SELECT id,username,password,real_name AS name,email,phone,avatar,department_id,status,create_time,update_time,last_login_time,create_by,update_by,remark,deleted FROM sys_user WHERE deleted = 0" +
             "<if test='username != null and username != \"\"'> AND username LIKE CONCAT('%', #{username}, '%')</if>" +
-            "<if test='name != null and name != \"\"'> AND name LIKE CONCAT('%', #{name}, '%')</if>" +
+            "<if test='name != null and name != \"\"'> AND real_name LIKE CONCAT('%', #{name}, '%')</if>" +
             "<if test='status != null'> AND status = #{status}</if>" +
             "<if test='departmentId != null'> AND department_id = #{departmentId}</if>" +
             " ORDER BY create_time DESC" +

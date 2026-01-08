@@ -23,7 +23,7 @@ public class UserRegisterDTO {
      */
     @NotBlank(message = "用户名不能为空")
     @Size(min = 3, max = 20, message = "用户名长度必须在3-20个字符之间")
-    @Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "用户名只能包含字母、数字和下划线")
+    @Pattern(regexp = "^[\\u4e00-\\u9fa5a-zA-Z0-9_]+$", message = "用户名只能包含中文、字母、数字和下划线")
     private String username;
 
     /**
@@ -51,7 +51,7 @@ public class UserRegisterDTO {
      */
     @NotBlank(message = "真实姓名不能为空")
     @Size(max = 50, message = "真实姓名长度不能超过50个字符")
-    @Pattern(regexp = "^[\\u4e00-\\u9fa5a-zA-Z0-9\\s]+$", message = "真实姓名只能包含中文、英文、数字和空格")
+    @Pattern(regexp = "^[\\u4e00-\\u9fa5a-zA-Z0-9_\\s]+$", message = "真实姓名只能包含中文、字母、数字、下划线和空格")
     private String name;
 
     /**

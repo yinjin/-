@@ -53,6 +53,7 @@ public class SysUser {
      * 真实姓名
      * 用户的真实姓名，用于显示和身份验证
      */
+    @TableField("real_name")
     @NotBlank(message = "真实姓名不能为空")
     @Size(max = 50, message = "真实姓名长度不能超过50个字符")
     private String name;
@@ -116,18 +117,18 @@ public class SysUser {
     private LocalDateTime lastLoginTime;
 
     /**
-     * 创建者ID
-     * 记录创建该用户账号的管理员ID
+     * 创建者
+     * 记录创建该用户账号的管理员用户名
      */
     @TableField(value = "create_by", fill = FieldFill.INSERT)
-    private Long createBy;
+    private String createBy;
 
     /**
-     * 更新者ID
-     * 记录最后更新该用户账号的管理员ID
+     * 更新者
+     * 记录最后更新该用户账号的管理员用户名
      */
     @TableField(value = "update_by", fill = FieldFill.INSERT_UPDATE)
-    private Long updateBy;
+    private String updateBy;
 
     /**
      * 备注信息

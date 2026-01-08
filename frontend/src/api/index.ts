@@ -1,24 +1,42 @@
 import axios from 'axios'
+import type { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 'axios'
 import { ElMessage } from 'element-plus'
 import router from '@/router'
 
-// 创建axios实例
+// API响应接口
+export interface ApiResponse<T = any> {
+  code: number
+  message: string
+  data: T
+}
+
+// 创建类型化的axios实例，响应拦截器返回ApiResponse<T>
+// 使用接口继承来保留AxiosInstance的所有属性，同时添加泛型方法类型
+interface TypedAxiosInstance extends AxiosInstance {
+  get<T = ApiResponse<any>>(url: string, config?: Partial<InternalAxiosRequestConfig>): Promise<T>
+  post<T = ApiResponse<any>>(url: string, data?: any, config?: Partial<InternalAxiosRequestConfig>): Promise<T>
+  put<T = ApiResponse<any>>(url: string, data?: any, config?: Partial<InternalAxiosRequestConfig>): Promise<T>
+  delete<T = ApiResponse<any>>(url: string, config?: Partial<InternalAxiosRequestConfig>): Promise<T>
+  patch<T = ApiResponse<any>>(url: string, data?: any, config?: Partial<InternalAxiosRequestConfig>): Promise<T>
+  request<T = ApiResponse<any>>(config: Partial<InternalAxiosRequestConfig>): Promise<T>
+}
+
 const request = axios.create({
   baseURL: '/api',
   timeout: 10000,
-})
+}) as TypedAxiosInstance
 
 // 请求拦截器
 request.interceptors.request.use(
-  (config) => {
+  (config: InternalAxiosRequestConfig) => {
     // 在发送请求之前做些什么
     const token = localStorage.getItem('token')
-    if (token) {
+    if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`
     }
     return config
   },
-  (error) => {
+  (error: any) => {
     // 对请求错误做些什么
     console.error('请求错误:', error)
     return Promise.reject(error)
@@ -27,11 +45,11 @@ request.interceptors.request.use(
 
 // 响应拦截器
 request.interceptors.response.use(
-  (response) => {
+  (response: AxiosResponse) => {
     // 对响应数据做点什么
     return response.data
   },
-  (error) => {
+  (error: any) => {
     // 对响应错误做点什么
     console.error('响应错误:', error)
     

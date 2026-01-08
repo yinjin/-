@@ -255,7 +255,7 @@ public class SysUserServiceImpl implements ISysUserService {
         SysUser updateUser = new SysUser();
         updateUser.setStatus(status);
         updateUser.setUpdateTime(LocalDateTime.now());
-        updateUser.setUpdateBy(updateBy);
+        updateUser.setUpdateBy(updateBy != null ? String.valueOf(updateBy) : null);
 
         com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper<SysUser> updateWrapper = 
             new com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper<>();
@@ -292,7 +292,7 @@ public class SysUserServiceImpl implements ISysUserService {
         SysUser updateUser = new SysUser();
         updateUser.setStatus(status);
         updateUser.setUpdateTime(LocalDateTime.now());
-        updateUser.setUpdateBy(updateBy);
+        updateUser.setUpdateBy(updateBy != null ? String.valueOf(updateBy) : null);
 
         com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper<SysUser> updateWrapper = 
             new com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper<>();
@@ -440,11 +440,10 @@ public class SysUserServiceImpl implements ISysUserService {
             throw new BusinessException(1010, "部分角色不存在");
         }
         
-        // 删除用户原有的所有角色
-        com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<SysUserRole> deleteWrapper = 
-            new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<>();
-        deleteWrapper.eq(SysUserRole::getUserId, userId);
-        userRoleMapper.delete(deleteWrapper);
+        // 删除用户原有的所有角色（物理删除以避免唯一约束冲突）
+        // 遵循：数据访问规范-第3条（逻辑删除处理）
+        // 注意：由于存在唯一索引uk_user_role，需要物理删除记录，否则插入时会报重复键错误
+        userRoleMapper.physicalDeleteByUserId(userId);
         
         // 批量插入新的用户角色关联
         List<SysUserRole> userRoles = new ArrayList<>();
@@ -452,7 +451,7 @@ public class SysUserServiceImpl implements ISysUserService {
             SysUserRole userRole = new SysUserRole();
             userRole.setUserId(userId);
             userRole.setRoleId(roleId);
-            userRole.setCreateBy(operatorId);
+            userRole.setCreateBy(operatorId != null ? String.valueOf(operatorId) : null);
             userRoles.add(userRole);
         }
         

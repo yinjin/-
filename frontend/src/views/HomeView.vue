@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user'
 import { ElMessage } from 'element-plus'
-import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+import { User, Box, Document, DataLine, Setting, TrendCharts, ArrowDown, UserFilled, Lock, OfficeBuilding } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -22,6 +22,21 @@ const handleLogout = async () => {
 // 跳转到用户管理页面
 const goToUserManage = () => {
   router.push('/users')
+}
+
+// 跳转到角色管理页面
+const goToRoleManage = () => {
+  router.push('/roles')
+}
+
+// 跳转到权限管理页面
+const goToPermissionManage = () => {
+  router.push('/permissions')
+}
+
+// 跳转到部门管理页面
+const goToDepartmentManage = () => {
+  router.push('/departments')
 }
 </script>
 
@@ -45,7 +60,7 @@ const goToUserManage = () => {
         </el-card>
 
         <el-row :gutter="20" class="menu-cards">
-          <el-col :span="8">
+          <el-col :xs="24" :sm="12" :md="8">
             <el-card class="menu-card" shadow="hover" @click="goToUserManage">
               <div class="card-content">
                 <el-icon :size="40" color="#409EFF"><User /></el-icon>
@@ -55,7 +70,7 @@ const goToUserManage = () => {
             </el-card>
           </el-col>
           
-          <el-col :span="8">
+          <el-col :xs="24" :sm="12" :md="8">
             <el-card class="menu-card" shadow="hover">
               <div class="card-content">
                 <el-icon :size="40" color="#67C23A"><Box /></el-icon>
@@ -65,7 +80,7 @@ const goToUserManage = () => {
             </el-card>
           </el-col>
           
-          <el-col :span="8">
+          <el-col :xs="24" :sm="12" :md="8">
             <el-card class="menu-card" shadow="hover">
               <div class="card-content">
                 <el-icon :size="40" color="#E6A23C"><Document /></el-icon>
@@ -77,7 +92,7 @@ const goToUserManage = () => {
         </el-row>
 
         <el-row :gutter="20" class="menu-cards">
-          <el-col :span="8">
+          <el-col :xs="24" :sm="12" :md="8">
             <el-card class="menu-card" shadow="hover">
               <div class="card-content">
                 <el-icon :size="40" color="#F56C6C"><DataLine /></el-icon>
@@ -87,17 +102,36 @@ const goToUserManage = () => {
             </el-card>
           </el-col>
           
-          <el-col :span="8">
-            <el-card class="menu-card" shadow="hover">
-              <div class="card-content">
-                <el-icon :size="40" color="#909399"><Setting /></el-icon>
-                <h3>系统设置</h3>
-                <p>系统配置管理，包括参数设置、权限管理等</p>
+          <el-col :xs="24" :sm="12" :md="8">
+            <el-popover placement="bottom" :width="200" trigger="click">
+              <template #reference>
+                <el-card class="menu-card menu-card-clickable" shadow="hover">
+                  <div class="card-content">
+                    <el-icon :size="40" color="#909399"><Setting /></el-icon>
+                    <h3>系统设置</h3>
+                    <p>系统配置管理，包括参数设置、权限管理等</p>
+                    <el-icon class="expand-icon"><ArrowDown /></el-icon>
+                  </div>
+                </el-card>
+              </template>
+              <div class="system-menu-list">
+                <div class="system-menu-item" @click="goToRoleManage">
+                  <el-icon><UserFilled /></el-icon>
+                  <span>角色管理</span>
+                </div>
+                <div class="system-menu-item" @click="goToPermissionManage">
+                  <el-icon><Lock /></el-icon>
+                  <span>权限管理</span>
+                </div>
+                <div class="system-menu-item" @click="goToDepartmentManage">
+                  <el-icon><OfficeBuilding /></el-icon>
+                  <span>部门管理</span>
+                </div>
               </div>
-            </el-card>
+            </el-popover>
           </el-col>
           
-          <el-col :span="8">
+          <el-col :xs="24" :sm="12" :md="8">
             <el-card class="menu-card" shadow="hover">
               <div class="card-content">
                 <el-icon :size="40" color="#409EFF"><TrendCharts /></el-icon>
@@ -111,6 +145,17 @@ const goToUserManage = () => {
     </el-container>
   </div>
 </template>
+
+<style>
+/* 全局隐藏滚动条 */
+.el-popover, .el-popover el-popover__wrapper {
+  overflow: hidden !important;
+}
+
+body .el-popover {
+  overflow: hidden !important;
+}
+</style>
 
 <style scoped>
 .home {
@@ -176,16 +221,30 @@ const goToUserManage = () => {
 .menu-card {
   cursor: pointer;
   transition: transform 0.3s;
-  height: 200px;
+  height: 230px;
+  overflow: hidden !important;
 }
 
 .menu-card:hover {
   transform: translateY(-5px);
 }
 
+.menu-card-clickable:hover {
+  transform: translateY(-5px);
+}
+
 .card-content {
   text-align: center;
   padding: 20px;
+  overflow: hidden;
+}
+
+:deep(.el-card) {
+  overflow: hidden;
+}
+
+:deep(.el-popover) {
+  overflow: hidden;
 }
 
 .card-content h3 {
@@ -198,5 +257,42 @@ const goToUserManage = () => {
   color: #909399;
   font-size: 14px;
   line-height: 1.5;
+}
+
+.expand-icon {
+  margin-top: 10px;
+  color: #909399;
+  transition: transform 0.3s;
+}
+
+.el-popover:hover .expand-icon {
+  transform: rotate(180deg);
+  color: #409EFF;
+}
+
+.system-menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.system-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #606266;
+}
+
+.system-menu-item:hover {
+  background: #409EFF;
+  color: #fff;
+}
+
+.system-menu-item .el-icon {
+  font-size: 18px;
 }
 </style>

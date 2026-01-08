@@ -10,6 +10,18 @@ export interface UserInfo {
   status: number  // 0-正常，1-禁用，2-锁定
   createTime: string
   updateTime: string
+  roles?: RoleInfo[]  // 用户角色列表
+}
+
+// 角色信息类型
+export interface RoleInfo {
+  id: number
+  name: string  // 后端返回的是name，不是roleName
+  code: string  // 后端返回的是code，不是roleCode
+  description?: string
+  status: number
+  createTime?: string
+  updateTime?: string
 }
 
 // 登录请求类型
@@ -144,6 +156,21 @@ export const userApi = {
   // 批量删除用户
   batchDeleteUsers: (ids: number[]): Promise<ApiResponse<void>> => {
     return request.delete('/users/batch', { data: ids })
+  },
+
+  // 获取用户的角色列表
+  getUserRoles: (userId: number): Promise<ApiResponse<RoleInfo[]>> => {
+    return request.get(`/users/${userId}/roles`)
+  },
+
+  // 为用户分配角色
+  assignRoles: (userId: number, roleIds: number[]): Promise<ApiResponse<void>> => {
+    return request.post(`/users/${userId}/roles`, roleIds)
+  },
+
+  // 移除用户的角色
+  removeUserRole: (userId: number, roleId: number): Promise<ApiResponse<void>> => {
+    return request.delete(`/users/${userId}/roles/${roleId}`)
   }
 }
 
@@ -161,3 +188,6 @@ export const updateUserStatus = userApi.updateUserStatus
 export const batchUpdateStatus = userApi.batchUpdateStatus
 export const deleteUser = userApi.deleteUser
 export const batchDeleteUsers = userApi.batchDeleteUsers
+export const getUserRoles = userApi.getUserRoles
+export const assignRoles = userApi.assignRoles
+export const removeUserRole = userApi.removeUserRole

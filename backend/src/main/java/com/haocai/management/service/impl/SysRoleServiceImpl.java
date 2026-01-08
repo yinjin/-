@@ -71,7 +71,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
         role.setDescription(dto.getDescription());
         role.setStatus(dto.getStatus());
         role.setDeleted(0);
-        role.setCreateBy(createBy);
+        role.setCreateBy(createBy != null ? String.valueOf(createBy) : null);
         
         roleMapper.insert(role);
         log.info("创建角色成功，角色ID：{}，角色名称：{}", role.getId(), role.getRoleName());
@@ -111,7 +111,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
         role.setRoleCode(dto.getCode());
         role.setDescription(dto.getDescription());
         role.setStatus(dto.getStatus());
-        role.setUpdateBy(updateBy);
+        role.setUpdateBy(updateBy != null ? String.valueOf(updateBy) : null);
         
         roleMapper.updateById(role);
         log.info("更新角色成功，角色ID：{}", roleId);
@@ -249,7 +249,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
             SysRolePermission rp = new SysRolePermission();
             rp.setRoleId(roleId);
             rp.setPermissionId(permissionId);
-            rp.setCreateBy(operatorId);
+            rp.setCreateBy(operatorId != null ? String.valueOf(operatorId) : null);
             rolePermissions.add(rp);
         }
         

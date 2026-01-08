@@ -165,4 +165,13 @@ public interface SysRolePermissionMapper extends BaseMapper<SysRolePermission> {
             "</foreach>" +
             "</script>")
     List<Long> selectExistingPermissionIds(@Param("roleId") Long roleId, @Param("permissionIds") List<Long> permissionIds);
+
+    /**
+     * 根据角色ID物理删除所有角色权限关联
+     * 
+     * @param roleId 角色ID
+     * @return 删除的记录数
+     */
+    @Delete("DELETE FROM sys_role_permission WHERE role_id = #{roleId}")
+    int physicalDeleteByRoleId(@Param("roleId") Long roleId);
 }

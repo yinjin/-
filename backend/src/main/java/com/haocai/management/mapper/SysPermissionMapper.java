@@ -31,7 +31,7 @@ public interface SysPermissionMapper extends BaseMapper<SysPermission> {
      * @param permissionCode 权限编码
      * @return 权限对象，如果不存在返回null
      */
-    @Select("SELECT * FROM sys_permission WHERE code = #{permissionCode} AND deleted = 0")
+    @Select("SELECT * FROM sys_permission WHERE permission_code = #{permissionCode} AND deleted = 0")
     SysPermission selectByPermissionCode(@Param("permissionCode") String permissionCode);
 
     /**
@@ -93,7 +93,7 @@ public interface SysPermissionMapper extends BaseMapper<SysPermission> {
      * @param permissionName 权限名称（支持模糊匹配）
      * @return 权限列表
      */
-    @Select("SELECT * FROM sys_permission WHERE name LIKE CONCAT('%', #{permissionName}, '%') AND deleted = 0 ORDER BY sort_order ASC, id ASC")
+    @Select("SELECT * FROM sys_permission WHERE permission_name LIKE CONCAT('%', #{permissionName}, '%') AND deleted = 0 ORDER BY sort_order ASC, id ASC")
     List<SysPermission> selectByPermissionName(@Param("permissionName") String permissionName);
 
     /**
@@ -109,7 +109,7 @@ public interface SysPermissionMapper extends BaseMapper<SysPermission> {
             "SELECT * FROM sys_permission " +
             "WHERE deleted = 0 " +
             "<if test='permissionName != null and permissionName != \"\"'>" +
-            "AND name LIKE CONCAT('%', #{permissionName}, '%') " +
+            "AND permission_name LIKE CONCAT('%', #{permissionName}, '%') " +
             "</if>" +
             "<if test='type != null'>" +
             "AND type = #{type} " +
@@ -130,7 +130,7 @@ public interface SysPermissionMapper extends BaseMapper<SysPermission> {
      * @param permissionCode 权限编码
      * @return 存在的数量
      */
-    @Select("SELECT COUNT(*) FROM sys_permission WHERE code = #{permissionCode} AND deleted = 0")
+    @Select("SELECT COUNT(*) FROM sys_permission WHERE permission_code = #{permissionCode} AND deleted = 0")
     int countByPermissionCode(@Param("permissionCode") String permissionCode);
 
     /**
@@ -139,7 +139,7 @@ public interface SysPermissionMapper extends BaseMapper<SysPermission> {
      * @param permissionName 权限名称
      * @return 存在的数量
      */
-    @Select("SELECT COUNT(*) FROM sys_permission WHERE name = #{permissionName} AND deleted = 0")
+    @Select("SELECT COUNT(*) FROM sys_permission WHERE permission_name = #{permissionName} AND deleted = 0")
     int countByPermissionName(@Param("permissionName") String permissionName);
 
     /**
@@ -174,4 +174,19 @@ public interface SysPermissionMapper extends BaseMapper<SysPermission> {
      */
     @Select("SELECT * FROM sys_permission WHERE deleted = 0 ORDER BY parent_id ASC, sort_order ASC, id ASC")
     List<SysPermission> selectAllForTree();
+
+    /**
+     * 查询权限树形结构（使用正确的JSON字段别名）
+     * 这个方法确保返回的JSON使用permissionName和permissionCode字段名
+     * 
+     * @return 所有权限列表（按层级排序）
+     */
+    @Select("SELECT id, permission_name AS permissionName, permission_code AS permissionCode, type, " +
+            "parent_id AS parentId, path, component, icon, sort_order AS sortOrder, status, " +
+            "create_time AS createTime, update_time AS updateTime, create_by AS createBy, " +
+            "update_by AS updateBy, deleted " +
+            "FROM sys_permission " +
+            "WHERE deleted = 0 " +
+            "ORDER BY parent_id ASC, sort_order ASC, id ASC")
+    List<SysPermission> selectAllForTreeWithCorrectAliases();
 }

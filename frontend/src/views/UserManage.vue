@@ -68,6 +68,22 @@
         <el-table-column prop="name" label="姓名" width="120" />
         <el-table-column prop="email" label="邮箱" width="180" />
         <el-table-column prop="phone" label="手机号" width="130" />
+        <el-table-column prop="roles" label="角色" width="200">
+          <template #default="{ row }">
+            <div v-if="row.roles && row.roles.length > 0">
+              <el-tag
+                v-for="role in row.roles"
+                :key="role.id"
+                type="success"
+                size="small"
+                style="margin-right: 5px; margin-bottom: 5px"
+              >
+                {{ role.name || '未知角色' }}
+              </el-tag>
+            </div>
+            <span v-else style="color: #999">无角色</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
             <el-tag :type="getStatusType(row.status)">
@@ -143,6 +159,7 @@
             placeholder="请输入密码"
             show-password
           />
+          <div class="password-tip">密码必须包含大写字母、小写字母、数字和特殊字符（$ @ ! % * ? &）</div>
         </el-form-item>
         <el-form-item label="确认密码" prop="confirmPassword" v-if="!isEdit">
           <el-input
@@ -177,6 +194,23 @@
             <el-option label="锁定" :value="2" />
           </el-select>
         </el-form-item>
+        <el-form-item label="角色" prop="roleId" v-if="isEdit">
+          <el-select
+            v-model="userForm.roleId"
+            placeholder="请选择角色"
+            style="width: 100%"
+          >
+            <el-option
+              v-for="role in allRoles"
+              :key="role.id"
+              :label="role.name"
+              :value="role.id"
+            />
+            <div v-if="allRoles.length === 0" style="padding: 10px; color: #999">
+              暂无角色数据
+            </div>
+          </el-select>
+        </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
@@ -192,12 +226,17 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import { Plus, Delete } from '@element-plus/icons-vue'
-import { getUserList, createUser, updateUser, deleteUser, batchDeleteUsers, updateUserStatus, batchUpdateStatus } from '@/api/user'
+import { getUserList, createUser, updateUser, deleteUser, batchDeleteUsers, updateUserStatus, batchUpdateStatus, getUserRoles, assignRoles, removeUserRole } from '@/api/user'
+import { roleApi } from '@/api/role'
 import type { UserInfo, UserListRequest, CreateUserRequest, UpdateUserRequest } from '@/api/user'
+import type { RoleInfo } from '@/api/role'
 
 // 用户列表数据
 const userList = ref<UserInfo[]>([])
 const loading = ref(false)
+
+// 所有角色列表
+const allRoles = ref<RoleInfo[]>([])
 
 // 搜索表单
 const searchForm = reactive<UserListRequest>({
@@ -224,7 +263,7 @@ const submitLoading = ref(false)
 
 // 用户表单
 const userFormRef = ref<FormInstance>()
-const userForm = reactive<CreateUserRequest & UpdateUserRequest & { confirmPassword?: string }>({
+const userForm = reactive<CreateUserRequest & UpdateUserRequest & { confirmPassword?: string; roleId?: number }>({
   username: '',
   password: '',
   confirmPassword: '',
@@ -232,7 +271,8 @@ const userForm = reactive<CreateUserRequest & UpdateUserRequest & { confirmPassw
   email: '',
   phone: '',
   agreeToTerms: true,
-  status: 0
+  status: 0,
+  roleId: undefined
 })
 
 // 表单验证规则
@@ -240,12 +280,12 @@ const userRules: FormRules = {
   username: [
     { required: true, message: '请输入用户名', trigger: 'blur' },
     { min: 3, max: 20, message: '用户名长度在 3 到 20 个字符', trigger: 'blur' },
-    { pattern: /^[a-zA-Z0-9_]+$/, message: '用户名只能包含字母、数字和下划线', trigger: 'blur' }
+    { pattern: /^[\u4e00-\u9fa5a-zA-Z0-9_]+$/, message: '用户名只能包含中文、字母、数字和下划线', trigger: 'blur' }
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
     { 
-      pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/, 
+      pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, 
       message: '密码必须包含至少一个大写字母、小写字母、数字和特殊字符', 
       trigger: 'blur' 
     },
@@ -261,12 +301,13 @@ const userRules: FormRules = {
           callback()
         }
       },
-      trigger: 'blur'
+      trigger: 'change'
     }
   ],
   name: [
     { required: true, message: '请输入姓名', trigger: 'blur' },
-    { pattern: /^[\u4e00-\u9fa5a-zA-Z0-9\s]+$/, message: '姓名只能包含中文、英文、数字和空格', trigger: 'blur' }
+    { max: 50, message: '姓名长度不能超过 50 个字符', trigger: 'blur' },
+    { pattern: /^[\u4e00-\u9fa5a-zA-Z0-9_\s]+$/, message: '姓名只能包含中文、字母、数字、下划线和空格', trigger: 'blur' }
   ],
   email: [
     { required: true, message: '请输入邮箱', trigger: 'blur' },
@@ -276,6 +317,24 @@ const userRules: FormRules = {
     { required: true, message: '请输入手机号', trigger: 'blur' },
     { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号格式', trigger: 'blur' }
   ]
+}
+
+// 获取所有角色列表
+// 遵循：API规范-响应数据处理
+// axios拦截器已返回response.data，所以response直接是ApiResponse<PageResponse<RoleInfo>>
+const fetchRoleList = async () => {
+  try {
+    const response = await roleApi.getRoleList({ pageNum: 1, pageSize: 100 })
+    console.log('角色列表响应:', response)
+    if (response.code === 200 && response.data) {
+      allRoles.value = response.data.records || []
+      console.log('角色列表数据:', allRoles.value)
+    } else {
+      console.error('获取角色列表失败:', response.message)
+    }
+  } catch (error: any) {
+    console.error('获取角色列表失败:', error)
+  }
 }
 
 // 获取用户列表
@@ -293,6 +352,36 @@ const fetchUserList = async () => {
     if (response.code === 200 && response.data) {
       userList.value = response.data.records || []
       pagination.total = response.data.total || 0
+      
+      // 为每个用户获取角色信息（并行获取以提高性能）
+      const rolePromises = userList.value.map(async (user) => {
+        try {
+          const rolesResponse = await getUserRoles(user.id)
+          console.log(`用户 ${user.username} 的角色响应:`, rolesResponse)
+          return {
+            userId: user.id,
+            roles: rolesResponse.code === 200 && rolesResponse.data ? rolesResponse.data : []
+          }
+        } catch (error) {
+          console.error(`获取用户 ${user.username} 的角色失败:`, error)
+          return {
+            userId: user.id,
+            roles: []
+          }
+        }
+      })
+
+      const roleResults = await Promise.all(rolePromises)
+      console.log('所有角色结果:', roleResults)
+
+      // 更新用户列表中的角色信息
+      roleResults.forEach(result => {
+        const userIndex = userList.value.findIndex(user => user.id === result.userId)
+        if (userIndex !== -1) {
+          // 使用Vue的响应式更新
+          userList.value[userIndex].roles = result.roles
+        }
+      })
     } else {
       ElMessage.error(response.message || '获取用户列表失败')
     }
@@ -345,7 +434,7 @@ const handleAdd = () => {
 }
 
 // 编辑用户
-const handleEdit = (row: UserInfo) => {
+const handleEdit = async (row: UserInfo) => {
   isEdit.value = true
   dialogTitle.value = '编辑用户'
   dialogVisible.value = true
@@ -356,6 +445,19 @@ const handleEdit = (row: UserInfo) => {
   userForm.email = row.email
   userForm.phone = row.phone
   userForm.status = row.status
+  
+  // 加载用户的角色
+  try {
+    const response = await getUserRoles(row.id)
+    if (response.code === 200 && response.data) {
+      userForm.roleId = response.data[0]?.id || undefined
+    } else {
+      userForm.roleId = undefined
+    }
+  } catch (error: any) {
+    console.error('获取用户角色失败:', error)
+    userForm.roleId = undefined
+  }
 }
 
 // 删除用户
@@ -470,7 +572,59 @@ const handleSubmit = async () => {
       
       const response = await updateUser(currentUser.id, updateData)
       if (response.code === 200) {
-        ElMessage.success('更新成功')
+        // 更新角色
+        let roleUpdateSuccess = true
+        let roleErrorMessage = ''
+        try {
+          const currentRolesResponse = await getUserRoles(currentUser.id)
+          if (currentRolesResponse.code === 200 && currentRolesResponse.data) {
+            const currentRoleId = currentRolesResponse.data[0]?.id
+            if (currentRoleId !== userForm.roleId) {
+              // 移除旧角色
+              if (currentRoleId) {
+                const removeResponse = await removeUserRole(currentUser.id, currentRoleId)
+                if (removeResponse.code !== 200) {
+                  roleUpdateSuccess = false
+                  roleErrorMessage = removeResponse.message || '移除角色失败'
+                  console.error('移除角色失败:', roleErrorMessage)
+                } else {
+                  // 只有移除成功，才添加新角色
+                  if (userForm.roleId) {
+                    const assignResponse = await assignRoles(currentUser.id, [userForm.roleId])
+                    if (assignResponse.code !== 200) {
+                      roleUpdateSuccess = false
+                      roleErrorMessage = assignResponse.message || '分配角色失败'
+                      console.error('分配角色失败:', roleErrorMessage)
+                    }
+                  }
+                }
+              } else {
+                // 没有旧角色，直接添加新角色
+                if (userForm.roleId) {
+                  const assignResponse = await assignRoles(currentUser.id, [userForm.roleId])
+                  if (assignResponse.code !== 200) {
+                    roleUpdateSuccess = false
+                    roleErrorMessage = assignResponse.message || '分配角色失败'
+                    console.error('分配角色失败:', roleErrorMessage)
+                  }
+                }
+              }
+            }
+          } else {
+            roleUpdateSuccess = false
+            roleErrorMessage = '获取当前角色失败'
+          }
+        } catch (error: any) {
+          roleUpdateSuccess = false
+          roleErrorMessage = error.message || '更新角色失败'
+          console.error('更新角色失败:', error)
+        }
+        
+        if (roleUpdateSuccess) {
+          ElMessage.success('更新成功')
+        } else {
+          ElMessage.warning('用户信息更新成功，但角色更新失败: ' + roleErrorMessage)
+        }
         dialogVisible.value = false
         fetchUserList()
       } else {
@@ -520,6 +674,7 @@ const resetUserForm = () => {
   userForm.email = ''
   userForm.phone = ''
   userForm.status = 0
+  userForm.roleId = undefined
   userFormRef.value?.resetFields()
 }
 
@@ -543,9 +698,10 @@ const getStatusText = (status: number) => {
   return textMap[status] || '未知'
 }
 
-// 页面加载时获取用户列表
+// 页面加载时获取用户列表和角色列表
 onMounted(() => {
   fetchUserList()
+  fetchRoleList()
 })
 </script>
 
@@ -564,5 +720,12 @@ onMounted(() => {
 
 .action-buttons .el-button {
   margin-right: 10px;
+}
+
+.password-tip {
+  font-size: 12px;
+  color: #909399;
+  line-height: 1.5;
+  margin-top: 4px;
 }
 </style>

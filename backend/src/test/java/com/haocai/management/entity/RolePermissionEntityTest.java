@@ -26,8 +26,8 @@ class RolePermissionEntityTest {
         role.setStatus(1);
         role.setCreateTime(LocalDateTime.now());
         role.setUpdateTime(LocalDateTime.now());
-        role.setCreateBy(1L);
-        role.setUpdateBy(1L);
+        role.setCreateBy("1");
+        role.setUpdateBy("1");
         role.setDeleted(0);
 
         assertNotNull(role);
@@ -36,7 +36,7 @@ class RolePermissionEntityTest {
         assertEquals("admin", role.getRoleCode());
         assertEquals("系统管理员角色", role.getDescription());
         assertEquals(1, role.getStatus());
-        assertEquals(1L, role.getCreateBy());
+        assertEquals("1", role.getCreateBy());
         assertEquals(0, role.getDeleted());
     }
 
@@ -58,8 +58,8 @@ class RolePermissionEntityTest {
         permission.setStatus(1);
         permission.setCreateTime(LocalDateTime.now());
         permission.setUpdateTime(LocalDateTime.now());
-        permission.setCreateBy(1L);
-        permission.setUpdateBy(1L);
+        permission.setCreateBy("1");
+        permission.setUpdateBy("1");
         permission.setDeleted(0);
 
         assertNotNull(permission);
@@ -86,14 +86,14 @@ class RolePermissionEntityTest {
         rolePermission.setRoleId(1L);
         rolePermission.setPermissionId(1L);
         rolePermission.setCreateTime(LocalDateTime.now());
-        rolePermission.setCreateBy(1L);
+        rolePermission.setCreateBy("1");
         rolePermission.setDeleted(0);
 
         assertNotNull(rolePermission);
         assertEquals(1L, rolePermission.getId());
         assertEquals(1L, rolePermission.getRoleId());
         assertEquals(1L, rolePermission.getPermissionId());
-        assertEquals(1L, rolePermission.getCreateBy());
+        assertEquals("1", rolePermission.getCreateBy());
         assertEquals(0, rolePermission.getDeleted());
     }
 
@@ -107,14 +107,14 @@ class RolePermissionEntityTest {
         userRole.setUserId(1L);
         userRole.setRoleId(1L);
         userRole.setCreateTime(LocalDateTime.now());
-        userRole.setCreateBy(1L);
+        userRole.setCreateBy("1");
         userRole.setDeleted(0);
 
         assertNotNull(userRole);
         assertEquals(1L, userRole.getId());
         assertEquals(1L, userRole.getUserId());
         assertEquals(1L, userRole.getRoleId());
-        assertEquals(1L, userRole.getCreateBy());
+        assertEquals("1", userRole.getCreateBy());
         assertEquals(0, userRole.getDeleted());
     }
 

@@ -560,527 +560,76 @@
           
 ## 三、数据库设计方案
 
-### 3.1 数据库表设计
+> **注意**：详细的数据库设计文档已独立为单独的文档，请参考 [数据库设计文档](./database-design.md)
 
-#### 3.1.1 用户相关表
-```sql
--- 高职人工智能学院实训耗材管理系统数据库初始化脚本
--- 数据库：haocai_management
--- 创建时间：2026年1月6日
--- 注意：此脚本由Spring Boot自动执行，假设数据库haocai_management已存在
+### 3.1 数据库概述
 
--- 用户表
-CREATE TABLE sys_user (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '用户ID',
-    username VARCHAR(50) NOT NULL UNIQUE COMMENT '用户名',
-    password VARCHAR(255) NOT NULL COMMENT '密码',
-    name VARCHAR(50) NOT NULL COMMENT '真实姓名',
-    email VARCHAR(100) NOT NULL COMMENT '邮箱地址',
-    phone VARCHAR(20) NOT NULL COMMENT '手机号码',
-    avatar VARCHAR(255) COMMENT '头像URL',
-    status TINYINT NOT NULL DEFAULT 0 COMMENT '用户状态：0-正常，1-禁用，2-锁定',
-    department_id BIGINT COMMENT '部门ID',
-    last_login_time DATETIME COMMENT '最后登录时间',
-    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    create_by BIGINT COMMENT '创建人ID',
-    update_by BIGINT COMMENT '更新人ID',
-    remark VARCHAR(500) COMMENT '备注信息',
-    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除：0未删除 1已删除',
-    INDEX idx_username (username),
-    INDEX idx_email (email),
-    INDEX idx_phone (phone),
-    INDEX idx_department (department_id),
-    INDEX idx_status (status),
-    INDEX idx_deleted (deleted),
-    INDEX idx_create_time (create_time)
-) COMMENT '用户表';
+本系统采用 MySQL 8.0+ 作为数据库管理系统，数据库设计遵循第三范式（3NF），确保数据的一致性和完整性。
 
--- 用户登录日志表
-CREATE TABLE sys_user_login_log (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '日志ID',
-    user_id BIGINT NOT NULL COMMENT '用户ID',
-    username VARCHAR(50) COMMENT '用户名（冗余字段，便于查询）',
-    login_ip VARCHAR(50) COMMENT '登录IP地址',
-    login_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '登录时间',
-    login_success TINYINT NOT NULL COMMENT '登录结果：1-成功，0-失败',
-    fail_reason VARCHAR(255) COMMENT '失败原因（登录失败时填写）',
-    user_agent VARCHAR(500) COMMENT '用户代理信息（浏览器、设备等）',
-    location VARCHAR(255) COMMENT '地理位置信息（可选）',
-    session_id VARCHAR(100) COMMENT '会话ID（可选，用于关联同一登录会话的多次操作）',
-    INDEX idx_user_id (user_id),
-    INDEX idx_username (username),
-    INDEX idx_login_time (login_time),
-    INDEX idx_login_success (login_success),
-    INDEX idx_login_ip (login_ip)
-) COMMENT '用户登录日志表';
+**数据库基本信息**：
+- 数据库名称：haocai_management
+- 字符集：utf8mb4
+- 排序规则：utf8mb4_unicode_ci
+- 存储引擎：InnoDB
 
--- 部门表
-CREATE TABLE sys_department (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '部门ID',
-    name VARCHAR(100) NOT NULL COMMENT '部门名称',
-    code VARCHAR(50) UNIQUE COMMENT '部门编码',
-    parent_id BIGINT COMMENT '父部门ID',
-    level INT NOT NULL DEFAULT 1 COMMENT '部门层级',
-    sort_order INT NOT NULL DEFAULT 0 COMMENT '排序',
-    status TINYINT NOT NULL DEFAULT 1 COMMENT '状态：1正常 0禁用',
-    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    INDEX idx_parent (parent_id),
-    INDEX idx_level (level),
-    INDEX idx_status (status)
-) COMMENT '部门表';
+### 3.2 数据库表结构
 
--- 角色表
-CREATE TABLE sys_role (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '角色ID',
-    role_name VARCHAR(100) NOT NULL COMMENT '角色名称',
-    role_code VARCHAR(50) NOT NULL UNIQUE COMMENT '角色编码',
-    description VARCHAR(255) COMMENT '角色描述',
-    status TINYINT NOT NULL DEFAULT 1 COMMENT '状态：1正常 0禁用',
-    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    create_by BIGINT COMMENT '创建人ID',
-    update_by BIGINT COMMENT '更新人ID',
-    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除：0未删除 1已删除',
-    INDEX idx_role_code (role_code),
-    INDEX idx_status (status),
-    INDEX idx_deleted (deleted)
-) COMMENT '角色表';
+系统共包含 18 张核心表，分为以下几大类：
 
--- 权限表
-CREATE TABLE sys_permission (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '权限ID',
-    permission_name VARCHAR(100) NOT NULL COMMENT '权限名称',
-    permission_code VARCHAR(100) NOT NULL UNIQUE COMMENT '权限编码',
-    type VARCHAR(20) NOT NULL COMMENT '权限类型：menu/button/api',
-    parent_id BIGINT COMMENT '父权限ID',
-    path VARCHAR(255) COMMENT '路由路径',
-    component VARCHAR(255) COMMENT '组件路径',
-    icon VARCHAR(100) COMMENT '图标',
-    sort_order INT NOT NULL DEFAULT 0 COMMENT '排序',
-    status TINYINT NOT NULL DEFAULT 1 COMMENT '状态：1正常 0禁用',
-    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    create_by BIGINT COMMENT '创建人ID',
-    update_by BIGINT COMMENT '更新人ID',
-    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除：0未删除 1已删除',
-    INDEX idx_permission_code (permission_code),
-    INDEX idx_parent (parent_id),
-    INDEX idx_type (type),
-    INDEX idx_status (status),
-    INDEX idx_deleted (deleted)
-) COMMENT '权限表';
+#### 3.2.1 用户相关表（7张）
+- sys_user - 用户表
+- sys_user_login_log - 用户登录日志表
+- sys_department - 部门表
+- sys_role - 角色表
+- sys_permission - 权限表
+- sys_role_permission - 角色权限关联表
+- sys_user_role - 用户角色关联表
 
--- 角色权限关联表
-CREATE TABLE sys_role_permission (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '关联ID',
-    role_id BIGINT NOT NULL COMMENT '角色ID',
-    permission_id BIGINT NOT NULL COMMENT '权限ID',
-    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    create_by BIGINT COMMENT '创建人ID',
-    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除：0未删除 1已删除',
-    UNIQUE KEY uk_role_permission (role_id, permission_id),
-    INDEX idx_role (role_id),
-    INDEX idx_permission (permission_id),
-    INDEX idx_deleted (deleted)
-) COMMENT '角色权限关联表';
+#### 3.2.2 耗材相关表（4张）
+- material_category - 耗材分类表
+- material_info - 耗材信息表
+- supplier_info - 供应商信息表
+- material_inventory - 库存表
 
--- 用户角色关联表
-CREATE TABLE sys_user_role (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '关联ID',
-    user_id BIGINT NOT NULL COMMENT '用户ID',
-    role_id BIGINT NOT NULL COMMENT '角色ID',
-    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    create_by BIGINT COMMENT '创建人ID',
-    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除：0未删除 1已删除',
-    UNIQUE KEY uk_user_role (user_id, role_id),
-    INDEX idx_user (user_id),
-    INDEX idx_role (role_id),
-    INDEX idx_deleted (deleted)
-) COMMENT '用户角色关联表';
+#### 3.2.3 入库相关表（2张）
+- inbound_order - 入库单表
+- inbound_detail - 入库明细表
 
--- 插入初始数据
--- 默认管理员用户
-INSERT INTO sys_user (username, password, name, email, phone, status, deleted) VALUES
-('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lbdxp7jyxv5QD0yRK', '系统管理员', 'admin@haocai.com', '13800138000', 0, 0);
+#### 3.2.4 出库相关表（3张）
+- outbound_order - 出库单表
+- outbound_detail - 出库明细表
+- return_record - 归还记录表
 
--- 默认角色
-INSERT INTO sys_role (role_name, role_code, description, status) VALUES
-('管理员', 'admin', '系统管理员', 1),
-('教师', 'teacher', '教师用户', 1),
-('学生', 'student', '学生用户', 1),
-('仓库管理员', 'warehouse', '仓库管理员', 1);
+#### 3.2.5 盘点相关表（2张）
+- inventory_check - 盘点单表
+- inventory_check_detail - 盘点明细表
 
--- 默认权限
-INSERT INTO sys_permission (permission_name, permission_code, type, path, component, icon, sort_order, status) VALUES
-('系统管理', 'system', 'menu', '/system', 'Layout', 'setting', 1, 1),
-('用户管理', 'system:user', 'menu', '/system/user', 'system/User', 'user', 1, 1),
-('角色管理', 'system:role', 'menu', '/system/role', 'system/Role', 'role', 2, 1),
-('权限管理', 'system:permission', 'menu', '/system/permission', 'system/Permission', 'lock', 3, 1),
-('部门管理', 'system:department', 'menu', '/system/department', 'system/Department', 'apartment', 4, 1);
+#### 3.2.6 系统日志表（2张）
+- sys_log - 操作日志表
+- sys_config - 系统配置表
 
--- 关联管理员角色权限
-INSERT INTO sys_role_permission (role_id, permission_id)
-SELECT r.id, p.id FROM sys_role r, sys_permission p WHERE r.role_code = 'admin';
+### 3.3 数据库设计特点
 
--- 关联管理员用户角色
-INSERT INTO sys_user_role (user_id, role_id)
-SELECT u.id, r.id FROM sys_user u, sys_role r WHERE u.username = 'admin' AND r.role_code = 'admin';
-```
+1. **规范化设计**：遵循第三范式，减少数据冗余
+2. **审计字段**：所有业务表包含 create_time、update_time、create_by、update_by、deleted 等审计字段
+3. **逻辑删除**：支持逻辑删除，不物理删除数据
+4. **树形结构**：部门、权限、分类支持树形结构
+5. **索引优化**：为常用查询字段创建索引，优化查询性能
 
+### 3.4 数据库初始化
 
-#### 3.1.2 耗材相关表
+数据库初始化脚本位于 `backend/src/main/resources/init.sql`，包含：
+- 所有表的创建语句
+- 初始用户数据（admin用户）
+- 初始角色数据（管理员、教师、学生、仓库管理员）
+- 初始权限数据（系统管理相关权限）
+- 角色权限关联数据
+- 用户角色关联数据
 
-**耗材分类表 (material_category)**
-```sql
-CREATE TABLE material_category (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '分类ID',
-    category_name VARCHAR(50) NOT NULL COMMENT '分类名称',
-    category_code VARCHAR(50) NOT NULL COMMENT '分类编码',
-    parent_id BIGINT DEFAULT 0 COMMENT '父分类ID，0表示顶级分类',
-    level INT DEFAULT 1 COMMENT '分类层级',
-    sort_order INT DEFAULT 0 COMMENT '排序',
-    description VARCHAR(200) COMMENT '分类描述',
-    status TINYINT DEFAULT 1 COMMENT '状态：1正常 0禁用',
-    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    INDEX idx_parent_id (parent_id),
-    INDEX idx_category_code (category_code),
-    INDEX idx_sort_order (sort_order)
-) COMMENT='耗材分类表';
-```
+### 3.5 相关文档
 
-**耗材信息表 (material_info)**
-```sql
-CREATE TABLE material_info (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '耗材ID',
-    material_code VARCHAR(50) NOT NULL UNIQUE COMMENT '耗材编码',
-    material_name VARCHAR(100) NOT NULL COMMENT '耗材名称',
-    category_id BIGINT NOT NULL COMMENT '分类ID',
-    specification VARCHAR(200) COMMENT '规格型号',
-    unit VARCHAR(20) NOT NULL COMMENT '单位（个、台、套等）',
-    unit_price DECIMAL(10,2) COMMENT '单价',
-    supplier_id BIGINT COMMENT '供应商ID',
-    shelf_life INT COMMENT '保质期（天）',
-    barcode VARCHAR(100) COMMENT '条形码',
-    qr_code VARCHAR(200) COMMENT '二维码',
-    image_url VARCHAR(500) COMMENT '图片URL',
-    description TEXT COMMENT '描述',
-    technical_parameters TEXT COMMENT '技术参数',
-    usage_instructions TEXT COMMENT '使用说明',
-    storage_requirements VARCHAR(500) COMMENT '存储要求',
-    status TINYINT DEFAULT 1 COMMENT '状态：1正常 0停用 2报废',
-    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    INDEX idx_material_code (material_code),
-    INDEX idx_category_id (category_id),
-    INDEX idx_supplier_id (supplier_id),
-    INDEX idx_barcode (barcode),
-    INDEX idx_status (status),
-    CONSTRAINT fk_material_category FOREIGN KEY (category_id) REFERENCES material_category(id),
-    CONSTRAINT fk_material_supplier FOREIGN KEY (supplier_id) REFERENCES supplier_info(id)
-) COMMENT='耗材信息表';
-```
-
-**供应商信息表 (supplier_info)**
-```sql
-CREATE TABLE supplier_info (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '供应商ID',
-    supplier_code VARCHAR(50) NOT NULL UNIQUE COMMENT '供应商编码',
-    supplier_name VARCHAR(100) NOT NULL COMMENT '供应商名称',
-    contact_person VARCHAR(50) COMMENT '联系人',
-    phone VARCHAR(20) COMMENT '联系电话',
-    email VARCHAR(100) COMMENT '邮箱',
-    address VARCHAR(200) COMMENT '地址',
-    business_license VARCHAR(200) COMMENT '营业执照',
-    tax_number VARCHAR(50) COMMENT '税号',
-    bank_account VARCHAR(100) COMMENT '银行账号',
-    bank_name VARCHAR(100) COMMENT '开户行',
-    credit_rating TINYINT DEFAULT 5 COMMENT '信用等级（1-10）',
-    cooperation_status TINYINT DEFAULT 1 COMMENT '合作状态：1合作中 0已终止',
-    description TEXT COMMENT '供应商描述',
-    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    INDEX idx_supplier_code (supplier_code),
-    INDEX idx_supplier_name (supplier_name),
-    INDEX idx_credit_rating (credit_rating)
-) COMMENT='供应商信息表';
-```
-
-**库存表 (material_inventory)**
-```sql
-CREATE TABLE material_inventory (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '库存ID',
-    material_id BIGINT NOT NULL UNIQUE COMMENT '耗材ID',
-    quantity INT NOT NULL DEFAULT 0 COMMENT '当前库存数量',
-    available_quantity INT NOT NULL DEFAULT 0 COMMENT '可用库存数量（扣除已申请未出库数量）',
-    safe_quantity INT DEFAULT 10 COMMENT '安全库存阈值',
-    max_quantity INT DEFAULT 1000 COMMENT '最大库存阈值',
-    warehouse VARCHAR(50) DEFAULT '主仓库' COMMENT '仓库名称',
-    location VARCHAR(100) COMMENT '存放位置',
-    last_in_time DATETIME COMMENT '最后入库时间',
-    last_out_time DATETIME COMMENT '最后出库时间',
-    total_in_quantity INT DEFAULT 0 COMMENT '累计入库数量',
-    total_out_quantity INT DEFAULT 0 COMMENT '累计出库数量',
-    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    INDEX idx_material_id (material_id),
-    INDEX idx_warehouse (warehouse),
-    INDEX idx_location (location),
-    INDEX idx_available_quantity (available_quantity),
-    CONSTRAINT fk_inventory_material FOREIGN KEY (material_id) REFERENCES material_info(id) ON DELETE CASCADE
-) COMMENT='库存表';
-```
-
-#### 3.1.3 入库相关表
-
-**入库单表 (inbound_order)**
-```sql
-CREATE TABLE inbound_order (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '入库单ID',
-    order_no VARCHAR(50) NOT NULL UNIQUE COMMENT '入库单号',
-    inbound_date DATE NOT NULL COMMENT '入库日期',
-    supplier_id BIGINT COMMENT '供应商ID',
-    handler_id BIGINT NOT NULL COMMENT '经办人ID',
-    checker_id BIGINT COMMENT '验收人ID',
-    total_quantity INT DEFAULT 0 COMMENT '总数量',
-    total_amount DECIMAL(12,2) DEFAULT 0 COMMENT '总金额',
-    status TINYINT DEFAULT 0 COMMENT '状态：0待审核 1已审核 2已拒绝 3已完成',
-    audit_time DATETIME COMMENT '审核时间',
-    auditor_id BIGINT COMMENT '审核人ID',
-    audit_opinion TEXT COMMENT '审核意见',
-    remark TEXT COMMENT '备注',
-    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    INDEX idx_order_no (order_no),
-    INDEX idx_inbound_date (inbound_date),
-    INDEX idx_status (status),
-    INDEX idx_handler_id (handler_id),
-    INDEX idx_supplier_id (supplier_id),
-    CONSTRAINT fk_inbound_handler FOREIGN KEY (handler_id) REFERENCES sys_user(id),
-    CONSTRAINT fk_inbound_supplier FOREIGN KEY (supplier_id) REFERENCES supplier_info(id),
-    CONSTRAINT fk_inbound_auditor FOREIGN KEY (auditor_id) REFERENCES sys_user(id),
-    CONSTRAINT fk_inbound_checker FOREIGN KEY (checker_id) REFERENCES sys_user(id)
-) COMMENT='入库单表';
-```
-
-**入库明细表 (inbound_detail)**
-```sql
-CREATE TABLE inbound_detail (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '明细ID',
-    inbound_order_id BIGINT NOT NULL COMMENT '入库单ID',
-    material_id BIGINT NOT NULL COMMENT '耗材ID',
-    quantity INT NOT NULL COMMENT '数量',
-    unit_price DECIMAL(10,2) COMMENT '单价',
-    total_price DECIMAL(12,2) COMMENT '总价',
-    batch_no VARCHAR(50) COMMENT '批次号',
-    production_date DATE COMMENT '生产日期',
-    expiry_date DATE COMMENT '过期日期',
-    supplier_batch_no VARCHAR(100) COMMENT '供应商批次号',
-    quality_certificate VARCHAR(200) COMMENT '质检证书',
-    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    INDEX idx_inbound_order_id (inbound_order_id),
-    INDEX idx_material_id (material_id),
-    INDEX idx_batch_no (batch_no),
-    CONSTRAINT fk_inbound_detail_order FOREIGN KEY (inbound_order_id) REFERENCES inbound_order(id) ON DELETE CASCADE,
-    CONSTRAINT fk_inbound_detail_material FOREIGN KEY (material_id) REFERENCES material_info(id)
-) COMMENT='入库明细表';
-```
-
-#### 3.1.4 出库相关表
-
-**出库单表 (outbound_order)**
-```sql
-CREATE TABLE outbound_order (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '出库单ID',
-    order_no VARCHAR(50) NOT NULL UNIQUE COMMENT '出库单号',
-    outbound_date DATE COMMENT '出库日期',
-    applicant_id BIGINT NOT NULL COMMENT '申请人ID',
-    applicant_dept_id BIGINT COMMENT '申请人部门ID',
-    handler_id BIGINT COMMENT '处理人ID',
-    approver_id BIGINT COMMENT '审批人ID',
-    total_quantity INT DEFAULT 0 COMMENT '总数量',
-    total_amount DECIMAL(12,2) DEFAULT 0 COMMENT '总金额',
-    usage_type TINYINT NOT NULL COMMENT '用途类型：1教学用 2科研用 3竞赛用 4其他',
-    usage_detail TEXT NOT NULL COMMENT '用途详情（JSON格式）',
-    expected_return_date DATE COMMENT '预计归还日期',
-    actual_return_date DATE COMMENT '实际归还日期',
-    status TINYINT DEFAULT 0 COMMENT '状态：0待审批 1已批准 2已拒绝 3待出库 4已出库 5已归还 6已损坏 7已丢失',
-    approval_time DATETIME COMMENT '审批时间',
-    approval_opinion TEXT COMMENT '审批意见',
-    outbound_time DATETIME COMMENT '出库时间',
-    remark TEXT COMMENT '备注',
-    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    INDEX idx_order_no (order_no),
-    INDEX idx_outbound_date (outbound_date),
-    INDEX idx_applicant_id (applicant_id),
-    INDEX idx_status (status),
-    INDEX idx_usage_type (usage_type),
-    INDEX idx_expected_return_date (expected_return_date),
-    CONSTRAINT fk_outbound_applicant FOREIGN KEY (applicant_id) REFERENCES sys_user(id),
-    CONSTRAINT fk_outbound_applicant_dept FOREIGN KEY (applicant_dept_id) REFERENCES sys_department(id),
-    CONSTRAINT fk_outbound_handler FOREIGN KEY (handler_id) REFERENCES sys_user(id),
-    CONSTRAINT fk_outbound_approver FOREIGN KEY (approver_id) REFERENCES sys_user(id)
-) COMMENT='出库单表';
-```
-
-**出库明细表 (outbound_detail)**
-```sql
-CREATE TABLE outbound_detail (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '明细ID',
-    outbound_order_id BIGINT NOT NULL COMMENT '出库单ID',
-    material_id BIGINT NOT NULL COMMENT '耗材ID',
-    quantity INT NOT NULL COMMENT '数量',
-    unit_price DECIMAL(10,2) COMMENT '单价',
-    total_price DECIMAL(12,2) COMMENT '总价',
-    return_quantity INT DEFAULT 0 COMMENT '已归还数量',
-    return_status TINYINT DEFAULT 0 COMMENT '归还状态：0未归还 1部分归还 2已归还 3已损坏 4已丢失',
-    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    INDEX idx_outbound_order_id (outbound_order_id),
-    INDEX idx_material_id (material_id),
-    INDEX idx_return_status (return_status),
-    CONSTRAINT fk_outbound_detail_order FOREIGN KEY (outbound_order_id) REFERENCES outbound_order(id) ON DELETE CASCADE,
-    CONSTRAINT fk_outbound_detail_material FOREIGN KEY (material_id) REFERENCES material_info(id)
-) COMMENT='出库明细表';
-```
-
-**归还记录表 (return_record)**
-```sql
-CREATE TABLE return_record (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '归还记录ID',
-    outbound_detail_id BIGINT NOT NULL COMMENT '出库明细ID',
-    return_date DATE NOT NULL COMMENT '归还日期',
-    return_quantity INT NOT NULL COMMENT '归还数量',
-    return_status TINYINT NOT NULL COMMENT '归还状态：1完好 2损坏 3丢失',
-    damage_description TEXT COMMENT '损坏描述',
-    handler_id BIGINT COMMENT '处理人ID',
-    remark TEXT COMMENT '备注',
-    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    INDEX idx_outbound_detail_id (outbound_detail_id),
-    INDEX idx_return_date (return_date),
-    INDEX idx_return_status (return_status),
-    INDEX idx_handler_id (handler_id),
-    CONSTRAINT fk_return_detail FOREIGN KEY (outbound_detail_id) REFERENCES outbound_detail(id) ON DELETE CASCADE,
-    CONSTRAINT fk_return_handler FOREIGN KEY (handler_id) REFERENCES sys_user(id)
-) COMMENT='归还记录表';
-```
-
-#### 3.1.5 盘点相关表
-
-**盘点单表 (inventory_check)**
-```sql
-CREATE TABLE inventory_check (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '盘点单ID',
-    check_no VARCHAR(50) NOT NULL UNIQUE COMMENT '盘点单号',
-    check_date DATE NOT NULL COMMENT '盘点日期',
-    checker_id BIGINT NOT NULL COMMENT '盘点人ID',
-    checker_dept_id BIGINT COMMENT '盘点人部门ID',
-    check_type TINYINT DEFAULT 1 COMMENT '盘点类型：1全盘 2抽盘 3专项盘',
-    check_scope TEXT COMMENT '盘点范围（JSON格式）',
-    status TINYINT DEFAULT 0 COMMENT '状态：0进行中 1已完成 2已作废',
-    total_items INT DEFAULT 0 COMMENT '盘点总项数',
-    discrepancy_items INT DEFAULT 0 COMMENT '差异项数',
-    remark TEXT COMMENT '备注',
-    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    complete_time DATETIME COMMENT '完成时间',
-    INDEX idx_check_no (check_no),
-    INDEX idx_check_date (check_date),
-    INDEX idx_checker_id (checker_id),
-    INDEX idx_status (status),
-    CONSTRAINT fk_check_checker FOREIGN KEY (checker_id) REFERENCES sys_user(id),
-    CONSTRAINT fk_check_checker_dept FOREIGN KEY (checker_dept_id) REFERENCES sys_department(id)
-) COMMENT='盘点单表';
-```
-
-**盘点明细表 (inventory_check_detail)**
-```sql
-CREATE TABLE inventory_check_detail (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '明细ID',
-    inventory_check_id BIGINT NOT NULL COMMENT '盘点单ID',
-    material_id BIGINT NOT NULL COMMENT '耗材ID',
-    system_quantity INT NOT NULL COMMENT '系统库存数量',
-    actual_quantity INT NOT NULL COMMENT '实际盘点数量',
-    diff_quantity INT NOT NULL COMMENT '差异数量',
-    diff_amount DECIMAL(12,2) COMMENT '差异金额',
-    check_status TINYINT DEFAULT 0 COMMENT '盘点状态：0待确认 1已确认 2已调整',
-    adjust_quantity INT DEFAULT 0 COMMENT '调整数量',
-    adjust_reason TEXT COMMENT '调整原因',
-    adjust_time DATETIME COMMENT '调整时间',
-    adjuster_id BIGINT COMMENT '调整人ID',
-    remark TEXT COMMENT '备注',
-    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    INDEX idx_inventory_check_id (inventory_check_id),
-    INDEX idx_material_id (material_id),
-    INDEX idx_check_status (check_status),
-    INDEX idx_adjuster_id (adjuster_id),
-    CONSTRAINT fk_check_detail_check FOREIGN KEY (inventory_check_id) REFERENCES inventory_check(id) ON DELETE CASCADE,
-    CONSTRAINT fk_check_detail_material FOREIGN KEY (material_id) REFERENCES material_info(id),
-    CONSTRAINT fk_check_detail_adjuster FOREIGN KEY (adjuster_id) REFERENCES sys_user(id)
-) COMMENT='盘点明细表';
-```
-
-#### 3.1.6 系统日志表
-
-**操作日志表 (sys_log)**
-```sql
-CREATE TABLE sys_log (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '日志ID',
-    user_id BIGINT COMMENT '用户ID',
-    username VARCHAR(50) COMMENT '用户名',
-    real_name VARCHAR(50) COMMENT '真实姓名',
-    operation VARCHAR(100) COMMENT '操作内容',
-    method VARCHAR(200) COMMENT '请求方法',
-    params TEXT COMMENT '请求参数',
-    result TEXT COMMENT '返回结果',
-    ip VARCHAR(50) COMMENT 'IP地址',
-    user_agent TEXT COMMENT '用户代理',
-    status TINYINT COMMENT '状态：1成功 0失败',
-    error_msg TEXT COMMENT '错误信息',
-    execute_time BIGINT COMMENT '执行时长（毫秒）',
-    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    INDEX idx_user_id (user_id),
-    INDEX idx_create_time (create_time),
-    INDEX idx_operation (operation),
-    INDEX idx_status (status),
-    INDEX idx_ip (ip)
-) COMMENT='操作日志表';
-```
-
-**系统配置表 (sys_config)**
-```sql
-CREATE TABLE sys_config (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '配置ID',
-    config_key VARCHAR(100) NOT NULL UNIQUE COMMENT '配置键',
-    config_name VARCHAR(100) NOT NULL COMMENT '配置名称',
-    config_value TEXT COMMENT '配置值',
-    config_type VARCHAR(50) DEFAULT 'text' COMMENT '配置类型',
-    description VARCHAR(200) COMMENT '配置描述',
-    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    INDEX idx_config_key (config_key)
-) COMMENT='系统配置表';
-```
-
-### 3.2 数据库索引设计
-- 所有主键自动创建索引
-- 外键字段创建索引
-- 常用查询字段（如单号、日期、状态）创建索引
-- 复合索引优化多条件查询
-- 高频查询字段创建覆盖索引
-
-### 3.3 数据库优化建议
-- 使用MyBatis-Plus的分页插件
-- 大屏数据使用Redis缓存
-- 定期归档历史数据
-- 使用数据库连接池（HikariCP）
-- 启用慢查询日志监控
-- 合理设置数据库参数（如innodb_buffer_pool_size）
-- 定期进行数据库性能分析和优化
+- [数据库设计文档](./database-design.md) - 详细的数据库表设计、索引设计、优化建议
+- [数据库初始化脚本](../backend/src/main/resources/init.sql) - 数据库初始化SQL脚本
         
             
 

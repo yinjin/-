@@ -71,13 +71,13 @@ public interface SysUserRoleMapper extends BaseMapper<SysUserRole> {
     int countByUserIdAndRoleId(@Param("userId") Long userId, @Param("roleId") Long roleId);
 
     /**
-     * 根据用户ID删除所有用户角色关联（逻辑删除）
+     * 根据用户ID物理删除所有用户角色关联
      * 
      * @param userId 用户ID
      * @return 删除的记录数
      */
-    @Delete("UPDATE sys_user_role SET deleted = 1 WHERE user_id = #{userId}")
-    int deleteByUserId(@Param("userId") Long userId);
+    @Delete("DELETE FROM sys_user_role WHERE user_id = #{userId}")
+    int physicalDeleteByUserId(@Param("userId") Long userId);
 
     /**
      * 根据角色ID删除所有用户角色关联（逻辑删除）

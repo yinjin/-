@@ -497,6 +497,143 @@ public class SysUserController {
     }
 
     /**
+     * 获取用户的角色列表
+     * GET /api/users/{userId}/roles
+     * 
+     * 遵循：安全规范-需要认证的接口配置
+     * 遵循：控制层规范-使用@RequirePermission进行权限控制
+     * 遵循：控制层规范-使用@Log记录操作日志
+     *
+     * @param userId 用户ID
+     * @return 角色列表
+     */
+    @GetMapping("/{userId}/roles")
+    @PreAuthorize("isAuthenticated()")
+    public ApiResponse<List<com.haocai.management.entity.SysRole>> getUserRoles(@PathVariable Long userId) {
+        log.info("获取用户角色列表: userId={}", userId);
+        
+        try {
+            List<com.haocai.management.entity.SysRole> roles = userService.getRolesByUserId(userId);
+            
+            // 直接返回角色列表，SysRole实体已使用@JsonProperty注解，会自动转换为name和code
+            return ApiResponse.success(roles);
+        } catch (Exception e) {
+            log.error("获取用户角色列表失败", e);
+            return ApiResponse.error(500, "获取用户角色列表失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 为用户分配角色
+     * POST /api/users/{userId}/roles
+     * 
+     * 遵循：安全规范-需要认证的接口配置
+     * 遵循：控制层规范-使用@RequirePermission进行权限控制
+     * 遵循：控制层规范-使用@Log记录操作日志
+     * 遵循：数据访问层规范-批量操作使用事务管理
+     *
+     * @param userId 用户ID
+     * @param roleIds 角色ID列表
+     * @param request HTTP请求
+     * @return 操作结果
+     */
+    @PostMapping("/{userId}/roles")
+    @PreAuthorize("isAuthenticated()")
+    public ApiResponse<Void> assignRoles(
+            @PathVariable Long userId,
+            @RequestBody List<Long> roleIds,
+            HttpServletRequest request) {
+        log.info("为用户分配角色: userId={}, roleIds={}", userId, roleIds);
+        
+        try {
+            // TODO: 从JWT token中获取操作人ID
+            Long operatorId = 1L;
+            
+            userService.assignRolesToUser(userId, roleIds, operatorId);
+            
+            return ApiResponse.success();
+        } catch (Exception e) {
+            log.error("分配用户角色失败", e);
+            return ApiResponse.error(500, "分配用户角色失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 移除用户的角色
+     * DELETE /api/users/{userId}/roles/{roleId}
+     * 
+     * 遵循：安全规范-需要认证的接口配置
+     * 遵循：控制层规范-使用@RequirePermission进行权限控制
+     * 遵循：控制层规范-使用@Log记录操作日志
+     *
+     * @param userId 用户ID
+     * @param roleId 角色ID
+     * @param request HTTP请求
+     * @return 操作结果
+     */
+    @DeleteMapping("/{userId}/roles/{roleId}")
+    @PreAuthorize("isAuthenticated()")
+    public ApiResponse<Void> removeRole(
+            @PathVariable Long userId,
+            @PathVariable Long roleId,
+            HttpServletRequest request) {
+        log.info("移除用户角色: userId={}, roleId={}", userId, roleId);
+        
+        try {
+            // TODO: 从JWT token中获取操作人ID
+            Long operatorId = 1L;
+            
+            userService.removeRolesFromUser(userId, List.of(roleId), operatorId);
+            
+            return ApiResponse.success();
+        } catch (Exception e) {
+            log.error("移除用户角色失败", e);
+            return ApiResponse.error(500, "移除用户角色失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 退出登录接口
+     * POST /api/users/logout
+     * 
+     * 遵循：安全规范-需要认证的接口配置
+     * 使用@PreAuthorize("isAuthenticated()")确保用户已认证
+     *
+     * @param request HTTP请求
+     * @return 退出结果
+     */
+    @PostMapping("/logout")
+    @PreAuthorize("isAuthenticated()")
+    public ApiResponse<Void> logout(HttpServletRequest request) {
+        log.info("用户退出登录");
+        
+        try {
+            // 从JWT token中获取用户名
+            String token = request.getHeader("Authorization");
+            if (token != null && token.startsWith("Bearer ")) {
+                token = token.substring(7);
+            }
+            
+            // 从SecurityContext中获取已认证的用户信息
+            org.springframework.security.core.Authentication authentication = 
+                org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+            
+            if (authentication != null && authentication.isAuthenticated()) {
+                String username = authentication.getName();
+                log.info("用户退出登录: username={}", username);
+                
+                // 清除SecurityContext中的认证信息
+                org.springframework.security.core.context.SecurityContextHolder.clearContext();
+            }
+            
+            return ApiResponse.success();
+        } catch (Exception e) {
+            log.error("退出登录失败", e);
+            return ApiResponse.error(500, "退出登录失败: " + e.getMessage());
+        }
+    }
+
+    /**
      * 获取客户端IP地址
      *
      * @param request HTTP请求

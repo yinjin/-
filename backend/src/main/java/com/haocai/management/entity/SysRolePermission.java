@@ -60,11 +60,12 @@ public class SysRolePermission implements Serializable {
     private LocalDateTime createTime;
 
     /**
-     * 创建人ID
-     * 遵循：审计字段规范-第3条（创建人自动填充）
+     * 创建人
+     * 遵循：审计字段规范-第1.3条（create_by字段）
+     * 遵循：字段自动填充规范-第2.3条（INSERT时自动填充）
      */
     @TableField(value = "create_by", fill = FieldFill.INSERT)
-    private Long createBy;
+    private String createBy;
 
     /**
      * 逻辑删除：0未删除 1已删除

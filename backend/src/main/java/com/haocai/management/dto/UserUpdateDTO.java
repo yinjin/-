@@ -26,7 +26,7 @@ public class UserUpdateDTO {
      * 用户的真实姓名，可选更新字段
      */
     @Size(max = 50, message = "真实姓名长度不能超过50个字符")
-    @Pattern(regexp = "^[\\u4e00-\\u9fa5a-zA-Z\\s]+$", message = "真实姓名只能包含中文、英文和空格")
+    @Pattern(regexp = "^[\\u4e00-\\u9fa5a-zA-Z0-9_\\s]+$", message = "真实姓名只能包含中文、字母、数字、下划线和空格")
     private String name;
 
     /**

@@ -222,10 +222,12 @@ public class SecurityConfig {
         // 遵循：安全规范-限制允许的源，避免使用通配符
         configuration.setAllowedOrigins(Arrays.asList(
             "http://localhost:5173",  // Vite开发服务器
-            "http://localhost:5174",  // Vite开发服务器（当前使用）
+            "http://localhost:5174",  // Vite开发服务器
+            "http://localhost:5175",  // Vite开发服务器（当前使用）
             "http://localhost:3000",  // 其他可能的开发服务器
             "http://127.0.0.1:5173",
-            "http://127.0.0.1:5174"
+            "http://127.0.0.1:5174",
+            "http://127.0.0.1:5175"
         ));
         
         // 允许的HTTP方法

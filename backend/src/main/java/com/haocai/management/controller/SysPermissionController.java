@@ -5,6 +5,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.haocai.management.annotation.Log;
 import com.haocai.management.common.ApiResponse;
 import com.haocai.management.entity.SysPermission;
+import com.haocai.management.entity.SysRolePermission;
+import com.haocai.management.mapper.SysPermissionMapper;
+import com.haocai.management.mapper.SysRolePermissionMapper;
 import com.haocai.management.service.ISysPermissionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -47,6 +50,8 @@ import java.util.stream.Collectors;
 public class SysPermissionController {
 
     private final ISysPermissionService permissionService;
+    private final SysPermissionMapper permissionMapper;
+    private final SysRolePermissionMapper rolePermissionMapper;
 
     /**
      * 创建权限
@@ -165,12 +170,12 @@ public class SysPermissionController {
             return ApiResponse.error("权限下有子权限，无法删除");
         }
         
-        // TODO: 检查是否有角色关联此权限
-        // if (rolePermissionService.count(new LambdaQueryWrapper<SysRolePermission>()
-        //         .eq(SysRolePermission::getPermissionId, id)) > 0) {
-        //     log.warn("权限已被角色使用，无法删除，权限ID: {}", id);
-        //     return ApiResponse.error("权限已被角色使用，无法删除");
-        // }
+        // 检查是否有角色关联此权限
+        int roleCount = rolePermissionMapper.countRolesByPermissionId(id);
+        if (roleCount > 0) {
+            log.warn("权限已被 {} 个角色使用，无法删除，权限ID: {}", roleCount, id);
+            return ApiResponse.error("权限已被 " + roleCount + " 个角色使用，无法删除");
+        }
         
         // 删除权限
         boolean success = permissionService.removeById(id);
@@ -223,11 +228,11 @@ public class SysPermissionController {
     public ApiResponse<List<SysPermission>> getPermissionTree() {
         log.info("获取权限树形结构");
         
-        // 查询所有权限
-        List<SysPermission> allPermissions = permissionService.list();
+        // 使用自定义查询方法，确保返回正确的JSON字段名
+        List<SysPermission> allPermissions = permissionMapper.selectAllForTreeWithCorrectAliases();
         
-        // 构建树形结构
-        List<SysPermission> tree = buildPermissionTree(allPermissions, 0L);
+        // 构建树形结构，根节点的parent_id为null
+        List<SysPermission> tree = buildPermissionTree(allPermissions, null);
         
         log.info("获取权限树形结构成功，根节点数量: {}", tree.size());
         return ApiResponse.success(tree);
@@ -291,7 +296,8 @@ public class SysPermissionController {
         List<SysPermission> tree = new ArrayList<>();
         
         for (SysPermission permission : permissions) {
-            if (permission.getParentId().equals(parentId)) {
+            // 使用 Objects.equals 来安全地比较，避免空指针异常
+            if (java.util.Objects.equals(permission.getParentId(), parentId)) {
                 // 递归查找子权限
                 List<SysPermission> children = buildPermissionTree(permissions, permission.getId());
                 permission.setChildren(children);

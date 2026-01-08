@@ -1,6 +1,7 @@
 package com.haocai.management.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -42,6 +43,7 @@ public class SysPermission implements Serializable {
      */
     @NotBlank(message = "权限名称不能为空")
     @TableField("permission_name")
+    @JsonProperty("name")
     private String name;
 
     /**
@@ -50,6 +52,7 @@ public class SysPermission implements Serializable {
      */
     @NotBlank(message = "权限编码不能为空")
     @TableField("permission_code")
+    @JsonProperty("code")
     private String code;
 
     /**
@@ -119,14 +122,14 @@ public class SysPermission implements Serializable {
      * 遵循：审计字段规范-第3条（创建人自动填充）
      */
     @TableField(value = "create_by", fill = FieldFill.INSERT)
-    private Long createBy;
+    private String createBy;
 
     /**
      * 更新人ID
      * 遵循：审计字段规范-第4条（更新人自动填充）
      */
     @TableField(value = "update_by", fill = FieldFill.INSERT_UPDATE)
-    private Long updateBy;
+    private String updateBy;
 
     /**
      * 逻辑删除：0未删除 1已删除

@@ -86,7 +86,7 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
         permission.setSortOrder(dto.getSortOrder() != null ? dto.getSortOrder() : 0);
         permission.setStatus(dto.getStatus());
         permission.setDeleted(0);
-        permission.setCreateBy(createBy);
+        permission.setCreateBy(createBy != null ? String.valueOf(createBy) : null);
         
         permissionMapper.insert(permission);
         log.info("创建权限成功，权限ID：{}，权限名称：{}", permission.getId(), permission.getName());
@@ -144,7 +144,7 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
         permission.setIcon(dto.getIcon());
         permission.setSortOrder(dto.getSortOrder());
         permission.setStatus(dto.getStatus());
-        permission.setUpdateBy(updateBy);
+        permission.setUpdateBy(updateBy != null ? String.valueOf(updateBy) : null);
         
         permissionMapper.updateById(permission);
         log.info("更新权限成功，权限ID：{}", permissionId);
