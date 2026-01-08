@@ -63,6 +63,13 @@ public class UserVO {
     private String departmentName;
 
     /**
+     * 部门对象
+     * 完整的部门信息，包含部门ID、名称、编码等
+     * 遵循：前端类型规范-与后端DTO/VO保持一致
+     */
+    private DepartmentVO department;
+
+    /**
      * 用户角色列表
      * 用户拥有的所有角色名称列表
      */

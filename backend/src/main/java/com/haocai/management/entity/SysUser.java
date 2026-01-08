@@ -96,6 +96,55 @@ public class SysUser {
     private Long departmentId;
 
     /**
+     * 部门名称（关联查询字段）
+     * 从sys_department表关联查询，用于显示
+     */
+    @TableField(exist = false)
+    private String deptName;
+
+    /**
+     * 部门编码（关联查询字段）
+     * 从sys_department表关联查询，用于显示
+     */
+    @TableField(exist = false)
+    private String deptCode;
+
+    /**
+     * 部门父ID（关联查询字段）
+     * 从sys_department表关联查询，用于显示
+     */
+    @TableField(exist = false)
+    private Long deptParentId;
+
+    /**
+     * 部门负责人（关联查询字段）
+     * 从sys_department表关联查询，用于显示
+     */
+    @TableField(exist = false)
+    private String deptLeader;
+
+    /**
+     * 部门联系电话（关联查询字段）
+     * 从sys_department表关联查询，用于显示
+     */
+    @TableField(exist = false)
+    private String deptPhone;
+
+    /**
+     * 部门邮箱（关联查询字段）
+     * 从sys_department表关联查询，用于显示
+     */
+    @TableField(exist = false)
+    private String deptEmail;
+
+    /**
+     * 部门描述（关联查询字段）
+     * 从sys_department表关联查询，用于显示
+     */
+    @TableField(exist = false)
+    private String deptDescription;
+
+    /**
      * 创建时间
      * 记录用户账号的创建时间
      */

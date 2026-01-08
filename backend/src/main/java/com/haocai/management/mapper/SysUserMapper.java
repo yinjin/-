@@ -65,6 +65,8 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
     /**
      * 分页查询用户列表
      * 支持多条件组合查询
+     * 遵循：数据访问层规范-关联查询优化
+     * 使用LEFT JOIN关联查询部门信息，避免N+1查询问题
      *
      * @param page 分页对象
      * @param username 用户名关键词（可选）
@@ -74,12 +76,17 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
      * @return 分页结果
      */
     @Select("<script>" +
-            "SELECT id,username,password,real_name AS name,email,phone,avatar,department_id,status,create_time,update_time,last_login_time,create_by,update_by,remark,deleted FROM sys_user WHERE deleted = 0" +
-            "<if test='username != null and username != \"\"'> AND username LIKE CONCAT('%', #{username}, '%')</if>" +
-            "<if test='name != null and name != \"\"'> AND real_name LIKE CONCAT('%', #{name}, '%')</if>" +
-            "<if test='status != null'> AND status = #{status}</if>" +
-            "<if test='departmentId != null'> AND department_id = #{departmentId}</if>" +
-            " ORDER BY create_time DESC" +
+            "SELECT u.id,u.username,u.password,u.real_name AS name,u.email,u.phone,u.avatar,u.department_id,u.status,u.create_time,u.update_time,u.last_login_time,u.create_by,u.update_by,u.remark,u.deleted," +
+            "d.id AS dept_id,d.department_name AS dept_name,d.department_code AS dept_code,d.parent_id AS dept_parent_id," +
+            "d.leader AS dept_leader,d.phone AS dept_phone,d.email AS dept_email,d.description AS dept_description " +
+            "FROM sys_user u " +
+            "LEFT JOIN sys_department d ON u.department_id = d.id AND d.deleted = 0 " +
+            "WHERE u.deleted = 0" +
+            "<if test='username != null and username != \"\"'> AND u.username LIKE CONCAT('%', #{username}, '%')</if>" +
+            "<if test='name != null and name != \"\"'> AND u.real_name LIKE CONCAT('%', #{name}, '%')</if>" +
+            "<if test='status != null'> AND u.status = #{status}</if>" +
+            "<if test='departmentId != null'> AND u.department_id = #{departmentId}</if>" +
+            "ORDER BY u.create_time DESC" +
             "</script>")
     IPage<SysUser> selectUserPage(Page<SysUser> page,
                                   @Param("username") String username,
