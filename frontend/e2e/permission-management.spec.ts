@@ -38,11 +38,17 @@ test.describe('权限管理页面功能测试', () => {
     
     // 导航到权限管理页面
     // 遵循：E2E测试规范-第6.1条（选择器稳定性）
-    // 使用更稳定的选择器定位系统设置卡片
-    await page.locator('h3:has-text("系统设置")').click();
-    // 点击下拉菜单中的权限管理选项
-    await page.click('text=权限管理');
-    await page.waitForURL('http://localhost:5174/permissions');
+    // 点击系统设置卡片（触发Popover）
+    await page.locator('.menu-card:has(h3:text("系统设置"))').click();
+    
+    // 等待Popover菜单显示
+    await page.waitForSelector('.system-menu-list', { timeout: 3000 });
+    
+    // 点击权限管理菜单项
+    await page.locator('.system-menu-item:has-text("权限管理")').click();
+    
+    // 等待页面跳转到权限管理页面
+    await page.waitForURL('http://localhost:5174/permissions', { timeout: 5000 });
   });
 
   /**

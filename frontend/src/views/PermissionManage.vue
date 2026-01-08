@@ -44,8 +44,16 @@
             <el-tag v-else-if="row.type === 'api'" type="info">接口</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="path" label="路径" show-overflow-tooltip />
-        <el-table-column prop="component" label="组件" show-overflow-tooltip />
+        <el-table-column prop="path" label="路径" show-overflow-tooltip>
+          <template #default="{ row }">
+            {{ row.path || '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="component" label="组件" show-overflow-tooltip>
+          <template #default="{ row }">
+            {{ row.component || '-' }}
+          </template>
+        </el-table-column>
         <el-table-column prop="icon" label="图标" width="100">
           <template #default="{ row }">
             <el-icon v-if="row.icon">

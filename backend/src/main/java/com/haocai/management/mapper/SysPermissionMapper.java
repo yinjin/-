@@ -173,7 +173,7 @@ public interface SysPermissionMapper extends BaseMapper<SysPermission> {
      * @return 所有权限列表（按层级排序）
      */
     @Select("SELECT id, permission_name AS name, permission_code AS code, " +
-            "parent_id, path, component, icon, sort_order, status, " +
+            "permission_type AS type, parent_id, path, component, icon, sort_order, status, " +
             "create_time, update_time, create_by, " +
             "update_by, deleted " +
             "FROM sys_permission " +

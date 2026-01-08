@@ -1,6 +1,7 @@
 package com.haocai.management.enums;
 
 import com.baomidou.mybatisplus.annotation.EnumValue;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -26,21 +27,23 @@ public enum DepartmentStatus {
      * 正常状态
      * 部门正常运营，可以进行业务操作
      */
-    NORMAL(0, "正常"),
+    NORMAL(1, "正常"),
 
     /**
      * 禁用状态
      * 部门已被禁用，无法进行新增业务操作，但不影响历史数据查询
      */
-    DISABLED(1, "禁用");
+    DISABLED(0, "禁用");
 
     /**
      * 状态码
      * 使用@EnumValue注解标记，MyBatis-Plus会将此值存入数据库
+     * 使用@JsonValue注解标记，Jackson序列化时会使用此值
      *
      * 遵循：实体类设计规范-第2.2条（@EnumValue注解标记）
      */
     @EnumValue
+    @JsonValue
     private final Integer code;
 
     /**

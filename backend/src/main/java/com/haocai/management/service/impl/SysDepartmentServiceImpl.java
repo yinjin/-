@@ -567,6 +567,11 @@ public class SysDepartmentServiceImpl extends ServiceImpl<SysDepartmentMapper, S
         DepartmentVO vo = new DepartmentVO();
         BeanUtils.copyProperties(department, vo);
         
+        // 手动转换枚举类型为字符串
+        if (department.getStatus() != null) {
+            vo.setStatus(department.getStatus().name());
+        }
+        
         // 设置父部门名称
         if (department.getParentId() != null) {
             SysDepartment parent = departmentMapper.selectById(department.getParentId());
@@ -593,9 +598,25 @@ public class SysDepartmentServiceImpl extends ServiceImpl<SysDepartmentMapper, S
      * 将部门实体转换为树形VO
      */
     private DepartmentTreeVO convertToTreeVO(SysDepartment department) {
+        log.debug("开始转换部门为树形VO: id={}, name={}, status={}", 
+                department.getId(), department.getName(), department.getStatus());
+        
         DepartmentTreeVO vo = new DepartmentTreeVO();
         BeanUtils.copyProperties(department, vo);
+        
+        log.debug("BeanUtils复制完成: vo.id={}, vo.name={}, vo.status={}", 
+                vo.getId(), vo.getName(), vo.getStatus());
+        
+        // 手动转换枚举类型为字符串
+        if (department.getStatus() != null) {
+            vo.setStatus(department.getStatus().name());
+            log.debug("枚举转换完成: status={}", vo.getStatus());
+        }
+        
         vo.setChildren(new ArrayList<>());
+        log.debug("树形VO转换完成: id={}, name={}, status={}", 
+                vo.getId(), vo.getName(), vo.getStatus());
+        
         return vo;
     }
 
@@ -604,11 +625,24 @@ public class SysDepartmentServiceImpl extends ServiceImpl<SysDepartmentMapper, S
      * 遵循：树形结构规范-第1条（递归构建树形结构）
      */
     private List<DepartmentTreeVO> buildDepartmentTree(List<SysDepartment> departments, Long parentId) {
-        return departments.stream()
-                .filter(d -> Objects.equals(d.getParentId(), parentId))
+        log.debug("构建部门树形结构: parentId={}, 部门总数={}", parentId, departments.size());
+        
+        List<DepartmentTreeVO> result = departments.stream()
+                .filter(d -> {
+                    // 处理顶级部门：parentId为null或0都视为顶级部门
+                    boolean match = (parentId == null && (d.getParentId() == null || d.getParentId() == 0L)) 
+                            || Objects.equals(d.getParentId(), parentId);
+                    log.debug("部门过滤: id={}, name={}, parentId={}, 匹配={}", 
+                            d.getId(), d.getName(), d.getParentId(), match);
+                    return match;
+                })
                 .map(this::convertToTreeVO)
                 .peek(vo -> vo.setChildren(buildDepartmentTree(departments, vo.getId())))
                 .collect(Collectors.toList());
+        
+        log.debug("构建部门树形结构完成: parentId={}, 子节点数量={}", parentId, result.size());
+        
+        return result;
     }
 
     /**
