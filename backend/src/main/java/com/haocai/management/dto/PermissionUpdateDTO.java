@@ -31,14 +31,14 @@ public class PermissionUpdateDTO {
     @NotBlank(message = "权限编码不能为空")
     @Size(max = 100, message = "权限编码长度不能超过100个字符")
     private String code;
-    
+
     /**
      * 权限类型（menu-菜单，button-按钮，api-接口）
      */
     @NotBlank(message = "权限类型不能为空")
     @Size(max = 20, message = "权限类型长度不能超过20个字符")
     private String type;
-    
+
     /**
      * 父权限ID（顶级权限为0）
      */

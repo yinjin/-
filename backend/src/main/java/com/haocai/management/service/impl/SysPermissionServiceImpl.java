@@ -78,6 +78,7 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
         SysPermission permission = new SysPermission();
         permission.setName(dto.getName());
         permission.setCode(dto.getCode());
+        permission.setType(dto.getType());
         permission.setParentId(dto.getParentId());
         permission.setPath(dto.getPath());
         permission.setComponent(dto.getComponent());
@@ -136,6 +137,7 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
         permission.setId(permissionId);
         permission.setName(dto.getName());
         permission.setCode(dto.getCode());
+        permission.setType(dto.getType());
         permission.setParentId(dto.getParentId());
         permission.setPath(dto.getPath());
         permission.setComponent(dto.getComponent());
@@ -391,6 +393,7 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
         vo.setId(permission.getId());
         vo.setName(permission.getName());
         vo.setCode(permission.getCode());
+        vo.setType(permission.getType());
         vo.setParentId(permission.getParentId());
         vo.setPath(permission.getPath());
         vo.setComponent(permission.getComponent());

@@ -56,6 +56,12 @@ public class SysPermission implements Serializable {
     private String code;
 
     /**
+     * 权限类型（menu-菜单，button-按钮，api-接口）
+     */
+    @TableField("permission_type")
+    private String type;
+
+    /**
      * 父权限ID
      */
     @TableField("parent_id")

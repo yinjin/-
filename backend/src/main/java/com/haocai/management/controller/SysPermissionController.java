@@ -278,6 +278,11 @@ public class SysPermissionController {
             wrapper.like(SysPermission::getName, permissionName.trim());
         }
         
+        // 权限类型查询
+        if (permissionType != null && !permissionType.trim().isEmpty()) {
+            wrapper.eq(SysPermission::getType, permissionType.trim());
+        }
+        
         // 按排序字段升序排序
         wrapper.orderByAsc(SysPermission::getSortOrder);
         
