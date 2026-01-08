@@ -65,17 +65,25 @@ public class DepartmentUpdateDTO {
     private String status;
 
     /**
-     * 部门负责人ID
+     * 部门负责人
      */
-    @Schema(description = "部门负责人ID（关联sys_user表）", example = "1")
-    private Long leaderId;
+    @Size(max = 50, message = "部门负责人长度不能超过50个字符")
+    @Schema(description = "部门负责人", example = "张三")
+    private String leader;
 
     /**
-     * 联系方式
+     * 联系电话
      */
-    @Size(max = 200, message = "联系方式长度不能超过200个字符")
-    @Schema(description = "联系方式", example = "010-88888888")
-    private String contactInfo;
+    @Size(max = 20, message = "联系电话长度不能超过20个字符")
+    @Schema(description = "联系电话", example = "010-88888888")
+    private String phone;
+
+    /**
+     * 电子邮箱
+     */
+    @Size(max = 100, message = "电子邮箱长度不能超过100个字符")
+    @Schema(description = "电子邮箱", example = "dept@example.com")
+    private String email;
 
     /**
      * 部门描述

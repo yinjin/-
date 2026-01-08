@@ -233,25 +233,25 @@
           </el-radio-group>
         </el-form-item>
         <el-form-item label="负责人">
-          <el-select
-            v-model="departmentForm.leaderId"
-            placeholder="请选择部门负责人"
-            clearable
-            style="width: 100%"
-          >
-            <el-option
-              v-for="user in userList"
-              :key="user.id"
-              :label="user.name"
-              :value="user.id"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="联系方式">
           <el-input
-            v-model="departmentForm.contactInfo"
-            placeholder="请输入联系方式"
-            maxlength="200"
+            v-model="departmentForm.leader"
+            placeholder="请输入负责人用户名"
+            clearable
+            maxlength="50"
+          />
+        </el-form-item>
+        <el-form-item label="联系电话">
+          <el-input
+            v-model="departmentForm.phone"
+            placeholder="请输入联系电话"
+            maxlength="20"
+          />
+        </el-form-item>
+        <el-form-item label="联系邮箱">
+          <el-input
+            v-model="departmentForm.email"
+            placeholder="请输入联系邮箱"
+            maxlength="100"
           />
         </el-form-item>
         <el-form-item label="部门描述">
@@ -365,8 +365,9 @@ const departmentForm = reactive<{
   parentId: number | null
   sortOrder: number
   status?: 'NORMAL' | 'DISABLED'
-  leaderId: number | null | undefined
-  contactInfo: string
+  leader: string | undefined
+  phone: string
+  email: string
   description: string
 }>({
   id: undefined,
@@ -375,8 +376,9 @@ const departmentForm = reactive<{
   parentId: null,
   sortOrder: 0,
   status: 'NORMAL',
-  leaderId: undefined,
-  contactInfo: '',
+  leader: undefined,
+  phone: '',
+  email: '',
   description: ''
 })
 
@@ -624,8 +626,9 @@ const handleEdit = (data: DepartmentVO | DepartmentTreeVO) => {
   departmentForm.parentId = data.parentId
   departmentForm.sortOrder = data.sortOrder
   departmentForm.status = data.status
-  departmentForm.leaderId = data.leaderId ?? undefined
-  departmentForm.contactInfo = data.contactInfo || ''
+  departmentForm.leader = data.leader ?? undefined
+  departmentForm.phone = data.phone || ''
+  departmentForm.email = data.email || ''
   departmentForm.description = data.description || ''
 }
 
@@ -770,8 +773,9 @@ const handleSubmit = async () => {
         parentId: departmentForm.parentId,
         sortOrder: departmentForm.sortOrder,
         status: departmentForm.status,
-      leaderId: departmentForm.leaderId ?? undefined,
-        contactInfo: departmentForm.contactInfo,
+        leader: departmentForm.leader ?? undefined,
+        phone: departmentForm.phone,
+        email: departmentForm.email,
         description: departmentForm.description
       }
       
@@ -794,8 +798,9 @@ const handleSubmit = async () => {
         code: departmentForm.code,
         parentId: departmentForm.parentId,
         sortOrder: departmentForm.sortOrder,
-        leaderId: departmentForm.leaderId,
-        contactInfo: departmentForm.contactInfo,
+        leader: departmentForm.leader,
+        phone: departmentForm.phone,
+        email: departmentForm.email,
         description: departmentForm.description
       }
       
@@ -839,8 +844,9 @@ const resetDepartmentForm = () => {
   departmentForm.parentId = null
   departmentForm.sortOrder = 0
   departmentForm.status = 'NORMAL'
-  departmentForm.leaderId = undefined
-  departmentForm.contactInfo = ''
+  departmentForm.leader = undefined
+  departmentForm.phone = ''
+  departmentForm.email = ''
   departmentForm.description = ''
 }
 </script>

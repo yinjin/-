@@ -52,6 +52,7 @@ com\haocai\management\entity\SysUserRole.class
 com\haocai\management\dto\RoleUpdateDTO.class
 com\haocai\management\controller\SysUserController.class
 com\haocai\management\mapper\SysUserLoginLogMapper.class
+com\haocai\management\config\DatabaseCharsetConfig.class
 com\haocai\management\service\impl\SysUserServiceImpl.class
 com\haocai\management\dto\UserLoginDTO.class
 com\haocai\management\controller\DebugController.class

@@ -42,7 +42,6 @@ public class SysPermissionServiceTest {
         PermissionCreateDTO dto = new PermissionCreateDTO();
         dto.setCode("user:create");
         dto.setName("创建用户");
-        dto.setType("button");
         dto.setPath("/api/user/create");
         dto.setStatus(1);
 
@@ -54,7 +53,6 @@ public class SysPermissionServiceTest {
         assertNotNull(permission, "权限应存在");
         assertEquals("user:create", permission.getCode(), "权限代码应匹配");
         assertEquals("创建用户", permission.getName(), "权限名称应匹配");
-        assertEquals("button", permission.getType(), "权限类型应匹配");
     }
 
     /**
@@ -66,7 +64,6 @@ public class SysPermissionServiceTest {
         PermissionCreateDTO parentDto = new PermissionCreateDTO();
         parentDto.setCode("user");
         parentDto.setName("用户管理");
-        parentDto.setType("menu");
         parentDto.setStatus(1);
         Long parentId = permissionService.createPermission(parentDto, 1L);
 
@@ -74,7 +71,6 @@ public class SysPermissionServiceTest {
         PermissionCreateDTO childDto = new PermissionCreateDTO();
         childDto.setCode("user:create");
         childDto.setName("创建用户");
-        childDto.setType("button");
         childDto.setParentId(parentId);
         childDto.setPath("/api/user/create");
         childDto.setStatus(1);
@@ -95,7 +91,6 @@ public class SysPermissionServiceTest {
         PermissionCreateDTO dto1 = new PermissionCreateDTO();
         dto1.setCode("DUPLICATE_PERM");
         dto1.setName("权限1");
-        dto1.setType("button");
         dto1.setStatus(1);
         permissionService.createPermission(dto1, 1L);
 
@@ -103,7 +98,6 @@ public class SysPermissionServiceTest {
         PermissionCreateDTO dto2 = new PermissionCreateDTO();
         dto2.setCode("DUPLICATE_PERM");
         dto2.setName("权限2");
-        dto2.setType("button");
         dto2.setStatus(1);
 
         assertThrows(RuntimeException.class, () -> {
@@ -120,7 +114,6 @@ public class SysPermissionServiceTest {
         PermissionCreateDTO createDto = new PermissionCreateDTO();
         createDto.setCode("UPDATE_PERM");
         createDto.setName("原始名称");
-        createDto.setType("button");
         createDto.setPath("/api/old");
         createDto.setStatus(1);
         Long permissionId = permissionService.createPermission(createDto, 1L);
@@ -151,7 +144,6 @@ public class SysPermissionServiceTest {
         PermissionCreateDTO dto = new PermissionCreateDTO();
         dto.setCode("DELETE_PERM");
         dto.setName("待删除权限");
-        dto.setType("button");
         dto.setStatus(1);
         Long permissionId = permissionService.createPermission(dto, 1L);
 
@@ -172,14 +164,12 @@ public class SysPermissionServiceTest {
         PermissionCreateDTO dto1 = new PermissionCreateDTO();
         dto1.setCode("BATCH_DELETE_PERM_1");
         dto1.setName("批量删除权限1");
-        dto1.setType("button");
         dto1.setStatus(1);
         Long permissionId1 = permissionService.createPermission(dto1, 1L);
 
         PermissionCreateDTO dto2 = new PermissionCreateDTO();
         dto2.setCode("BATCH_DELETE_PERM_2");
         dto2.setName("批量删除权限2");
-        dto2.setType("button");
         dto2.setStatus(1);
         Long permissionId2 = permissionService.createPermission(dto2, 1L);
 
@@ -206,7 +196,6 @@ public class SysPermissionServiceTest {
         PermissionCreateDTO parentDto = new PermissionCreateDTO();
         parentDto.setCode("user");
         parentDto.setName("用户管理");
-        parentDto.setType("menu");
         parentDto.setStatus(1);
         Long parentId = permissionService.createPermission(parentDto, 1L);
 
@@ -214,7 +203,6 @@ public class SysPermissionServiceTest {
         PermissionCreateDTO childDto1 = new PermissionCreateDTO();
         childDto1.setCode("user:create");
         childDto1.setName("创建用户");
-        childDto1.setType("button");
         childDto1.setParentId(parentId);
         childDto1.setPath("/api/user/create");
         childDto1.setStatus(1);
@@ -223,7 +211,6 @@ public class SysPermissionServiceTest {
         PermissionCreateDTO childDto2 = new PermissionCreateDTO();
         childDto2.setCode("user:update");
         childDto2.setName("更新用户");
-        childDto2.setType("button");
         childDto2.setParentId(parentId);
         childDto2.setPath("/api/user/update");
         childDto2.setStatus(1);
@@ -245,7 +232,6 @@ public class SysPermissionServiceTest {
         PermissionCreateDTO dto = new PermissionCreateDTO();
         dto.setCode("USER_PERM");
         dto.setName("用户权限");
-        dto.setType("api");
         dto.setPath("/api/user");
         dto.setStatus(1);
         Long permissionId = permissionService.createPermission(dto, 1L);
@@ -265,7 +251,6 @@ public class SysPermissionServiceTest {
         PermissionCreateDTO dto = new PermissionCreateDTO();
         dto.setCode("ROLE_PERM");
         dto.setName("角色权限");
-        dto.setType("api");
         dto.setPath("/api/role");
         dto.setStatus(1);
         Long permissionId = permissionService.createPermission(dto, 1L);
@@ -310,22 +295,18 @@ public class SysPermissionServiceTest {
         PermissionCreateDTO menuDto = new PermissionCreateDTO();
         menuDto.setCode("menu");
         menuDto.setName("菜单");
-        menuDto.setType("menu");
         menuDto.setStatus(1);
         Long menuId = permissionService.createPermission(menuDto, 1L);
 
         SysPermission menu = permissionService.getById(menuId);
-        assertEquals("menu", menu.getType(), "菜单类型应为menu");
 
         // 测试按钮类型
         PermissionCreateDTO buttonDto = new PermissionCreateDTO();
         buttonDto.setCode("button");
         buttonDto.setName("按钮");
-        buttonDto.setType("button");
         buttonDto.setStatus(1);
         Long buttonId = permissionService.createPermission(buttonDto, 1L);
 
         SysPermission button = permissionService.getById(buttonId);
-        assertEquals("button", button.getType(), "按钮类型应为button");
     }
 }

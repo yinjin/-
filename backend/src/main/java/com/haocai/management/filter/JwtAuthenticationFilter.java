@@ -89,12 +89,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
                 // 步骤2.3：构建认证对象
-                // 注意：这里使用空权限列表，实际权限可根据需要从数据库加载
+                // 使用userDetails中的权限列表，确保权限验证正常工作
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
                                 userDetails,
                                 null,
-                                Collections.emptyList()
+                                userDetails.getAuthorities()
                         );
 
                 // 步骤2.4：设置认证详情（包含IP地址等）

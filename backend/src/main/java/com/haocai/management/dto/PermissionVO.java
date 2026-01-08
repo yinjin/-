@@ -1,5 +1,6 @@
 package com.haocai.management.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -19,12 +20,16 @@ public class PermissionVO {
     
     /**
      * 权限名称
+     * 使用@JsonProperty确保前端能正确获取permissionName字段
      */
+    @JsonProperty("permissionName")
     private String name;
     
     /**
      * 权限编码
+     * 使用@JsonProperty确保前端能正确获取permissionCode字段
      */
+    @JsonProperty("permissionCode")
     private String code;
     
     /**

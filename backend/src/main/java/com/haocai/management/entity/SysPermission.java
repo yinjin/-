@@ -43,7 +43,7 @@ public class SysPermission implements Serializable {
      */
     @NotBlank(message = "权限名称不能为空")
     @TableField("permission_name")
-    @JsonProperty("name")
+    @JsonProperty("permissionName")
     private String name;
 
     /**
@@ -52,16 +52,8 @@ public class SysPermission implements Serializable {
      */
     @NotBlank(message = "权限编码不能为空")
     @TableField("permission_code")
-    @JsonProperty("code")
+    @JsonProperty("permissionCode")
     private String code;
-
-    /**
-     * 权限类型：menu/button/api
-     * 遵循：参数验证规范-第1条（必填字段验证）
-     */
-    @NotBlank(message = "权限类型不能为空")
-    @TableField("type")
-    private String type;
 
     /**
      * 父权限ID

@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.Statement;
 
 /**
  * 数据库初始化工具类
@@ -61,6 +62,22 @@ public class DatabaseInitializer implements CommandLineRunner {
             ClassPathResource resource = new ClassPathResource("init.sql");
             if (resource.exists()) {
                 System.out.println("开始执行数据库初始化脚本...");
+                
+                // 设置连接字符集为utf8mb4
+                try {
+                    Connection connection = jdbcTemplate.getDataSource().getConnection();
+                    Statement statement = connection.createStatement();
+                    statement.execute("SET NAMES utf8mb4");
+                    statement.execute("SET CHARACTER SET utf8mb4");
+                    statement.execute("SET character_set_client=utf8mb4");
+                    statement.execute("SET character_set_connection=utf8mb4");
+                    statement.execute("SET character_set_results=utf8mb4");
+                    statement.close();
+                    connection.close();
+                    System.out.println("已设置数据库连接字符集为utf8mb4");
+                } catch (Exception e) {
+                    System.err.println("设置字符集失败: " + e.getMessage());
+                }
                 
                 try (BufferedReader reader = new BufferedReader(
                         new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))) {

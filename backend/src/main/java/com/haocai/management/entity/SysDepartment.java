@@ -53,6 +53,7 @@ public class SysDepartment {
      * 长度：100字符
      * 必填
      */
+    @TableField("department_name")
     private String name;
 
     /**
@@ -60,6 +61,7 @@ public class SysDepartment {
      * 长度：50字符
      * 唯一
      */
+    @TableField("department_code")
     private String code;
 
     /**
@@ -68,13 +70,6 @@ public class SysDepartment {
      */
     @TableField("parent_id")
     private Long parentId;
-
-    /**
-     * 部门层级
-     * 顶级部门为1级
-     * 默认值：1
-     */
-    private Integer level;
 
     /**
      * 排序
@@ -95,17 +90,22 @@ public class SysDepartment {
     private DepartmentStatus status;
 
     /**
-     * 部门负责人ID
-     * 关联sys_user表
+     * 部门负责人
      */
-    @TableField("leader_id")
-    private Long leaderId;
+    @TableField("leader")
+    private String leader;
 
     /**
-     * 联系方式
+     * 联系电话
      */
-    @TableField("contact_info")
-    private String contactInfo;
+    @TableField("phone")
+    private String phone;
+
+    /**
+     * 邮箱
+     */
+    @TableField("email")
+    private String email;
 
     /**
      * 部门描述

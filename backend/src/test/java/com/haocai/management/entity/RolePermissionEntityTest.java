@@ -49,7 +49,6 @@ class RolePermissionEntityTest {
         permission.setId(1L);
         permission.setName("用户管理");
         permission.setCode("system:user");
-        permission.setType("menu");
         permission.setParentId(0L);
         permission.setPath("/system/user");
         permission.setComponent("system/user/index");
@@ -66,7 +65,6 @@ class RolePermissionEntityTest {
         assertEquals(1L, permission.getId());
         assertEquals("用户管理", permission.getName());
         assertEquals("system:user", permission.getCode());
-        assertEquals("menu", permission.getType());
         assertEquals(0L, permission.getParentId());
         assertEquals("/system/user", permission.getPath());
         assertEquals("system/user/index", permission.getComponent());
@@ -190,7 +188,6 @@ class RolePermissionEntityTest {
         PermissionCreateDTO dto = new PermissionCreateDTO();
         dto.setName("角色管理");
         dto.setCode("system:role");
-        dto.setType("menu");
         dto.setParentId(0L);
         dto.setPath("/system/role");
         dto.setComponent("system/role/index");
@@ -201,7 +198,6 @@ class RolePermissionEntityTest {
         assertNotNull(dto);
         assertEquals("角色管理", dto.getName());
         assertEquals("system:role", dto.getCode());
-        assertEquals("menu", dto.getType());
         assertEquals(0L, dto.getParentId());
         assertEquals("/system/role", dto.getPath());
         assertEquals("system/role/index", dto.getComponent());
@@ -219,7 +215,6 @@ class RolePermissionEntityTest {
         dto.setId(1L);
         dto.setName("用户管理");
         dto.setCode("system:user");
-        dto.setType("menu");
         dto.setParentId(0L);
         dto.setPath("/system/user");
         dto.setComponent("system/user/index");
@@ -231,7 +226,6 @@ class RolePermissionEntityTest {
         assertEquals(1L, dto.getId());
         assertEquals("用户管理", dto.getName());
         assertEquals("system:user", dto.getCode());
-        assertEquals("menu", dto.getType());
         assertEquals(0L, dto.getParentId());
         assertEquals("/system/user", dto.getPath());
         assertEquals("system/user/index", dto.getComponent());
@@ -249,7 +243,6 @@ class RolePermissionEntityTest {
         vo.setId(1L);
         vo.setName("用户管理");
         vo.setCode("system:user");
-        vo.setType("menu");
         vo.setParentId(0L);
         vo.setPath("/system/user");
         vo.setComponent("system/user/index");
@@ -265,7 +258,6 @@ class RolePermissionEntityTest {
         assertEquals(1L, vo.getId());
         assertEquals("用户管理", vo.getName());
         assertEquals("system:user", vo.getCode());
-        assertEquals("menu", vo.getType());
         assertEquals(0L, vo.getParentId());
         assertEquals("/system/user", vo.getPath());
         assertEquals("system/user/index", vo.getComponent());
@@ -331,13 +323,11 @@ class RolePermissionEntityTest {
         PermissionCreateDTO permissionCreateDTO = new PermissionCreateDTO();
         permissionCreateDTO.setName("");
         permissionCreateDTO.setCode("");
-        permissionCreateDTO.setType("");
         permissionCreateDTO.setParentId(null);
         permissionCreateDTO.setStatus(null);
         
         assertEquals("", permissionCreateDTO.getName());
         assertEquals("", permissionCreateDTO.getCode());
-        assertEquals("", permissionCreateDTO.getType());
         assertNull(permissionCreateDTO.getParentId());
         assertNull(permissionCreateDTO.getStatus());
     }

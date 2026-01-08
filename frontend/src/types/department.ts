@@ -21,10 +21,12 @@ export interface DepartmentCreateDTO {
   parentId?: number | null
   /** 排序号（同级部门排序，数字越小越靠前） */
   sortOrder?: number
-  /** 部门负责人ID */
-  leaderId?: number
-  /** 联系方式 */
-  contactInfo?: string
+  /** 部门负责人（用户名） */
+  leader?: string
+  /** 联系电话 */
+  phone?: string
+  /** 联系邮箱 */
+  email?: string
   /** 部门描述 */
   description?: string
 }
@@ -45,10 +47,12 @@ export interface DepartmentUpdateDTO {
   sortOrder?: number
   /** 状态：NORMAL-正常，DISABLED-禁用 */
   status?: 'NORMAL' | 'DISABLED'
-  /** 部门负责人ID */
-  leaderId?: number
-  /** 联系方式 */
-  contactInfo?: string
+  /** 部门负责人（用户名） */
+  leader?: string
+  /** 联系电话 */
+  phone?: string
+  /** 联系邮箱 */
+  email?: string
   /** 部门描述 */
   description?: string
 }
@@ -93,12 +97,14 @@ export interface DepartmentVO {
   sortOrder: number
   /** 状态：NORMAL-正常，DISABLED-禁用 */
   status: 'NORMAL' | 'DISABLED'
-  /** 部门负责人ID */
-  leaderId: number | null
+  /** 部门负责人（用户名） */
+  leader: string | null
   /** 部门负责人名称 */
   leaderName: string
-  /** 联系方式 */
-  contactInfo: string
+  /** 联系电话 */
+  phone: string
+  /** 联系邮箱 */
+  email: string
   /** 部门描述 */
   description: string
   /** 子部门数量 */

@@ -71,7 +71,6 @@ public class SysPermissionControllerTest {
         testPermission.setId(1L);
         testPermission.setName("用户管理");
         testPermission.setCode("user:manage");
-        testPermission.setType("MENU");
         testPermission.setParentId(0L);
         testPermission.setPath("/user");
         testPermission.setComponent("UserManage");
@@ -87,7 +86,6 @@ public class SysPermissionControllerTest {
         parentPermission.setId(1L);
         parentPermission.setName("系统管理");
         parentPermission.setCode("system");
-        parentPermission.setType("MENU");
         parentPermission.setParentId(0L);
         parentPermission.setSortOrder(1);
         parentPermission.setStatus(1);
@@ -99,7 +97,6 @@ public class SysPermissionControllerTest {
         childPermission1.setId(2L);
         childPermission1.setName("用户管理");
         childPermission1.setCode("user:manage");
-        childPermission1.setType("MENU");
         childPermission1.setParentId(1L);
         childPermission1.setSortOrder(1);
         childPermission1.setStatus(1);
@@ -111,7 +108,6 @@ public class SysPermissionControllerTest {
         childPermission2.setId(3L);
         childPermission2.setName("角色管理");
         childPermission2.setCode("role:manage");
-        childPermission2.setType("MENU");
         childPermission2.setParentId(1L);
         childPermission2.setSortOrder(2);
         childPermission2.setStatus(1);
@@ -401,7 +397,6 @@ public class SysPermissionControllerTest {
             permission.setId((long) i);
             permission.setName("权限" + i);
             permission.setCode("permission:" + i);
-            permission.setType("MENU");
             permission.setParentId(0L);
             permission.setSortOrder(i);
             permission.setStatus(1);
@@ -439,7 +434,6 @@ public class SysPermissionControllerTest {
         root.setId(1L);
         root.setName("系统管理");
         root.setCode("system");
-        root.setType("MENU");
         root.setParentId(0L);
         root.setSortOrder(1);
         root.setStatus(1);
@@ -454,7 +448,6 @@ public class SysPermissionControllerTest {
             child.setId((long) i);
             child.setName("权限" + i);
             child.setCode("permission:" + i);
-            child.setType("MENU");
             child.setParentId(1L);
             child.setSortOrder(i - 1);
             child.setStatus(1);
@@ -490,7 +483,6 @@ public class SysPermissionControllerTest {
             permission.setId((long) i);
             permission.setName("权限" + i);
             permission.setCode("permission:" + i);
-            permission.setType("MENU");
             permission.setParentId(0L);
             permission.setSortOrder(i);
             permission.setStatus(1);

@@ -66,7 +66,6 @@ public class SysDepartmentServiceImpl extends ServiceImpl<SysDepartmentMapper, S
         }
         
         // 验证父部门存在性
-        Integer parentLevel = 0;
         if (dto.getParentId() != null) {
             SysDepartment parent = departmentMapper.selectById(dto.getParentId());
             if (parent == null) {
@@ -76,12 +75,6 @@ public class SysDepartmentServiceImpl extends ServiceImpl<SysDepartmentMapper, S
             if (DepartmentStatus.DISABLED.name().equals(parent.getStatus().name())) {
                 throw new BusinessException(400, "父部门已被禁用，无法在其下创建子部门");
             }
-            parentLevel = parent.getLevel();
-        }
-        
-        // 验证层级不超过最大值
-        if (parentLevel >= MAX_DEPARTMENT_LEVEL) {
-            throw new BusinessException(400, "部门层级不能超过" + MAX_DEPARTMENT_LEVEL + "级");
         }
         
         // 创建部门
@@ -89,11 +82,11 @@ public class SysDepartmentServiceImpl extends ServiceImpl<SysDepartmentMapper, S
         department.setName(dto.getName());
         department.setCode(dto.getCode());
         department.setParentId(dto.getParentId());
-        department.setLevel(parentLevel + 1);
         department.setSortOrder(dto.getSortOrder() != null ? dto.getSortOrder() : 0);
         department.setStatus(DepartmentStatus.NORMAL);
-        department.setLeaderId(dto.getLeaderId());
-        department.setContactInfo(dto.getContactInfo());
+        department.setLeader(dto.getLeader());
+        department.setPhone(dto.getPhone());
+        department.setEmail(dto.getEmail());
         department.setDescription(dto.getDescription());
         department.setCreateTime(LocalDateTime.now());
         department.setCreateBy(currentUserId != null ? String.valueOf(currentUserId) : null);
@@ -138,20 +131,13 @@ public class SysDepartmentServiceImpl extends ServiceImpl<SysDepartmentMapper, S
             
             // 重新计算层级
             if (dto.getParentId() == null) {
-                department.setLevel(1);
+                // 顶级部门，无需额外处理
             } else {
                 SysDepartment newParent = departmentMapper.selectById(dto.getParentId());
                 if (newParent == null) {
                     throw new BusinessException(400, "父部门不存在: " + dto.getParentId());
                 }
-                if (newParent.getLevel() >= MAX_DEPARTMENT_LEVEL) {
-                    throw new BusinessException(400, "部门层级不能超过" + MAX_DEPARTMENT_LEVEL + "级");
-                }
-                department.setLevel(newParent.getLevel() + 1);
             }
-            
-            // 更新所有子部门的层级
-            updateChildrenLevel(department.getId(), department.getLevel());
         }
         if (dto.getSortOrder() != null) {
             department.setSortOrder(dto.getSortOrder());
@@ -159,11 +145,14 @@ public class SysDepartmentServiceImpl extends ServiceImpl<SysDepartmentMapper, S
         if (StringUtils.hasText(dto.getStatus())) {
             department.setStatus(DepartmentStatus.valueOf(dto.getStatus()));
         }
-        if (dto.getLeaderId() != null) {
-            department.setLeaderId(dto.getLeaderId());
+        if (StringUtils.hasText(dto.getLeader())) {
+            department.setLeader(dto.getLeader());
         }
-        if (StringUtils.hasText(dto.getContactInfo())) {
-            department.setContactInfo(dto.getContactInfo());
+        if (StringUtils.hasText(dto.getPhone())) {
+            department.setPhone(dto.getPhone());
+        }
+        if (StringUtils.hasText(dto.getEmail())) {
+            department.setEmail(dto.getEmail());
         }
         if (StringUtils.hasText(dto.getDescription())) {
             department.setDescription(dto.getDescription());
@@ -393,7 +382,6 @@ public class SysDepartmentServiceImpl extends ServiceImpl<SysDepartmentMapper, S
         if (!Boolean.TRUE.equals(includeDisabled)) {
             queryWrapper.eq(SysDepartment::getStatus, DepartmentStatus.NORMAL);
         }
-        queryWrapper.orderByAsc(SysDepartment::getLevel);
         queryWrapper.orderByAsc(SysDepartment::getSortOrder);
         
         List<SysDepartment> departments = departmentMapper.selectList(queryWrapper);
@@ -470,25 +458,15 @@ public class SysDepartmentServiceImpl extends ServiceImpl<SysDepartmentMapper, S
             if (newParent == null) {
                 throw new BusinessException(400, "新父部门不存在: " + newParentId);
             }
-            if (newParent.getLevel() >= MAX_DEPARTMENT_LEVEL) {
-                throw new BusinessException(400, "部门层级不能超过" + MAX_DEPARTMENT_LEVEL + "级");
-            }
         }
         
-        // 计算新的层级
-        int newLevel = newParentId == null ? 1 : departmentMapper.selectById(newParentId).getLevel() + 1;
-        
-        // 更新父部门和层级
+        // 更新父部门
         department.setParentId(newParentId);
-        department.setLevel(newLevel);
         department.setUpdateTime(LocalDateTime.now());
         department.setUpdateBy(currentUserId != null ? String.valueOf(currentUserId) : null);
         departmentMapper.updateById(department);
         
-        // 遵循：层级管理规范-第2条（更新所有子部门层级）
-        updateChildrenLevel(id, newLevel);
-        
-        log.info("部门移动成功: id={}, newLevel={}", id, newLevel);
+        log.info("部门移动成功: id={}", id);
         
         return ApiResponse.success(convertToVO(department));
     }
@@ -505,15 +483,18 @@ public class SysDepartmentServiceImpl extends ServiceImpl<SysDepartmentMapper, S
             throw new BusinessException(400, "部门不存在: " + id);
         }
         
-        // 验证用户存在
+        // 验证用户存在并获取用户名
         if (leaderId != null) {
             SysUser user = userMapper.selectById(leaderId);
             if (user == null) {
                 throw new BusinessException(400, "用户不存在: " + leaderId);
             }
+            // 设置用户名作为负责人
+            department.setLeader(user.getName());
+        } else {
+            department.setLeader(null);
         }
         
-        department.setLeaderId(leaderId);
         department.setUpdateTime(LocalDateTime.now());
         department.setUpdateBy(currentUserId != null ? String.valueOf(currentUserId) : null);
         departmentMapper.updateById(department);
@@ -540,19 +521,35 @@ public class SysDepartmentServiceImpl extends ServiceImpl<SysDepartmentMapper, S
         List<SysDepartment> allDepartments = getAllChildren(id);
         allDepartments.add(department);
         
-        List<Long> userIds = allDepartments.stream()
-                .map(SysDepartment::getLeaderId)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+        // 由于leader字段现在是String类型（用户名），需要通过用户名查询用户ID
+        List<Long> userIds = new ArrayList<>();
+        for (SysDepartment dept : allDepartments) {
+            if (StringUtils.hasText(dept.getLeader())) {
+                // 通过用户名查询用户ID
+                LambdaQueryWrapper<SysUser> userWrapper = new LambdaQueryWrapper<>();
+                userWrapper.eq(SysUser::getName, dept.getLeader());
+                SysUser user = userMapper.selectOne(userWrapper);
+                if (user != null) {
+                    userIds.add(user.getId());
+                }
+            }
+        }
         
         return ApiResponse.success(userIds);
     }
 
     @Override
     public ApiResponse<List<DepartmentVO>> getDepartmentsByUserId(Long userId) {
+        // 先查询用户信息获取用户名
+        SysUser user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new BusinessException(400, "用户不存在: " + userId);
+        }
+        
+        // 通过用户名查询部门
         LambdaQueryWrapper<SysDepartment> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(SysDepartment::getDeleted, 0);
-        queryWrapper.eq(SysDepartment::getLeaderId, userId);
+        queryWrapper.eq(SysDepartment::getLeader, user.getName());
         List<SysDepartment> departments = departmentMapper.selectList(queryWrapper);
         List<DepartmentVO> result = departments.stream()
                 .map(this::convertToVO)
@@ -578,12 +575,9 @@ public class SysDepartmentServiceImpl extends ServiceImpl<SysDepartmentMapper, S
             }
         }
         
-        // 设置负责人名称
-        if (department.getLeaderId() != null) {
-            SysUser leader = userMapper.selectById(department.getLeaderId());
-            if (leader != null) {
-                vo.setLeaderName(leader.getName());
-            }
+        // 设置负责人名称（leader字段已经是用户名，直接使用）
+        if (StringUtils.hasText(department.getLeader())) {
+            vo.setLeaderName(department.getLeader());
         }
         
         // 设置子部门数量
@@ -652,22 +646,6 @@ public class SysDepartmentServiceImpl extends ServiceImpl<SysDepartmentMapper, S
         return allChildren;
     }
 
-    /**
-     * 更新所有子部门的层级
-     * 遵循：层级管理规范-第2条（更新所有子部门层级）
-     */
-    private void updateChildrenLevel(Long parentId, Integer newLevel) {
-        List<SysDepartment> children = getAllChildren(parentId);
-        
-        for (SysDepartment child : children) {
-            Integer childNewLevel = newLevel + child.getLevel() - 
-                departmentMapper.selectById(parentId).getLevel();
-            
-            child.setLevel(childNewLevel);
-            child.setUpdateTime(LocalDateTime.now());
-            departmentMapper.updateById(child);
-        }
-    }
 
     // ==================== 公共验证方法（接口定义） ====================
 

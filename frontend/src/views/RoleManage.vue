@@ -87,19 +87,12 @@
                   <span class="label">权限：</span>
                   <div v-if="role.permissions && role.permissions.length > 0" class="permission-tags">
                     <el-tag
-                      v-for="permission in role.permissions.slice(0, 3)"
+                      v-for="permission in role.permissions"
                       :key="permission.id"
                       size="small"
                       style="margin-right: 4px; margin-bottom: 4px"
                     >
                       {{ permission.permissionName }}
-                    </el-tag>
-                    <el-tag
-                      v-if="role.permissions.length > 3"
-                      size="small"
-                      type="info"
-                    >
-                      +{{ role.permissions.length - 3 }}
                     </el-tag>
                   </div>
                   <span v-else class="no-permissions">暂无权限</span>

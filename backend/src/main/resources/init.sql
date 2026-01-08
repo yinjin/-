@@ -7,22 +7,21 @@
 -- 排序规则: utf8mb4_unicode_ci
 -- ========================================
 
--- 设置字符集
-SET NAMES utf8mb4;
-
 -- ========================================
--- 创建数据库
+-- 注意：数据库需要在应用外部手动创建
+-- CREATE DATABASE `haocai_management` 
+--   DEFAULT CHARACTER SET utf8mb4 
+--   COLLATE utf8mb4_unicode_ci;
 -- ========================================
--- 如果数据库存在则删除
-DROP DATABASE IF EXISTS `haocai_management`;
-
--- 创建数据库
-CREATE DATABASE `haocai_management` 
-  DEFAULT CHARACTER SET utf8mb4 
-  COLLATE utf8mb4_unicode_ci;
 
 -- 使用数据库
 USE `haocai_management`;
+
+-- 设置字符集
+SET NAMES utf8mb4;
+SET character_set_client = utf8mb4;
+SET character_set_connection = utf8mb4;
+SET character_set_results = utf8mb4;
 
 -- 设置外键检查为0，避免删除表时的外键约束错误
 SET FOREIGN_KEY_CHECKS = 0;
@@ -409,7 +408,12 @@ INSERT INTO `sys_permission` (`permission_name`, `permission_code`, `permission_
 ('耗材管理', 'material', 'menu', 0, '/material', NULL, 'Box', 2, 1, 'system'),
 ('入库管理', 'inbound', 'menu', 0, '/inbound', NULL, 'Download', 3, 1, 'system'),
 ('出库管理', 'outbound', 'menu', 0, '/outbound', NULL, 'Upload', 4, 1, 'system'),
-('盘点管理', 'inventory', 'menu', 0, '/inventory', NULL, 'Document', 5, 1, 'system');
+('盘点管理', 'inventory', 'menu', 0, '/inventory', NULL, 'Document', 5, 1, 'system'),
+-- 部门管理按钮级权限
+('查看部门', 'department:view', 'button', 5, NULL, NULL, NULL, 1, 1, 'system'),
+('创建部门', 'department:create', 'button', 5, NULL, NULL, NULL, 2, 1, 'system'),
+('编辑部门', 'department:edit', 'button', 5, NULL, NULL, NULL, 3, 1, 'system'),
+('删除部门', 'department:delete', 'button', 5, NULL, NULL, NULL, 4, 1, 'system');
 
 -- 初始化用户数据（密码为 admin123，使用BCrypt加密）
 -- BCrypt哈希值生成方式：new BCryptPasswordEncoder().encode("admin123")
@@ -426,6 +430,7 @@ INSERT INTO `sys_user_role` (`user_id`, `role_id`) VALUES
 
 -- 初始化角色权限关联数据（超级管理员拥有所有权限）
 INSERT INTO `sys_role_permission` (`role_id`, `permission_id`) VALUES
-(1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (1, 8), (1, 9);
+(1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (1, 8), (1, 9),
+(1, 10), (1, 11), (1, 12), (1, 13);
 
 SET FOREIGN_KEY_CHECKS = 1;

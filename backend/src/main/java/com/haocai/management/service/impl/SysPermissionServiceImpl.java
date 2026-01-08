@@ -78,7 +78,6 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
         SysPermission permission = new SysPermission();
         permission.setName(dto.getName());
         permission.setCode(dto.getCode());
-        permission.setType(dto.getType());
         permission.setParentId(dto.getParentId());
         permission.setPath(dto.getPath());
         permission.setComponent(dto.getComponent());
@@ -137,7 +136,6 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
         permission.setId(permissionId);
         permission.setName(dto.getName());
         permission.setCode(dto.getCode());
-        permission.setType(dto.getType());
         permission.setParentId(dto.getParentId());
         permission.setPath(dto.getPath());
         permission.setComponent(dto.getComponent());
@@ -229,11 +227,6 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
             wrapper.like(SysPermission::getName, permissionName);
         }
         
-        // 权限类型查询
-        if (StringUtils.hasText(permissionType)) {
-            wrapper.eq(SysPermission::getType, permissionType);
-        }
-        
         // 状态查询
         if (status != null) {
             wrapper.eq(SysPermission::getStatus, status);
@@ -310,6 +303,15 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
         
         // 通过用户ID查询权限（通过角色）
         List<SysPermission> permissions = permissionMapper.selectByUserId(userId);
+        
+        log.info("查询用户权限 - 用户ID: {}, 查询到的权限数量: {}", userId, permissions.size());
+        
+        // 打印每个权限的详细信息
+        for (int i = 0; i < permissions.size(); i++) {
+            SysPermission permission = permissions.get(i);
+            log.info("权限[{}] - ID: {}, 名称: {}, code字段值: {}", 
+                    i, permission.getId(), permission.getName(), permission.getCode());
+        }
         
         return permissions.stream()
                 .map(this::convertToVO)
@@ -389,7 +391,6 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
         vo.setId(permission.getId());
         vo.setName(permission.getName());
         vo.setCode(permission.getCode());
-        vo.setType(permission.getType());
         vo.setParentId(permission.getParentId());
         vo.setPath(permission.getPath());
         vo.setComponent(permission.getComponent());

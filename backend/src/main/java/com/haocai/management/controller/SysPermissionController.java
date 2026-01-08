@@ -231,8 +231,18 @@ public class SysPermissionController {
         // 使用自定义查询方法，确保返回正确的JSON字段名
         List<SysPermission> allPermissions = permissionMapper.selectAllForTreeWithCorrectAliases();
         
-        // 构建树形结构，根节点的parent_id为null
-        List<SysPermission> tree = buildPermissionTree(allPermissions, null);
+        log.info("从数据库查询到的权限数量: {}", allPermissions.size());
+        if (allPermissions.isEmpty()) {
+            log.warn("数据库中没有权限数据");
+        } else {
+            for (SysPermission permission : allPermissions) {
+                log.info("权限详情 - ID: {}, 名称: {}, 编码: {}, 父ID: {}", 
+                    permission.getId(), permission.getName(), permission.getCode(), permission.getParentId());
+            }
+        }
+        
+        // 构建树形结构，根节点的parent_id为0
+        List<SysPermission> tree = buildPermissionTree(allPermissions, 0L);
         
         log.info("获取权限树形结构成功，根节点数量: {}", tree.size());
         return ApiResponse.success(tree);
@@ -266,11 +276,6 @@ public class SysPermissionController {
         // 权限名称模糊查询
         if (permissionName != null && !permissionName.trim().isEmpty()) {
             wrapper.like(SysPermission::getName, permissionName.trim());
-        }
-        
-        // 权限类型精确查询
-        if (permissionType != null && !permissionType.trim().isEmpty()) {
-            wrapper.eq(SysPermission::getType, permissionType.trim());
         }
         
         // 按排序字段升序排序

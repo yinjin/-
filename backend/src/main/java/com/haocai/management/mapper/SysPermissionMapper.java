@@ -61,14 +61,6 @@ public interface SysPermissionMapper extends BaseMapper<SysPermission> {
     @Select("SELECT * FROM sys_permission WHERE (parent_id IS NULL OR parent_id = 0) AND deleted = 0 ORDER BY sort_order ASC, id ASC")
     List<SysPermission> selectTopLevelPermissions();
 
-    /**
-     * 根据权限类型查询权限列表
-     * 
-     * @param type 权限类型（1:菜单 2:按钮 3:接口）
-     * @return 权限列表
-     */
-    @Select("SELECT * FROM sys_permission WHERE type = #{type} AND deleted = 0 ORDER BY sort_order ASC, id ASC")
-    List<SysPermission> selectByType(@Param("type") Integer type);
 
     /**
      * 根据状态查询权限列表
@@ -101,7 +93,6 @@ public interface SysPermissionMapper extends BaseMapper<SysPermission> {
      * 
      * @param page 分页对象
      * @param permissionName 权限名称（可选）
-     * @param type 权限类型（可选）
      * @param status 状态（可选）
      * @return 分页结果
      */
@@ -111,9 +102,6 @@ public interface SysPermissionMapper extends BaseMapper<SysPermission> {
             "<if test='permissionName != null and permissionName != \"\"'>" +
             "AND permission_name LIKE CONCAT('%', #{permissionName}, '%') " +
             "</if>" +
-            "<if test='type != null'>" +
-            "AND type = #{type} " +
-            "</if>" +
             "<if test='status != null'>" +
             "AND status = #{status} " +
             "</if>" +
@@ -121,7 +109,6 @@ public interface SysPermissionMapper extends BaseMapper<SysPermission> {
             "</script>")
     IPage<SysPermission> selectPageByCondition(Page<SysPermission> page,
                                                @Param("permissionName") String permissionName,
-                                               @Param("type") Integer type,
                                                @Param("status") Integer status);
 
     /**
@@ -156,11 +143,15 @@ public interface SysPermissionMapper extends BaseMapper<SysPermission> {
 
     /**
      * 根据用户ID查询权限列表（通过角色关联）
+     * 直接使用数据库字段名，依赖MyBatis Plus的map-underscore-to-camel-case配置自动映射
      * 
      * @param userId 用户ID
      * @return 权限列表
      */
-    @Select("SELECT DISTINCT p.* FROM sys_permission p " +
+    @Select("SELECT DISTINCT p.id, p.permission_name AS name, p.permission_code AS code, " +
+            "p.parent_id, p.path, p.component, p.icon, p.sort_order, p.status, " +
+            "p.create_time, p.update_time, p.create_by, p.update_by, p.deleted " +
+            "FROM sys_permission p " +
             "INNER JOIN sys_role_permission rp ON p.id = rp.permission_id " +
             "INNER JOIN sys_user_role ur ON rp.role_id = ur.role_id " +
             "WHERE ur.user_id = #{userId} AND p.deleted = 0 AND rp.deleted = 0 AND ur.deleted = 0 " +
@@ -181,10 +172,10 @@ public interface SysPermissionMapper extends BaseMapper<SysPermission> {
      * 
      * @return 所有权限列表（按层级排序）
      */
-    @Select("SELECT id, permission_name AS permissionName, permission_code AS permissionCode, type, " +
-            "parent_id AS parentId, path, component, icon, sort_order AS sortOrder, status, " +
-            "create_time AS createTime, update_time AS updateTime, create_by AS createBy, " +
-            "update_by AS updateBy, deleted " +
+    @Select("SELECT id, permission_name AS name, permission_code AS code, " +
+            "parent_id, path, component, icon, sort_order, status, " +
+            "create_time, update_time, create_by, " +
+            "update_by, deleted " +
             "FROM sys_permission " +
             "WHERE deleted = 0 " +
             "ORDER BY parent_id ASC, sort_order ASC, id ASC")

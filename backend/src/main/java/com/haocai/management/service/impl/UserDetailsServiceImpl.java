@@ -1,8 +1,10 @@
 package com.haocai.management.service.impl;
 
+import com.haocai.management.dto.PermissionVO;
 import com.haocai.management.entity.SysUser;
 import com.haocai.management.entity.UserStatus;
 import com.haocai.management.exception.BusinessException;
+import com.haocai.management.service.ISysPermissionService;
 import com.haocai.management.service.ISysUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +16,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Spring Security用户详情服务实现
@@ -46,6 +49,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Autowired
     @Lazy
     private ISysUserService sysUserService;
+
+    @Autowired
+    @Lazy
+    private ISysPermissionService sysPermissionService;
 
     /**
      * 根据用户名加载用户详情
@@ -82,22 +89,32 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             throw new BusinessException(1002, errorMsg);
         }
 
-        // 步骤4：构建UserDetails对象
-        // 注意：这里使用空权限列表，实际权限可根据需要从数据库加载
+        // 步骤4：加载用户权限
+        List<PermissionVO> permissions = sysPermissionService.getPermissionsByUserId(sysUser.getId());
+        List<SimpleGrantedAuthority> authorities = permissions.stream()
+                .filter(permission -> permission.getCode() != null && !permission.getCode().isEmpty())
+                .map(permission -> new SimpleGrantedAuthority(permission.getCode()))
+                .collect(Collectors.toList());
+
+        log.info("用户权限加载成功 - 用户ID: {}, 用户名: {}, 权限数量: {}, 原始权限数量: {}",
+                sysUser.getId(), sysUser.getUsername(), authorities.size(), permissions.size());
+
+        // 步骤5：构建UserDetails对象
         // 密码字段可以为null，因为JWT认证时不需要密码验证
         UserDetails userDetails = User.builder()
                 .username(sysUser.getUsername())
                 .password(sysUser.getPassword())
-                .authorities(Collections.emptyList())
+                .authorities(authorities)
                 .accountExpired(false) // 账户未过期
                 .accountLocked(false) // 账户未锁定
                 .credentialsExpired(false) // 凭证未过期
                 .disabled(sysUser.getStatus() == UserStatus.DISABLED) // 是否禁用
                 .build();
 
-        // 步骤5：记录日志
-        log.info("用户详情加载成功 - 用户ID: {}, 用户名: {}",
-                sysUser.getId(), sysUser.getUsername());
+        // 步骤6：记录日志
+        log.info("用户详情加载成功 - 用户ID: {}, 用户名: {}, 权限列表: {}",
+                sysUser.getId(), sysUser.getUsername(),
+                authorities.stream().map(SimpleGrantedAuthority::getAuthority).collect(Collectors.toList()));
 
         return userDetails;
     }
