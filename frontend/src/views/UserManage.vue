@@ -31,6 +31,14 @@
             <el-option label="锁定" :value="2" />
           </el-select>
         </el-form-item>
+        <el-form-item label="部门">
+          <DepartmentSelect
+            v-model="searchForm.departmentId"
+            placeholder="请选择部门"
+            clearable
+            @clear="handleSearch"
+          />
+        </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSearch">搜索</el-button>
           <el-button @click="handleReset">重置</el-button>
@@ -82,6 +90,12 @@
               </el-tag>
             </div>
             <span v-else style="color: #999">无角色</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="department" label="部门" width="150">
+          <template #default="{ row }">
+            <span v-if="row.department">{{ row.department.name }}</span>
+            <span v-else style="color: #999">未分配</span>
           </template>
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100">
@@ -211,6 +225,13 @@
             </div>
           </el-select>
         </el-form-item>
+        <el-form-item label="部门" prop="departmentId">
+          <DepartmentSelect
+            v-model="userForm.departmentId"
+            placeholder="请选择部门"
+            clearable
+          />
+        </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
@@ -230,6 +251,7 @@ import { getUserList, createUser, updateUser, deleteUser, batchDeleteUsers, upda
 import { roleApi } from '@/api/role'
 import type { UserInfo, UserListRequest, CreateUserRequest, UpdateUserRequest } from '@/api/user'
 import type { RoleInfo } from '@/api/role'
+import DepartmentSelect from '@/components/DepartmentSelect.vue'
 
 // 用户列表数据
 const userList = ref<UserInfo[]>([])
@@ -272,7 +294,8 @@ const userForm = reactive<CreateUserRequest & UpdateUserRequest & { confirmPassw
   phone: '',
   agreeToTerms: true,
   status: 0,
-  roleId: undefined
+  roleId: undefined,
+  departmentId: undefined
 })
 
 // 表单验证规则
@@ -346,7 +369,8 @@ const fetchUserList = async () => {
       size: pagination.size,
       username: searchForm.username || undefined,
       name: searchForm.name || undefined,
-      status: searchForm.status || undefined
+      status: searchForm.status || undefined,
+      departmentId: searchForm.departmentId || undefined  // 遵循：前端交互规范-数据查询
     })
     
     if (response.code === 200 && response.data) {
@@ -403,6 +427,7 @@ const handleReset = () => {
   searchForm.username = ''
   searchForm.name = ''
   searchForm.status = undefined
+  searchForm.departmentId = undefined  // 遵循：前端交互规范-搜索重置
   pagination.page = 1
   fetchUserList()
 }
@@ -445,6 +470,7 @@ const handleEdit = async (row: UserInfo) => {
   userForm.email = row.email
   userForm.phone = row.phone
   userForm.status = row.status
+  userForm.departmentId = row.department?.id  // 遵循：前端交互规范-数据回显
   
   // 加载用户的角色
   try {
@@ -560,7 +586,8 @@ const handleSubmit = async () => {
         name: userForm.name,
         email: userForm.email,
         phone: userForm.phone,
-        status: userForm.status
+        status: userForm.status,
+        departmentId: userForm.departmentId  // 遵循：前端交互规范-数据提交
       }
       
       // 获取当前编辑的用户ID
@@ -675,6 +702,7 @@ const resetUserForm = () => {
   userForm.phone = ''
   userForm.status = 0
   userForm.roleId = undefined
+  userForm.departmentId = undefined  // 遵循：前端交互规范-表单重置
   userFormRef.value?.resetFields()
 }
 

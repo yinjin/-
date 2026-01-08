@@ -1,4 +1,5 @@
 import request from './index'
+import type { DepartmentVO } from '@/types/department'
 
 // 用户信息类型
 export interface UserInfo {
@@ -11,6 +12,7 @@ export interface UserInfo {
   createTime: string
   updateTime: string
   roles?: RoleInfo[]  // 用户角色列表
+  department?: DepartmentVO  // 遵循：前端类型规范-与后端DTO/VO保持一致
 }
 
 // 角色信息类型
@@ -53,6 +55,7 @@ export interface UpdateUserRequest {
   email?: string
   phone?: string
   status?: number
+  departmentId?: number  // 遵循：前端类型规范-与后端DTO/VO保持一致
 }
 
 // 用户列表查询请求类型
@@ -62,6 +65,7 @@ export interface UserListRequest {
   username?: string
   name?: string
   status?: number
+  departmentId?: number  // 遵循：前端类型规范-与后端DTO/VO保持一致
 }
 
 // 创建用户请求类型
@@ -73,6 +77,7 @@ export interface CreateUserRequest {
   email: string
   phone: string
   agreeToTerms: boolean
+  departmentId?: number  // 遵循：前端类型规范-与后端DTO/VO保持一致
 }
 
 // 分页响应类型
