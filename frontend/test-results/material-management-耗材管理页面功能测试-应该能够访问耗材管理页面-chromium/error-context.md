@@ -1,0 +1,54 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - navigation [ref=e5]:
+        - link "Home" [ref=e6] [cursor=pointer]:
+          - /url: /
+        - link "About" [ref=e7] [cursor=pointer]:
+          - /url: /about
+    - main [ref=e8]:
+      - generic [ref=e10]:
+        - generic [ref=e12]:
+          - heading "高职人工智能学院实训耗材管理系统" [level=1] [ref=e13]
+          - generic [ref=e14]:
+            - generic [ref=e15]: 欢迎，管理员
+            - button "退出登录" [ref=e16] [cursor=pointer]:
+              - generic [ref=e17]: 退出登录
+        - main [ref=e18]:
+          - generic [ref=e20]:
+            - heading "欢迎使用耗材管理系统" [level=2] [ref=e21]
+            - paragraph [ref=e22]: 本系统提供完整的实训耗材管理功能，包括用户管理、耗材管理、库存管理、领用管理等模块。
+          - generic [ref=e23]:
+            - generic [ref=e27] [cursor=pointer]:
+              - img [ref=e29]
+              - heading "用户管理" [level=3] [ref=e31]
+              - paragraph [ref=e32]: 管理系统用户，包括新增、编辑、删除用户，以及用户状态管理
+            - generic [ref=e36] [cursor=pointer]:
+              - img [ref=e38]
+              - heading "耗材管理" [level=3] [ref=e42]
+              - paragraph [ref=e43]: 管理实训耗材信息，包括耗材分类、规格、库存等
+            - generic [ref=e47] [cursor=pointer]:
+              - img [ref=e49]
+              - heading "领用管理" [level=3] [ref=e51]
+              - paragraph [ref=e52]: 管理耗材领用申请，包括申请审批、领用记录等
+          - generic [ref=e53]:
+            - generic [ref=e57] [cursor=pointer]:
+              - img [ref=e59]
+              - heading "库存管理" [level=3] [ref=e61]
+              - paragraph [ref=e62]: 管理耗材库存，包括入库、出库、库存盘点等
+            - generic [ref=e66] [cursor=pointer]:
+              - img [ref=e68]
+              - heading "系统设置" [level=3] [ref=e70]
+              - paragraph [ref=e71]: 系统配置管理，包括参数设置、权限管理等
+              - img [ref=e73]
+            - generic [ref=e78] [cursor=pointer]:
+              - img [ref=e80]
+              - heading "统计分析" [level=3] [ref=e82]
+              - paragraph [ref=e83]: 耗材使用统计分析，包括领用统计、库存分析等
+  - alert [ref=e84]:
+    - img [ref=e86]
+    - paragraph [ref=e88]: 登录成功
+```

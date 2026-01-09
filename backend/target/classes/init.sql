@@ -171,6 +171,20 @@ CREATE TABLE `sys_operation_log` (
   KEY `idx_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='操作日志表';
 
+CREATE TABLE IF NOT EXISTS `sys_user_login_log` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `user_id` bigint NOT NULL COMMENT '用户ID',
+  `username` varchar(50) NOT NULL COMMENT '用户名',
+  `login_ip` varchar(50) DEFAULT NULL COMMENT '登录IP',
+  `login_time` datetime NOT NULL COMMENT '登录时间',
+  `login_success` tinyint(1) NOT NULL COMMENT '是否登录成功',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_login_time` (`login_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户登录日志表';
+
+
 -- ========================================
 -- 耗材管理相关表
 -- ========================================
@@ -182,6 +196,7 @@ CREATE TABLE `material_category` (
   `category_name` VARCHAR(50) NOT NULL COMMENT '分类名称',
   `category_code` VARCHAR(50) NOT NULL COMMENT '分类编码',
   `parent_id` BIGINT DEFAULT 0 COMMENT '父分类ID，0表示顶级分类',
+  `level` TINYINT NOT NULL DEFAULT 1 COMMENT '分类层级：1-一级，2-二级，3-三级',
   `description` VARCHAR(500) COMMENT '分类描述',
   `sort_order` INT DEFAULT 0 COMMENT '排序',
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态：0-禁用，1-启用',
@@ -192,7 +207,8 @@ CREATE TABLE `material_category` (
   `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '删除标记：0-未删除，1-已删除',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_category_code` (`category_code`),
-  KEY `idx_parent_id` (`parent_id`)
+  KEY `idx_parent_id` (`parent_id`),
+  KEY `idx_level` (`level`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='耗材分类表';
 
 -- 耗材表
@@ -202,14 +218,21 @@ CREATE TABLE `material` (
   `material_name` VARCHAR(100) NOT NULL COMMENT '耗材名称',
   `material_code` VARCHAR(50) NOT NULL COMMENT '耗材编码',
   `category_id` BIGINT COMMENT '分类ID',
+  `supplier_id` BIGINT COMMENT '供应商ID',
   `specification` VARCHAR(200) COMMENT '规格型号',
   `unit` VARCHAR(20) NOT NULL COMMENT '计量单位',
   `brand` VARCHAR(50) COMMENT '品牌',
   `manufacturer` VARCHAR(100) COMMENT '生产厂家',
+  `barcode` VARCHAR(100) COMMENT '条形码',
+  `qr_code` VARCHAR(200) COMMENT '二维码',
+  `unit_price` DECIMAL(10,2) COMMENT '单价',
+  `technical_parameters` TEXT COMMENT '技术参数',
+  `usage_instructions` TEXT COMMENT '使用说明',
+  `storage_requirements` VARCHAR(500) COMMENT '存储要求',
+  `image_url` VARCHAR(500) COMMENT '图片URL',
   `min_stock` INT DEFAULT 0 COMMENT '最小库存量',
   `max_stock` INT DEFAULT 0 COMMENT '最大库存量',
   `safety_stock` INT DEFAULT 0 COMMENT '安全库存量',
-  `price` DECIMAL(10,2) COMMENT '单价',
   `description` VARCHAR(500) COMMENT '耗材描述',
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态：0-禁用，1-启用',
   `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -220,6 +243,7 @@ CREATE TABLE `material` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_material_code` (`material_code`),
   KEY `idx_category_id` (`category_id`),
+  KEY `idx_supplier_id` (`supplier_id`),
   KEY `idx_status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='耗材表';
 
@@ -406,6 +430,7 @@ INSERT INTO `sys_permission` (`permission_name`, `permission_code`, `permission_
 ('权限管理', 'system:permission', 'menu', 1, '/system/permission', 'PermissionManage', 'Lock', 3, 1, 'system'),
 ('部门管理', 'system:department', 'menu', 1, '/system/department', 'DepartmentManage', 'OfficeBuilding', 4, 1, 'system'),
 ('耗材管理', 'material', 'menu', 0, '/material', NULL, 'Box', 2, 1, 'system'),
+('耗材分类管理', 'material:category', 'menu', 6, '/material/category', 'MaterialCategoryManage', 'FolderOpened', 1, 1, 'system'),
 ('入库管理', 'inbound', 'menu', 0, '/inbound', NULL, 'Download', 3, 1, 'system'),
 ('出库管理', 'outbound', 'menu', 0, '/outbound', NULL, 'Upload', 4, 1, 'system'),
 ('盘点管理', 'inventory', 'menu', 0, '/inventory', NULL, 'Document', 5, 1, 'system'),
@@ -413,7 +438,17 @@ INSERT INTO `sys_permission` (`permission_name`, `permission_code`, `permission_
 ('查看部门', 'department:view', 'button', 5, NULL, NULL, NULL, 1, 1, 'system'),
 ('创建部门', 'department:create', 'button', 5, NULL, NULL, NULL, 2, 1, 'system'),
 ('编辑部门', 'department:edit', 'button', 5, NULL, NULL, NULL, 3, 1, 'system'),
-('删除部门', 'department:delete', 'button', 5, NULL, NULL, NULL, 4, 1, 'system');
+('删除部门', 'department:delete', 'button', 5, NULL, NULL, NULL, 4, 1, 'system'),
+-- 耗材分类管理按钮级权限
+('查看耗材分类', 'material-category:view', 'button', 7, NULL, NULL, NULL, 1, 1, 'system'),
+('创建耗材分类', 'material-category:create', 'button', 7, NULL, NULL, NULL, 2, 1, 'system'),
+('编辑耗材分类', 'material-category:edit', 'button', 7, NULL, NULL, NULL, 3, 1, 'system'),
+('删除耗材分类', 'material-category:delete', 'button', 7, NULL, NULL, NULL, 4, 1, 'system'),
+-- 耗材管理按钮级权限
+('查看耗材', 'material:view', 'button', 6, NULL, NULL, NULL, 1, 1, 'system'),
+('创建耗材', 'material:create', 'button', 6, NULL, NULL, NULL, 2, 1, 'system'),
+('编辑耗材', 'material:edit', 'button', 6, NULL, NULL, NULL, 3, 1, 'system'),
+('删除耗材', 'material:delete', 'button', 6, NULL, NULL, NULL, 4, 1, 'system');
 
 -- 初始化用户数据（密码为 admin123，使用BCrypt加密）
 -- BCrypt哈希值生成方式：new BCryptPasswordEncoder().encode("admin123")
@@ -430,7 +465,44 @@ INSERT INTO `sys_user_role` (`user_id`, `role_id`) VALUES
 
 -- 初始化角色权限关联数据（超级管理员拥有所有权限）
 INSERT INTO `sys_role_permission` (`role_id`, `permission_id`) VALUES
-(1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (1, 8), (1, 9),
-(1, 10), (1, 11), (1, 12), (1, 13);
+(1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (1, 8), (1, 9), (1, 10),
+(1, 11), (1, 12), (1, 13), (1, 14), (1, 15), (1, 16), (1, 17), (1, 18), (1, 19), (1, 20), (1, 21);
+
+-- 初始化耗材分类数据
+INSERT INTO `material_category` (`category_name`, `category_code`, `parent_id`, `level`, `description`, `sort_order`, `status`, `create_by`) VALUES
+-- 一级分类
+('硬件类', 'A01', 0, 1, '硬件耗材分类', 1, 1, 'system'),
+('软件类', 'A02', 0, 1, '软件耗材分类', 2, 1, 'system'),
+('工具类', 'A03', 0, 1, '工具耗材分类', 3, 1, 'system'),
+('材料类', 'A04', 0, 1, '材料耗材分类', 4, 1, 'system'),
+-- 二级分类（硬件类）
+('计算机硬件', 'A01-01', 1, 2, '计算机硬件耗材', 1, 1, 'system'),
+('网络设备', 'A01-02', 1, 2, '网络设备耗材', 2, 1, 'system'),
+('存储设备', 'A01-03', 1, 2, '存储设备耗材', 3, 1, 'system'),
+-- 二级分类（软件类）
+('操作系统', 'A02-01', 2, 2, '操作系统软件', 1, 1, 'system'),
+('办公软件', 'A02-02', 2, 2, '办公软件', 2, 1, 'system'),
+('开发工具', 'A02-03', 2, 2, '开发工具软件', 3, 1, 'system'),
+-- 二级分类（工具类）
+('手动工具', 'A03-01', 3, 2, '手动工具', 1, 1, 'system'),
+('电动工具', 'A03-02', 3, 2, '电动工具', 2, 1, 'system'),
+('测量工具', 'A03-03', 3, 2, '测量工具', 3, 1, 'system'),
+-- 二级分类（材料类）
+('金属材料', 'A04-01', 4, 2, '金属材料', 1, 1, 'system'),
+('非金属材料', 'A04-02', 4, 2, '非金属材料', 2, 1, 'system'),
+('复合材料', 'A04-03', 4, 2, '复合材料', 3, 1, 'system'),
+-- 三级分类（计算机硬件）
+('CPU', 'A01-01-01', 5, 3, '中央处理器', 1, 1, 'system'),
+('内存', 'A01-01-02', 5, 3, '内存条', 2, 1, 'system'),
+('硬盘', 'A01-01-03', 5, 3, '硬盘', 3, 1, 'system'),
+('显卡', 'A01-01-04', 5, 3, '显卡', 4, 1, 'system'),
+-- 三级分类（网络设备）
+('路由器', 'A01-02-01', 6, 3, '路由器', 1, 1, 'system'),
+('交换机', 'A01-02-02', 6, 3, '交换机', 2, 1, 'system'),
+('网卡', 'A01-02-03', 6, 3, '网卡', 3, 1, 'system'),
+-- 三级分类（存储设备）
+('U盘', 'A01-03-01', 7, 3, 'U盘', 1, 1, 'system'),
+('移动硬盘', 'A01-03-02', 7, 3, '移动硬盘', 2, 1, 'system'),
+('SD卡', 'A01-03-03', 7, 3, 'SD卡', 3, 1, 'system');
 
 SET FOREIGN_KEY_CHECKS = 1;

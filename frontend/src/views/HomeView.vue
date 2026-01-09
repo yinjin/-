@@ -38,6 +38,21 @@ const goToPermissionManage = () => {
 const goToDepartmentManage = () => {
   router.push('/departments')
 }
+
+// 跳转到耗材分类管理页面
+const goToMaterialCategoryManage = () => {
+  router.push('/material-categories')
+}
+
+// 跳转到耗材管理页面
+const goToMaterialManage = () => {
+  router.push('/materials')
+}
+
+// 功能开发中提示
+const showDevelopingMessage = () => {
+  ElMessage.info('该功能正在开发中，敬请期待')
+}
 </script>
 
 <template>
@@ -71,17 +86,32 @@ const goToDepartmentManage = () => {
           </el-col>
           
           <el-col :xs="24" :sm="12" :md="8">
-            <el-card class="menu-card" shadow="hover">
-              <div class="card-content">
-                <el-icon :size="40" color="#67C23A"><Box /></el-icon>
-                <h3>耗材管理</h3>
-                <p>管理实训耗材信息，包括耗材分类、规格、库存等</p>
+            <el-popover placement="bottom" :width="200" trigger="click">
+              <template #reference>
+                <el-card class="menu-card menu-card-clickable" shadow="hover">
+                  <div class="card-content">
+                    <el-icon :size="40" color="#67C23A"><Box /></el-icon>
+                    <h3>耗材管理</h3>
+                    <p>管理实训耗材，包括耗材信息和分类结构</p>
+                    <el-icon class="expand-icon"><ArrowDown /></el-icon>
+                  </div>
+                </el-card>
+              </template>
+              <div class="system-menu-list">
+                <div class="system-menu-item" @click="goToMaterialManage">
+                  <el-icon><Box /></el-icon>
+                  <span>耗材管理</span>
+                </div>
+                <div class="system-menu-item" @click="goToMaterialCategoryManage">
+                  <el-icon><Box /></el-icon>
+                  <span>耗材分类管理</span>
+                </div>
               </div>
-            </el-card>
+            </el-popover>
           </el-col>
           
           <el-col :xs="24" :sm="12" :md="8">
-            <el-card class="menu-card" shadow="hover">
+            <el-card class="menu-card" shadow="hover" @click="showDevelopingMessage">
               <div class="card-content">
                 <el-icon :size="40" color="#E6A23C"><Document /></el-icon>
                 <h3>领用管理</h3>
@@ -93,7 +123,7 @@ const goToDepartmentManage = () => {
 
         <el-row :gutter="20" class="menu-cards">
           <el-col :xs="24" :sm="12" :md="8">
-            <el-card class="menu-card" shadow="hover">
+            <el-card class="menu-card" shadow="hover" @click="showDevelopingMessage">
               <div class="card-content">
                 <el-icon :size="40" color="#F56C6C"><DataLine /></el-icon>
                 <h3>库存管理</h3>
@@ -132,7 +162,7 @@ const goToDepartmentManage = () => {
           </el-col>
           
           <el-col :xs="24" :sm="12" :md="8">
-            <el-card class="menu-card" shadow="hover">
+            <el-card class="menu-card" shadow="hover" @click="showDevelopingMessage">
               <div class="card-content">
                 <el-icon :size="40" color="#409EFF"><TrendCharts /></el-icon>
                 <h3>统计分析</h3>

@@ -74,6 +74,9 @@ const loginFormRef = ref<FormInstance>()
 // 加载状态
 const loading = ref(false)
 
+// 防抖定时器
+let loginDebounceTimer: ReturnType<typeof setTimeout> | null = null
+
 // 登录表单数据
 const loginForm = reactive({
   username: '',
@@ -93,42 +96,55 @@ const loginRules: FormRules = {
   ]
 }
 
-// 处理登录
+// 处理登录（带防抖）
 const handleLogin = async () => {
-  if (!loginFormRef.value) return
-  
-  try {
-    // 验证表单
-    await loginFormRef.value.validate()
-    
-    loading.value = true
-    
-    // 调用登录API
-    await userStore.login({
-      username: loginForm.username,
-      password: loginForm.password,
-      rememberMe: loginForm.rememberMe
-    })
-    
-     ElMessage.success('登录成功')
-    
-    // 如果记住用户名，保存到localStorage
-    if (loginForm.rememberMe) {
-      localStorage.setItem('rememberedUsername', loginForm.username)
-    } else {
-      localStorage.removeItem('rememberedUsername')
-    }
-    
-    // 获取重定向路径，如果没有则跳转到首页
-    const redirect = (router.currentRoute.value.query.redirect as string) || '/'
-    router.push(redirect)
-  } catch (error: any) {
-    if (error.message) {
-      ElMessage.error(error.message)
-    }
-  } finally {
-    loading.value = false
+  // 如果正在加载，直接返回
+  if (loading.value) {
+    return
   }
+
+  // 清除之前的防抖定时器
+  if (loginDebounceTimer) {
+    clearTimeout(loginDebounceTimer)
+  }
+
+  // 设置新的防抖定时器（500ms）
+  loginDebounceTimer = setTimeout(async () => {
+    if (!loginFormRef.value) return
+    
+    try {
+      // 验证表单
+      await loginFormRef.value.validate()
+      
+      loading.value = true
+      
+      // 调用登录API
+      await userStore.login({
+        username: loginForm.username,
+        password: loginForm.password,
+        rememberMe: loginForm.rememberMe
+      })
+      
+       ElMessage.success('登录成功')
+      
+      // 如果记住用户名，保存到localStorage
+      if (loginForm.rememberMe) {
+        localStorage.setItem('rememberedUsername', loginForm.username)
+      } else {
+        localStorage.removeItem('rememberedUsername')
+      }
+      
+      // 获取重定向路径，如果没有则跳转到首页
+      const redirect = (router.currentRoute.value.query.redirect as string) || '/'
+      router.push(redirect)
+    } catch (error: any) {
+      if (error.message) {
+        ElMessage.error(error.message)
+      }
+    } finally {
+      loading.value = false
+    }
+  }, 500)
 }
 
 // 页面加载时，检查是否有记住的用户名

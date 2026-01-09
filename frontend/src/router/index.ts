@@ -58,6 +58,24 @@ const router = createRouter({
         requiresAuth: true,
         title: '部门管理'
       }
+    },
+    {
+      path: '/material-categories',
+      name: 'material-categories',
+      component: () => import('@/views/MaterialCategoryManage.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: '耗材分类管理'
+      }
+    },
+    {
+      path: '/materials',
+      name: 'materials',
+      component: () => import('@/views/MaterialManage.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: '耗材管理'
+      }
     }
   ]
 })

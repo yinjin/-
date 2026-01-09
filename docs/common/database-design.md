@@ -320,72 +320,150 @@ INSERT INTO sys_department (name, code, parent_id, level, sort_order, status, le
 
 **表说明**：存储耗材分类信息，支持多级分类
 
+**遵循规范**：
+- 数据库设计规范-第1.1条（字段命名规范：下划线命名法）
+- 数据库设计规范-第1.2条（字段类型规范：枚举类型使用TINYINT存储）
+- 数据库设计规范-第1.3条（审计字段规范：包含审计字段）
+- 数据库设计规范-第1.4条（索引规范：创建必要的索引）
+
 | 字段名 | 类型 | 长度 | 允许空 | 默认值 | 说明 |
 |--------|------|------|--------|--------|------|
 | id | BIGINT | - | 否 | AUTO_INCREMENT | 分类ID（主键） |
 | category_name | VARCHAR | 50 | 否 | - | 分类名称 |
 | category_code | VARCHAR | 50 | 否 | - | 分类编码 |
 | parent_id | BIGINT | - | 是 | 0 | 父分类ID，0表示顶级分类 |
-| level | INT | - | 是 | 1 | 分类层级 |
+| level | TINYINT | - | 否 | 1 | 分类层级：1-一级，2-二级，3-三级 |
+| description | VARCHAR | 500 | 是 | NULL | 分类描述 |
 | sort_order | INT | - | 是 | 0 | 排序 |
-| description | VARCHAR | 200 | 是 | NULL | 分类描述 |
-| status | TINYINT | - | 是 | 1 | 状态：1-正常，0-禁用 |
-| create_time | DATETIME | - | 是 | CURRENT_TIMESTAMP | 创建时间 |
-| update_time | DATETIME | - | 是 | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | 更新时间 |
+| status | TINYINT | - | 否 | 1 | 状态：0-禁用，1-启用 |
+| create_time | DATETIME | - | 否 | CURRENT_TIMESTAMP | 创建时间 |
+| update_time | DATETIME | - | 否 | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | 更新时间 |
+| create_by | VARCHAR | 50 | 是 | NULL | 创建人 |
+| update_by | VARCHAR | 50 | 是 | NULL | 更新人 |
+| deleted | TINYINT | - | 否 | 0 | 逻辑删除：0-未删除，1-已删除 |
 
 **索引设计**：
 - PRIMARY KEY: `id`
-- INDEX: `idx_parent_id`, `idx_category_code`, `idx_sort_order`
+- UNIQUE KEY: `uk_category_code` (category_code)
+- INDEX: `idx_parent_id` (parent_id)
+- INDEX: `idx_level` (level)
 
 **外键关系**：
 - `parent_id` → `material_category.id`（自关联）
 
 **业务规则**：
-- 支持多级分类树形结构
+- 支持多级分类树形结构（最多3级）
 - 分类编码必须唯一
 - 顶级分类的 `parent_id` 为 0
+- 支持逻辑删除，不物理删除数据
+- 分类层级限制为1-3级
+
+**初始化数据**：
+```sql
+INSERT INTO material_category (category_name, category_code, parent_id, level, description, sort_order, status, create_by) VALUES
+-- 一级分类
+('硬件类', 'A01', 0, 1, '硬件耗材分类', 1, 1, 'system'),
+('软件类', 'A02', 0, 1, '软件耗材分类', 2, 1, 'system'),
+('工具类', 'A03', 0, 1, '工具耗材分类', 3, 1, 'system'),
+('材料类', 'A04', 0, 1, '材料耗材分类', 4, 1, 'system'),
+-- 二级分类（硬件类）
+('计算机硬件', 'A01-01', 1, 2, '计算机硬件耗材', 1, 1, 'system'),
+('网络设备', 'A01-02', 1, 2, '网络设备耗材', 2, 1, 'system'),
+('存储设备', 'A01-03', 1, 2, '存储设备耗材', 3, 1, 'system'),
+-- 二级分类（软件类）
+('操作系统', 'A02-01', 2, 2, '操作系统软件', 1, 1, 'system'),
+('办公软件', 'A02-02', 2, 2, '办公软件', 2, 1, 'system'),
+('开发工具', 'A02-03', 2, 2, '开发工具软件', 3, 1, 'system'),
+-- 二级分类（工具类）
+('手动工具', 'A03-01', 3, 2, '手动工具', 1, 1, 'system'),
+('电动工具', 'A03-02', 3, 2, '电动工具', 2, 1, 'system'),
+('测量工具', 'A03-03', 3, 2, '测量工具', 3, 1, 'system'),
+-- 二级分类（材料类）
+('金属材料', 'A04-01', 4, 2, '金属材料', 1, 1, 'system'),
+('非金属材料', 'A04-02', 4, 2, '非金属材料', 2, 1, 'system'),
+('复合材料', 'A04-03', 4, 2, '复合材料', 3, 1, 'system'),
+-- 三级分类（计算机硬件）
+('CPU', 'A01-01-01', 5, 3, '中央处理器', 1, 1, 'system'),
+('内存', 'A01-01-02', 5, 3, '内存条', 2, 1, 'system'),
+('硬盘', 'A01-01-03', 5, 3, '硬盘', 3, 1, 'system'),
+('显卡', 'A01-01-04', 5, 3, '显卡', 4, 1, 'system'),
+-- 三级分类（网络设备）
+('路由器', 'A01-02-01', 6, 3, '路由器', 1, 1, 'system'),
+('交换机', 'A01-02-02', 6, 3, '交换机', 2, 1, 'system'),
+('网卡', 'A01-02-03', 6, 3, '网卡', 3, 1, 'system'),
+-- 三级分类（存储设备）
+('U盘', 'A01-03-01', 7, 3, 'U盘', 1, 1, 'system'),
+('移动硬盘', 'A01-03-02', 7, 3, '移动硬盘', 2, 1, 'system'),
+('SD卡', 'A01-03-03', 7, 3, 'SD卡', 3, 1, 'system');
+```
+
+**分类编码规则**：
+- 一级分类：A01, A02, A03, ...
+- 二级分类：A01-01, A01-02, A01-03, ...
+- 三级分类：A01-01-01, A01-01-02, A01-01-03, ...
 
 ---
 
-#### 2.2.2 耗材信息表 (material_info)
+#### 2.2.2 耗材表 (material)
 
 **表说明**：存储耗材的基本信息
+
+**遵循规范**：
+- 数据库设计规范-第1.1条（字段命名规范：下划线命名法）
+- 数据库设计规范-第1.2条（字段类型规范：枚举类型使用TINYINT存储）
+- 数据库设计规范-第1.3条（审计字段规范：包含审计字段）
+- 数据库设计规范-第1.4条（索引规范：创建必要的索引）
 
 | 字段名 | 类型 | 长度 | 允许空 | 默认值 | 说明 |
 |--------|------|------|--------|--------|------|
 | id | BIGINT | - | 否 | AUTO_INCREMENT | 耗材ID（主键） |
-| material_code | VARCHAR | 50 | 否 | - | 耗材编码（唯一） |
 | material_name | VARCHAR | 100 | 否 | - | 耗材名称 |
-| category_id | BIGINT | - | 否 | - | 分类ID（外键） |
+| material_code | VARCHAR | 50 | 否 | - | 耗材编码（唯一） |
+| category_id | BIGINT | - | 是 | NULL | 分类ID（外键） |
 | specification | VARCHAR | 200 | 是 | NULL | 规格型号 |
-| unit | VARCHAR | 20 | 否 | - | 单位（个、台、套等） |
-| unit_price | DECIMAL | 10,2 | 是 | NULL | 单价 |
-| supplier_id | BIGINT | - | 是 | NULL | 供应商ID（外键） |
-| shelf_life | INT | - | 是 | NULL | 保质期（天） |
-| barcode | VARCHAR | 100 | 是 | NULL | 条形码 |
-| qr_code | VARCHAR | 200 | 是 | NULL | 二维码 |
-| image_url | VARCHAR | 500 | 是 | NULL | 图片URL |
-| description | TEXT | - | 是 | NULL | 描述 |
-| technical_parameters | TEXT | - | 是 | NULL | 技术参数 |
-| usage_instructions | TEXT | - | 是 | NULL | 使用说明 |
-| storage_requirements | VARCHAR | 500 | 是 | NULL | 存储要求 |
-| status | TINYINT | - | 是 | 1 | 状态：1-正常，0-停用，2-报废 |
-| create_time | DATETIME | - | 是 | CURRENT_TIMESTAMP | 创建时间 |
-| update_time | DATETIME | - | 是 | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | 更新时间 |
+| unit | VARCHAR | 20 | 否 | - | 计量单位 |
+| brand | VARCHAR | 50 | 是 | NULL | 品牌 |
+| manufacturer | VARCHAR | 100 | 是 | NULL | 生产厂家 |
+| min_stock | INT | - | 是 | 0 | 最小库存量 |
+| max_stock | INT | - | 是 | 0 | 最大库存量 |
+| safety_stock | INT | - | 是 | 0 | 安全库存量 |
+| price | DECIMAL | 10,2 | 是 | NULL | 单价 |
+| description | VARCHAR | 500 | 是 | NULL | 耗材描述 |
+| status | TINYINT | - | 否 | 1 | 状态：0-禁用，1-启用 |
+| create_time | DATETIME | - | 否 | CURRENT_TIMESTAMP | 创建时间 |
+| update_time | DATETIME | - | 否 | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | 更新时间 |
+| create_by | VARCHAR | 50 | 是 | NULL | 创建人 |
+| update_by | VARCHAR | 50 | 是 | NULL | 更新人 |
+| deleted | TINYINT | - | 否 | 0 | 逻辑删除：0-未删除，1-已删除 |
 
 **索引设计**：
 - PRIMARY KEY: `id`
-- UNIQUE KEY: `material_code`
-- INDEX: `idx_category_id`, `idx_supplier_id`, `idx_barcode`, `idx_status`
+- UNIQUE KEY: `uk_material_code` (material_code)
+- INDEX: `idx_category_id` (category_id)
+- INDEX: `idx_status` (status)
 
 **外键关系**：
 - `category_id` → `material_category.id`
-- `supplier_id` → `supplier_info.id`
 
 **业务规则**：
 - 耗材编码必须唯一
-- 必须关联到有效的分类
-- 支持关联多个供应商
+- 支持关联到耗材分类
+- 支持逻辑删除，不物理删除数据
+- 库存相关字段用于库存预警
+- 状态使用枚举值存储，便于前端展示和扩展
+
+**枚举类型映射**：
+- 状态：0-禁用，1-启用
+
+**初始化数据**：
+```sql
+-- 示例耗材数据
+INSERT INTO material (material_name, material_code, category_id, specification, unit, brand, manufacturer, min_stock, max_stock, safety_stock, price, description, status, create_by) VALUES
+('Intel Core i7-13700K', 'CPU-I7-13700K', 18, '13代i7处理器', '个', 'Intel', 'Intel', 5, 50, 10, 2699.00, 'Intel Core i7-13700K处理器', 1, 'system'),
+('金士顿DDR4 3200 16GB', 'RAM-K16-3200', 19, 'DDR4 3200MHz 16GB内存条', '条', '金士顿', '金士顿', 10, 100, 20, 399.00, '金士顿DDR4 3200 16GB内存条', 1, 'system'),
+('三星980 PRO 1TB', 'SSD-S980-1TB', 20, 'NVMe M.2 1TB固态硬盘', '块', '三星', '三星', 5, 50, 10, 899.00, '三星980 PRO 1TB固态硬盘', 1, 'system'),
+('华硕RTX 4070', 'GPU-RTX4070', 21, 'RTX 4070显卡', '块', '华硕', '华硕', 3, 30, 5, 4299.00, '华硕RTX 4070显卡', 1, 'system');
+```
 
 ---
 
