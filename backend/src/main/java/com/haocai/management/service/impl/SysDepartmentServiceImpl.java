@@ -1,6 +1,7 @@
 package com.haocai.management.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.haocai.management.dto.*;
@@ -122,22 +123,21 @@ public class SysDepartmentServiceImpl extends ServiceImpl<SysDepartmentMapper, S
         if (StringUtils.hasText(dto.getCode())) {
             department.setCode(dto.getCode());
         }
-        if (dto.getParentId() != null) {
+        if (dto.getParentId() != null && dto.getParentId() != 0) {
             // 验证不能将部门设置为自己的子部门
             if (dto.getParentId().equals(dto.getId())) {
                 throw new BusinessException(400, "不能将部门设置为自己的子部门");
             }
             department.setParentId(dto.getParentId());
             
-            // 重新计算层级
-            if (dto.getParentId() == null) {
-                // 顶级部门，无需额外处理
-            } else {
-                SysDepartment newParent = departmentMapper.selectById(dto.getParentId());
-                if (newParent == null) {
-                    throw new BusinessException(400, "父部门不存在: " + dto.getParentId());
-                }
+            // 验证父部门存在
+            SysDepartment newParent = departmentMapper.selectById(dto.getParentId());
+            if (newParent == null) {
+                throw new BusinessException(400, "父部门不存在: " + dto.getParentId());
             }
+        } else {
+            // parentId为null或0表示顶级部门
+            department.setParentId(null);
         }
         if (dto.getSortOrder() != null) {
             department.setSortOrder(dto.getSortOrder());
@@ -185,11 +185,9 @@ public class SysDepartmentServiceImpl extends ServiceImpl<SysDepartmentMapper, S
             throw new BusinessException(400, (String) checkResult.get("reason"));
         }
         
-        // 逻辑删除
-        department.setDeleted(1);
-        department.setUpdateTime(LocalDateTime.now());
-        department.setUpdateBy(currentUserId != null ? String.valueOf(currentUserId) : null);
-        departmentMapper.updateById(department);
+        // 逻辑删除 - 使用MyBatis-Plus的deleteById方法触发逻辑删除（自动设置deleted=1）
+        // 注意：不能使用updateById，因为updateById不会触发@TableLogic的逻辑删除
+        departmentMapper.deleteById(id);
         
         log.info("部门删除成功: id={}", id);
         
@@ -598,24 +596,13 @@ public class SysDepartmentServiceImpl extends ServiceImpl<SysDepartmentMapper, S
      * 将部门实体转换为树形VO
      */
     private DepartmentTreeVO convertToTreeVO(SysDepartment department) {
-        log.debug("开始转换部门为树形VO: id={}, name={}, status={}", 
-                department.getId(), department.getName(), department.getStatus());
-        
         DepartmentTreeVO vo = new DepartmentTreeVO();
         BeanUtils.copyProperties(department, vo);
-        
-        log.debug("BeanUtils复制完成: vo.id={}, vo.name={}, vo.status={}", 
-                vo.getId(), vo.getName(), vo.getStatus());
         
         // 手动转换枚举类型为字符串
         if (department.getStatus() != null) {
             vo.setStatus(department.getStatus().name());
-            log.debug("枚举转换完成: status={}", vo.getStatus());
         }
-        
-        vo.setChildren(new ArrayList<>());
-        log.debug("树形VO转换完成: id={}, name={}, status={}", 
-                vo.getId(), vo.getName(), vo.getStatus());
         
         return vo;
     }
@@ -625,24 +612,14 @@ public class SysDepartmentServiceImpl extends ServiceImpl<SysDepartmentMapper, S
      * 遵循：树形结构规范-第1条（递归构建树形结构）
      */
     private List<DepartmentTreeVO> buildDepartmentTree(List<SysDepartment> departments, Long parentId) {
-        log.debug("构建部门树形结构: parentId={}, 部门总数={}", parentId, departments.size());
-        
-        List<DepartmentTreeVO> result = departments.stream()
-                .filter(d -> {
-                    // 处理顶级部门：parentId为null或0都视为顶级部门
-                    boolean match = (parentId == null && (d.getParentId() == null || d.getParentId() == 0L)) 
-                            || Objects.equals(d.getParentId(), parentId);
-                    log.debug("部门过滤: id={}, name={}, parentId={}, 匹配={}", 
-                            d.getId(), d.getName(), d.getParentId(), match);
-                    return match;
-                })
+        return departments.stream()
+                .filter(d -> Objects.equals(d.getParentId(), parentId))
                 .map(this::convertToTreeVO)
-                .peek(vo -> vo.setChildren(buildDepartmentTree(departments, vo.getId())))
+                .peek(vo -> {
+                    List<DepartmentTreeVO> children = buildDepartmentTree(departments, vo.getId());
+                    vo.setChildren(children);
+                })
                 .collect(Collectors.toList());
-        
-        log.debug("构建部门树形结构完成: parentId={}, 子节点数量={}", parentId, result.size());
-        
-        return result;
     }
 
     /**
@@ -732,8 +709,11 @@ public class SysDepartmentServiceImpl extends ServiceImpl<SysDepartmentMapper, S
             return result;
         }
         
-        // 检查是否有用户属于该部门
-        long usersCount = getUserIdsByDepartmentId(departmentId).getData().size();
+        // 检查是否有用户属于该部门（通过 department_id 字段）
+        LambdaQueryWrapper<SysUser> userWrapper = new LambdaQueryWrapper<>();
+        userWrapper.eq(SysUser::getDepartmentId, departmentId);
+        userWrapper.eq(SysUser::getDeleted, 0);
+        long usersCount = userMapper.selectCount(userWrapper);
         
         if (usersCount > 0) {
             result.put("canDelete", false);

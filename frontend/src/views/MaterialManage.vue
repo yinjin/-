@@ -74,7 +74,7 @@
                 style="width: 100px; height: 40px;"
                 fit="contain"
               />
-              <el-button size="mini" type="text" @click="downloadBarcode(row)">下载</el-button>
+              <el-button size="mini" type="link" @click="downloadBarcode(row)">下载</el-button>
             </div>
             <el-button v-else size="small" @click="handleGenerateBarcode(row)">
               生成条码
@@ -89,7 +89,7 @@
                 style="width: 60px; height: 60px;"
                 fit="contain"
               />
-              <el-button size="mini" type="text" @click="downloadQRCode(row)">下载</el-button>
+              <el-button size="mini" type="link" @click="downloadQRCode(row)">下载</el-button>
             </div>
             <el-button v-else size="small" @click="handleGenerateQRCode(row)">
               生成二维码

@@ -3,13 +3,12 @@ spring:
     url: jdbc:mysql://localhost:3306/haocai_management?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=UTF-8&useUnicode=true
     username: root
     password: root
-  # SQL初始化配置（开发环境）
-  # 改为 embedded 只在数据库不存在时初始化，避免每次重启都重新初始化导致乱码
-  sql:
-    init:
-      mode: embedded
-      schema-locations: classpath:init.sql
-      continue-on-error: true
+  # 移除Spring Boot自动SQL初始化，由DatabaseInitializer处理
+  # sql:
+  #   init:
+  #     mode: embedded
+  #     schema-locations: classpath:init.sql
+  #     continue-on-error: true
   # 禁用Spring Security自动配置（开发环境）
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration

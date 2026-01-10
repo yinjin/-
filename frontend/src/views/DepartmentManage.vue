@@ -55,7 +55,7 @@
           <div class="tree-header">
             <span>部门树形结构</span>
             <el-button
-              type="text"
+              type="link"
               size="small"
               @click="handleExpandAll"
             >
@@ -643,9 +643,17 @@ const handleDelete = async (data: DepartmentVO | DepartmentTreeVO) => {
     const checkResponse = await departmentApi.checkCanDelete(data.id)
     if (checkResponse.code === 200 && checkResponse.data) {
       deleteCheckResult.value = checkResponse.data
+      
+      // 只有检查通过时才显示确认对话框
+      if (checkResponse.data.canDelete) {
+        deleteDialogVisible.value = true
+      } else {
+        // 检查不通过，显示警告信息
+        ElMessage.warning(checkResponse.data.reason)
+      }
+    } else {
+      ElMessage.error(checkResponse.message || '检查删除条件失败')
     }
-    
-    deleteDialogVisible.value = true
   } catch (error: any) {
     ElMessage.error(error.message || '检查删除条件失败')
   }
@@ -687,9 +695,42 @@ const handleBatchDelete = async () => {
     return
   }
   
+  // 先检查每个部门是否可删除
+  const deletableIds: number[] = []
+  const nonDeletableReasons: string[] = []
+  
+  for (const id of selectedIds.value) {
+    try {
+      const checkResponse = await departmentApi.checkCanDelete(id)
+      if (checkResponse.code === 200 && checkResponse.data) {
+        if (checkResponse.data.canDelete) {
+          deletableIds.push(id)
+        } else {
+          // 尝试获取部门名称
+          const dept = departmentList.value.find(d => d.id === id)
+          const deptName = dept?.name || `ID: ${id}`
+          nonDeletableReasons.push(`${deptName}: ${checkResponse.data.reason}`)
+        }
+      }
+    } catch (error: any) {
+      console.error(`检查部门 ${id} 删除条件失败:`, error)
+    }
+  }
+  
+  // 如果有不可删除的部门，显示警告
+  if (nonDeletableReasons.length > 0) {
+    ElMessage.warning(`以下部门无法删除：\n${nonDeletableReasons.join('\n')}`)
+  }
+  
+  // 如果没有可删除的部门，直接返回
+  if (deletableIds.length === 0) {
+    return
+  }
+  
+  // 确认删除
   try {
     await ElMessageBox.confirm(
-      `确定要删除选中的 ${selectedIds.value.length} 个部门吗？`,
+      `确定要删除选中的 ${deletableIds.length} 个部门吗？${nonDeletableReasons.length > 0 ? `\n\n注意：${nonDeletableReasons.length} 个部门因存在子部门或用户无法删除` : ''}`,
       '批量删除确认',
       {
         confirmButtonText: '确定',
@@ -698,7 +739,7 @@ const handleBatchDelete = async () => {
       }
     )
     
-    const response = await departmentApi.batchDeleteDepartments(selectedIds.value)
+    const response = await departmentApi.batchDeleteDepartments(deletableIds)
     if (response.code === 200) {
       const result = response.data
       ElMessage.success(`成功删除 ${result.success} 个部门`)

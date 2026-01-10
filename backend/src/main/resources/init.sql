@@ -505,4 +505,32 @@ INSERT INTO `material_category` (`category_name`, `category_code`, `parent_id`, 
 ('移动硬盘', 'A01-03-02', 7, 3, '移动硬盘', 2, 1, 'system'),
 ('SD卡', 'A01-03-03', 7, 3, 'SD卡', 3, 1, 'system');
 
+-- ========================================
+-- 外键约束（2026-01-10 添加）
+-- ========================================
+
+-- 注意：外键约束要求被引用的字段值必须存在于主表中
+-- sys_department.parent_id 使用 0 表示顶级部门，但外键约束无法引用不存在的 id=0
+-- 因此需要先将 parent_id = 0 的数据更新为 NULL，再添加外键约束
+
+-- 1. 先将 parent_id = 0 的记录更新为 NULL（表示顶级部门）
+UPDATE `sys_department` SET `parent_id` = NULL WHERE `parent_id` = 0;
+
+-- 2. 修改 parent_id 字段，允许 NULL
+ALTER TABLE `sys_department` MODIFY COLUMN `parent_id` BIGINT NULL COMMENT '父部门ID，NULL表示顶级部门';
+
+-- 3. 为 sys_department 表的 parent_id 添加自引用外键约束
+ALTER TABLE `sys_department`
+ADD CONSTRAINT `fk_department_parent`
+FOREIGN KEY (`parent_id`) REFERENCES `sys_department`(`id`)
+ON DELETE SET NULL
+ON UPDATE CASCADE;
+
+-- 4. 为 sys_user 表的 department_id 添加外键约束
+ALTER TABLE `sys_user`
+ADD CONSTRAINT `fk_user_department`
+FOREIGN KEY (`department_id`) REFERENCES `sys_department`(`id`)
+ON DELETE SET NULL
+ON UPDATE CASCADE;
+
 SET FOREIGN_KEY_CHECKS = 1;
