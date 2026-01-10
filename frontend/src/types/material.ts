@@ -13,18 +13,19 @@ export interface Material {
   categoryName: string
   specification: string | null
   unit: string
-  brand: string | null
-  manufacturer: string | null
   minStock: number
   maxStock: number
   safetyStock: number
-  price: number | null
+  unitPrice: number | null
   description: string | null
   status: number
   createTime: string
   updateTime: string
   createBy: string
   updateBy: string
+  imageUrl: string | null
+  barcode: string | null
+  qrCode: string | null
 }
 
 /**
@@ -36,13 +37,13 @@ export interface MaterialCreateRequest {
   categoryId: number
   specification?: string
   unit: string
-  brand?: string
-  manufacturer?: string
   minStock?: number
   maxStock?: number
   safetyStock?: number
-  price?: number
+  unitPrice?: number
   description?: string
+  imageUrl?: string
+  status?: number
 }
 
 /**
@@ -54,14 +55,13 @@ export interface MaterialUpdateRequest {
   categoryId?: number
   specification?: string
   unit: string
-  brand?: string
-  manufacturer?: string
   minStock?: number
   maxStock?: number
   safetyStock?: number
-  price?: number
+  unitPrice?: number
   description?: string
   status?: number
+  imageUrl?: string
 }
 
 /**

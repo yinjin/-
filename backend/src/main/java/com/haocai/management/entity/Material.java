@@ -80,6 +80,7 @@ public class Material {
     /**
      * 单价
      */
+    @TableField("unit_price")
     private BigDecimal unitPrice;
 
     /**

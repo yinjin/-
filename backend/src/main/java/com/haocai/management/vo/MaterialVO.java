@@ -96,4 +96,13 @@ public class MaterialVO implements Serializable {
     
     @Schema(description = "更新人", example = "admin")
     private String updateBy;
+
+    @Schema(description = "最小库存量", example = "10")
+    private Integer minStock;
+
+    @Schema(description = "最大库存量", example = "100")
+    private Integer maxStock;
+
+    @Schema(description = "安全库存量", example = "20")
+    private Integer safetyStock;
 }

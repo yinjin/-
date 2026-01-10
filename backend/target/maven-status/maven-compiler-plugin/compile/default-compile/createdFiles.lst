@@ -35,6 +35,7 @@ com\haocai\management\dto\DepartmentVO.class
 com\haocai\management\entity\SysUserRole.class
 com\haocai\management\dto\RoleUpdateDTO.class
 com\haocai\management\vo\MaterialPageVO.class
+com\haocai\management\controller\FileController.class
 com\haocai\management\dto\UserLoginDTO.class
 com\haocai\management\controller\DebugController.class
 com\haocai\management\config\MyBatisPlusConfig.class

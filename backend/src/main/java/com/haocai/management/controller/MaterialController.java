@@ -1,6 +1,8 @@
 package com.haocai.management.controller;
 
 import com.haocai.management.common.ApiResponse;
+
+import java.time.LocalDateTime;
 import com.haocai.management.dto.MaterialCreateDTO;
 import com.haocai.management.dto.MaterialUpdateDTO;
 import com.haocai.management.service.IMaterialService;
@@ -275,6 +277,136 @@ public class MaterialController {
         log.info("========== 搜索耗材结束 ==========");
 
         return ApiResponse.success(materials);
+    }
+
+    // ==================== 图片管理接口 ====================
+
+    /**
+     * 上传耗材图片
+     * 权限：耗材管理-编辑
+     */
+    @PostMapping("/{id}/upload-image")
+    @Operation(summary = "上传耗材图片")
+    @PreAuthorize("hasAuthority('material:edit')")
+    public ApiResponse<String> uploadMaterialImage(
+            @Parameter(description = "耗材ID") @PathVariable Long id,
+            @Parameter(description = "图片文件") @RequestParam("file") MultipartFile file) {
+        log.info("========== 上传耗材图片 ==========");
+        log.info("耗材ID: {}, 文件名: {}, 文件大小: {}", id, file.getOriginalFilename(), file.getSize());
+        log.info("权限检查: material:edit");
+
+        // 检查文件是否为空
+        if (file.isEmpty()) {
+            log.error("上传文件为空");
+            return ApiResponse.<String>error("上传文件不能为空");
+        }
+
+        // 检查文件类型
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            log.error("文件类型不支持: {}", contentType);
+            return ApiResponse.<String>error("只支持图片文件上传");
+        }
+
+        try {
+            // 将MultipartFile转换为byte数组
+            byte[] imageBytes = file.getBytes();
+
+            String imageUrl = materialService.uploadImage(id, imageBytes);
+
+            log.info("上传成功，耗材ID: {}, 图片URL: {}", id, imageUrl);
+            log.info("========== 上传耗材图片结束 ==========");
+
+            return new ApiResponse<>(200, "success", imageUrl, LocalDateTime.now(), null);
+        } catch (Exception e) {
+            log.error("上传耗材图片失败", e);
+            return ApiResponse.<String>error("上传耗材图片失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 删除耗材图片
+     * 权限：耗材管理-编辑
+     */
+    @DeleteMapping("/{id}/image/{imageId}")
+    @Operation(summary = "删除耗材图片")
+    @PreAuthorize("hasAuthority('material:edit')")
+    public ApiResponse<Boolean> deleteMaterialImage(
+            @Parameter(description = "耗材ID") @PathVariable Long id,
+            @Parameter(description = "图片ID") @PathVariable String imageId) {
+        log.info("========== 删除耗材图片 ==========");
+        log.info("耗材ID: {}, 图片ID: {}", id, imageId);
+        log.info("权限检查: material:edit");
+
+        boolean result = materialService.deleteImage(id, imageId);
+
+        log.info("删除结果: {}", result);
+        log.info("========== 删除耗材图片结束 ==========");
+
+        return ApiResponse.success(result);
+    }
+
+    // ==================== 编码生成接口 ====================
+
+    /**
+     * 生成耗材编码
+     * 权限：耗材管理-查看（用于表单辅助功能）
+     */
+    @GetMapping("/generate-code")
+    @Operation(summary = "生成耗材编码")
+    public ApiResponse<String> generateMaterialCode(
+            @Parameter(description = "分类ID") @RequestParam Long categoryId) {
+        log.info("========== 生成耗材编码 ==========");
+        log.info("分类ID: {}", categoryId);
+
+        String code = materialService.generateMaterialCode(categoryId);
+
+        log.info("生成编码成功: {}", code);
+        log.info("========== 生成耗材编码结束 ==========");
+
+        return new ApiResponse<>(200, "success", code, LocalDateTime.now(), null);
+    }
+
+    /**
+     * 生成耗材条码
+     * 权限：耗材管理-查看
+     */
+    @GetMapping("/{id}/barcode")
+    @Operation(summary = "生成耗材条码")
+    @PreAuthorize("hasAuthority('material:view')")
+    public ApiResponse<String> generateBarcode(
+            @Parameter(description = "耗材ID") @PathVariable Long id) {
+        log.info("========== 生成耗材条码 ==========");
+        log.info("耗材ID: {}", id);
+        log.info("权限检查: material:view");
+
+        String barcode = materialService.generateBarcode(id);
+
+        log.info("条码生成成功");
+        log.info("========== 生成耗材条码结束 ==========");
+
+        return new ApiResponse<>(200, "success", barcode, LocalDateTime.now(), null);
+    }
+
+    /**
+     * 生成耗材二维码
+     * 权限：耗材管理-查看
+     */
+    @GetMapping("/{id}/qr-code")
+    @Operation(summary = "生成耗材二维码")
+    @PreAuthorize("hasAuthority('material:view')")
+    public ApiResponse<String> generateQRCode(
+            @Parameter(description = "耗材ID") @PathVariable Long id) {
+        log.info("========== 生成耗材二维码 ==========");
+        log.info("耗材ID: {}", id);
+        log.info("权限检查: material:view");
+
+        String qrCode = materialService.generateQRCode(id);
+
+        log.info("二维码生成成功");
+        log.info("========== 生成耗材二维码结束 ==========");
+
+        return new ApiResponse<>(200, "success", qrCode, LocalDateTime.now(), null);
     }
 
 }

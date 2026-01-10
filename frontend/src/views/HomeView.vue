@@ -100,7 +100,7 @@ const showDevelopingMessage = () => {
               <div class="system-menu-list">
                 <div class="system-menu-item" @click="goToMaterialManage">
                   <el-icon><Box /></el-icon>
-                  <span>耗材管理</span>
+                  <span>耗材信息管理</span>
                 </div>
                 <div class="system-menu-item" @click="goToMaterialCategoryManage">
                   <el-icon><Box /></el-icon>
@@ -175,17 +175,6 @@ const showDevelopingMessage = () => {
     </el-container>
   </div>
 </template>
-
-<style>
-/* 全局隐藏滚动条 */
-.el-popover, .el-popover el-popover__wrapper {
-  overflow: hidden !important;
-}
-
-body .el-popover {
-  overflow: hidden !important;
-}
-</style>
 
 <style scoped>
 .home {
@@ -269,14 +258,6 @@ body .el-popover {
   overflow: hidden;
 }
 
-:deep(.el-card) {
-  overflow: hidden;
-}
-
-:deep(.el-popover) {
-  overflow: hidden;
-}
-
 .card-content h3 {
   margin: 15px 0 10px 0;
   color: #303133;
@@ -324,5 +305,14 @@ body .el-popover {
 
 .system-menu-item .el-icon {
   font-size: 18px;
+}
+
+/* 确保popover内容可交互 */
+:deep(.el-popper) {
+  max-height: none;
+}
+
+:deep(.el-popover__wrapper) {
+  display: block;
 }
 </style>

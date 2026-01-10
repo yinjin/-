@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.haocai.management.common.ApiResponse;
 import com.haocai.management.dto.MaterialCreateDTO;
 import com.haocai.management.dto.MaterialUpdateDTO;
 import com.haocai.management.entity.Material;
@@ -18,265 +19,266 @@ import com.haocai.management.vo.MaterialPageVO;
 import com.haocai.management.vo.MaterialVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 耗材业务逻辑层实现类
- * 
+ * 耗材业务逻辑实现类
+ *
  * 遵循development-standards.md中的业务逻辑层规范：
- * - 使用@Service注解标记为服务类
- * - 使用@Transactional进行事务管理
- * - 使用@Slf4j进行日志记录
- * - 使用@RequiredArgsConstructor进行依赖注入
- * - 实现业务逻辑，处理数据转换和业务规则
- * 
+ * - Service命名规范：使用业务名称+ServiceImpl后缀
+ * - 继承ServiceImpl：继承MyBatis-Plus提供的基础实现
+ * - 事务管理：使用@Transactional注解管理事务
+ * - 日志记录：使用Slf4j进行日志记录
+ * - 依赖注入：使用@RequiredArgsConstructor进行构造器注入
+ *
  * @author haocai
  * @since 2026-01-09
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class MaterialServiceImpl extends ServiceImpl<MaterialMapper, Material> 
-        implements IMaterialService {
+public class MaterialServiceImpl extends ServiceImpl<MaterialMapper, Material> implements IMaterialService {
 
     private final MaterialMapper materialMapper;
     private final IMaterialCategoryService materialCategoryService;
 
     /**
      * 创建耗材
-     * 
      * 业务规则：
      * 1. 耗材编码不能重复
      * 2. 分类必须存在
      * 3. 自动设置默认值
-     * 
-     * @param createDTO 创建请求DTO
-     * @return 创建的耗材ID
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Long createMaterial(MaterialCreateDTO createDTO) {
-        log.info("开始创建耗材，耗材名称：{}", createDTO.getMaterialName());
-        
-        // 1. 检查耗材编码是否已存在
-        if (existsByMaterialCode(createDTO.getMaterialCode())) {
-            log.error("耗材编码已存在：{}", createDTO.getMaterialCode());
-            throw BusinessException.paramError("耗材编码已存在：" + createDTO.getMaterialCode());
+    public Long createMaterial(MaterialCreateDTO dto) {
+        log.info("开始创建耗材，耗材名称：{}", dto.getMaterialName());
+
+        // 检查耗材编码是否已存在
+        if (existsByMaterialCode(dto.getMaterialCode())) {
+            log.error("耗材编码已存在：{}", dto.getMaterialCode());
+            throw BusinessException.paramError("耗材编码已存在：" + dto.getMaterialCode());
         }
-        
-        // 2. 检查分类是否存在
-        MaterialCategory category = materialCategoryService.getById(createDTO.getCategoryId());
+
+        // 检查分类是否存在
+        MaterialCategory category = materialCategoryService.getById(dto.getCategoryId());
         if (category == null) {
-            log.error("分类不存在，分类ID：{}", createDTO.getCategoryId());
+            log.error("分类不存在，分类ID：{}", dto.getCategoryId());
             throw BusinessException.dataNotFound("分类不存在");
         }
-        
-        // 3. 创建耗材实体
+
+        // 创建耗材实体
         Material material = new Material();
-        BeanUtils.copyProperties(createDTO, material);
-        
-        // 4. 设置默认值
-        if (material.getStatus() == null) {
-            material.setStatus(1); // 默认启用
-        }
-        
-        // 5. 保存耗材
+        material.setMaterialName(dto.getMaterialName());
+        material.setMaterialCode(dto.getMaterialCode());
+        material.setCategoryId(dto.getCategoryId());
+        material.setSupplierId(dto.getSupplierId());
+        material.setSpecification(dto.getSpecification());
+        material.setUnit(dto.getUnit());
+        material.setBrand(dto.getBrand());
+        material.setManufacturer(dto.getManufacturer());
+        material.setBarcode(dto.getBarcode());
+        material.setQrCode(dto.getQrCode());
+        material.setUnitPrice(dto.getUnitPrice());
+        material.setTechnicalParameters(dto.getTechnicalParameters());
+        material.setUsageInstructions(dto.getUsageInstructions());
+        material.setStorageRequirements(dto.getStorageRequirements());
+        material.setImageUrl(dto.getImageUrl());
+        material.setDescription(dto.getDescription());
+        material.setMinStock(dto.getMinStock());
+        material.setMaxStock(dto.getMaxStock());
+        material.setSafetyStock(dto.getSafetyStock());
+        // 如果 DTO 中提供了状态，则使用 DTO 的状态；否则默认启用
+        material.setStatus(dto.getStatus() != null ? dto.getStatus() : 1);
+
+        // 保存耗材
         save(material);
-        
+
         log.info("耗材创建成功，耗材ID：{}，耗材名称：{}", material.getId(), material.getMaterialName());
         return material.getId();
     }
 
     /**
      * 更新耗材
-     * 
      * 业务规则：
      * 1. 耗材编码不能与其他耗材重复
      * 2. 分类必须存在
-     * 
-     * @param id 耗材ID
-     * @param updateDTO 更新请求DTO
-     * @return 是否成功
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean updateMaterial(Long id, MaterialUpdateDTO updateDTO) {
+    public boolean updateMaterial(Long id, MaterialUpdateDTO dto) {
         log.info("开始更新耗材，耗材ID：{}", id);
-        
-        // 1. 检查耗材是否存在
+
+        // 检查耗材是否存在
         Material material = getById(id);
         if (material == null) {
             log.error("耗材不存在，耗材ID：{}", id);
             throw BusinessException.dataNotFound("耗材不存在");
         }
-        
-        // 2. 检查耗材编码是否与其他耗材重复
-        if (!updateDTO.getMaterialCode().equals(material.getMaterialCode())) {
-            if (existsByMaterialCodeExcludeId(updateDTO.getMaterialCode(), id)) {
-                log.error("耗材编码已存在：{}", updateDTO.getMaterialCode());
-                throw BusinessException.paramError("耗材编码已存在：" + updateDTO.getMaterialCode());
+
+        // 检查耗材编码是否与其他耗材重复
+        if (!dto.getMaterialCode().equals(material.getMaterialCode())) {
+            if (existsByMaterialCodeExcludeId(dto.getMaterialCode(), id)) {
+                log.error("耗材编码已存在：{}", dto.getMaterialCode());
+                throw BusinessException.paramError("耗材编码已存在：" + dto.getMaterialCode());
             }
         }
-        
-        // 3. 检查分类是否存在
-        MaterialCategory category = materialCategoryService.getById(updateDTO.getCategoryId());
+
+        // 检查分类是否存在
+        MaterialCategory category = materialCategoryService.getById(dto.getCategoryId());
         if (category == null) {
-            log.error("分类不存在，分类ID：{}", updateDTO.getCategoryId());
+            log.error("分类不存在，分类ID：{}", dto.getCategoryId());
             throw BusinessException.dataNotFound("分类不存在");
         }
-        
-        // 4. 更新耗材信息
-        BeanUtils.copyProperties(updateDTO, material, "id");
-        
-        // 5. 保存更新
+
+        // 更新耗材信息
+        material.setMaterialName(dto.getMaterialName());
+        material.setMaterialCode(dto.getMaterialCode());
+        material.setCategoryId(dto.getCategoryId());
+        material.setSupplierId(dto.getSupplierId());
+        material.setSpecification(dto.getSpecification());
+        material.setUnit(dto.getUnit());
+        material.setBrand(dto.getBrand());
+        material.setManufacturer(dto.getManufacturer());
+        material.setBarcode(dto.getBarcode());
+        material.setQrCode(dto.getQrCode());
+        material.setUnitPrice(dto.getUnitPrice());
+        material.setTechnicalParameters(dto.getTechnicalParameters());
+        material.setUsageInstructions(dto.getUsageInstructions());
+        material.setStorageRequirements(dto.getStorageRequirements());
+        material.setImageUrl(dto.getImageUrl());
+        material.setDescription(dto.getDescription());
+        material.setMinStock(dto.getMinStock());
+        material.setMaxStock(dto.getMaxStock());
+        material.setSafetyStock(dto.getSafetyStock());
+        if (dto.getStatus() != null) {
+            material.setStatus(dto.getStatus());
+        }
+
+        // 保存更新
         boolean result = updateById(material);
-        
+
         log.info("耗材更新成功，耗材ID：{}，耗材名称：{}", id, material.getMaterialName());
         return result;
     }
 
     /**
      * 删除耗材（逻辑删除）
-     * 
      * 业务规则：
      * 1. 使用逻辑删除，不物理删除数据
-     * 
-     * @param id 耗材ID
-     * @return 是否成功
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteMaterial(Long id) {
         log.info("开始删除耗材，耗材ID：{}", id);
-        
-        // 1. 检查耗材是否存在
+
+        // 检查耗材是否存在
         Material material = getById(id);
         if (material == null) {
             log.error("耗材不存在，耗材ID：{}", id);
             throw BusinessException.dataNotFound("耗材不存在");
         }
-        
-        // 2. 逻辑删除耗材
+
+        // 逻辑删除耗材
         boolean result = removeById(id);
-        
+
         log.info("耗材删除成功，耗材ID：{}", id);
         return result;
     }
 
     /**
      * 批量删除耗材（逻辑删除）
-     * 
      * 业务规则：
      * 1. 使用逻辑删除，不物理删除数据
      * 2. 使用批量操作提高性能
-     * 
-     * @param ids 耗材ID列表
-     * @return 是否成功
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean batchDeleteMaterials(List<Long> ids) {
         log.info("开始批量删除耗材，耗材ID列表：{}", ids);
-        
-        // 1. 检查所有耗材是否存在
+
+        // 检查所有耗材是否存在
         List<Material> materials = listByIds(ids);
         if (materials.size() != ids.size()) {
             log.error("部分耗材不存在");
             throw BusinessException.dataNotFound("部分耗材不存在");
         }
-        
-        // 2. 批量逻辑删除耗材
+
+        // 批量逻辑删除耗材
         boolean result = removeByIds(ids);
-        
+
         log.info("批量删除耗材成功，删除数量：{}", ids.size());
         return result;
     }
 
     /**
      * 根据ID查询耗材
-     * 
-     * @param id 耗材ID
-     * @return 耗材信息VO
      */
     @Override
     public MaterialVO getMaterialById(Long id) {
         log.info("查询耗材，耗材ID：{}", id);
-        
+
         Material material = getById(id);
         if (material == null) {
             log.error("耗材不存在，耗材ID：{}", id);
             throw BusinessException.dataNotFound("耗材不存在");
         }
-        
+
         MaterialVO vo = convertToVO(material);
-        
-        log.info("查询耗材成功，耗材ID：{}", id);
+
+        log.info("查询成功，耗材名称：{}", vo.getMaterialName());
         return vo;
     }
 
     /**
      * 分页查询耗材列表
-     * 
-     * @param current 当前页
-     * @param size 每页大小
-     * @param materialName 耗材名称（可选）
-     * @param materialCode 耗材编码（可选）
-     * @param categoryId 分类ID（可选）
-     * @param brand 品牌（可选）
-     * @param manufacturer 制造商（可选）
-     * @param status 状态（可选）
-     * @param startTime 开始时间（可选）
-     * @param endTime 结束时间（可选）
-     * @return 分页结果
      */
     @Override
-    public MaterialPageVO getMaterialPage(Long current, Long size, String materialName, String materialCode, 
+    public MaterialPageVO getMaterialPage(Long current, Long size, String materialName, String materialCode,
             Long categoryId, String brand, String manufacturer, Integer status, String startTime, String endTime) {
-        log.info("分页查询耗材列表，当前页：{}，每页大小：{}，耗材名称：{}，耗材编码：{}，分类ID：{}，品牌：{}，制造商：{}，状态：{}，开始时间：{}，结束时间：{}", 
+        log.info("分页查询耗材列表，当前页：{}，每页大小：{}，耗材名称：{}，耗材编码：{}，分类ID：{}，品牌：{}，制造商：{}，状态：{}，开始时间：{}，结束时间：{}",
                 current, size, materialName, materialCode, categoryId, brand, manufacturer, status, startTime, endTime);
-        
-        // 1. 创建分页对象
+
+        // 创建分页对象
         Page<Material> page = new Page<>(current, size);
-        
-        // 2. 构建查询条件
+
+        // 构建查询条件
         LambdaQueryWrapper<Material> queryWrapper = new LambdaQueryWrapper<>();
-        
+
         // 耗材名称模糊查询
         if (materialName != null && !materialName.trim().isEmpty()) {
             queryWrapper.like(Material::getMaterialName, materialName);
         }
-        
+
         // 耗材编码模糊查询
         if (materialCode != null && !materialCode.trim().isEmpty()) {
             queryWrapper.like(Material::getMaterialCode, materialCode);
         }
-        
+
         // 分类ID精确查询
         if (categoryId != null) {
             queryWrapper.eq(Material::getCategoryId, categoryId);
         }
-        
+
         // 品牌模糊查询
         if (brand != null && !brand.trim().isEmpty()) {
             queryWrapper.like(Material::getBrand, brand);
         }
-        
+
         // 制造商模糊查询
         if (manufacturer != null && !manufacturer.trim().isEmpty()) {
             queryWrapper.like(Material::getManufacturer, manufacturer);
         }
-        
+
         // 状态精确查询
         if (status != null) {
             queryWrapper.eq(Material::getStatus, status);
         }
-        
+
         // 创建时间范围查询
         if (startTime != null && !startTime.trim().isEmpty()) {
             queryWrapper.ge(Material::getCreateTime, startTime);
@@ -284,128 +286,160 @@ public class MaterialServiceImpl extends ServiceImpl<MaterialMapper, Material>
         if (endTime != null && !endTime.trim().isEmpty()) {
             queryWrapper.le(Material::getCreateTime, endTime);
         }
-        
+
+        // 逻辑删除标识
+        queryWrapper.eq(Material::getDeleted, 0);
+
         // 按ID降序排序
         queryWrapper.orderByDesc(Material::getId);
-        
-        // 3. 执行分页查询
+
+        // 执行分页查询
         IPage<Material> materialPage = page(page, queryWrapper);
-        
-        // 4. 转换为VO
+
+        // 转换为VO
         MaterialPageVO pageVO = new MaterialPageVO();
         pageVO.setTotal(materialPage.getTotal());
         pageVO.setCurrent(materialPage.getCurrent());
         pageVO.setSize(materialPage.getSize());
         pageVO.setPages(materialPage.getPages());
-        
+
         List<MaterialVO> records = materialPage.getRecords().stream()
                 .map(this::convertToVO)
                 .collect(Collectors.toList());
         pageVO.setRecords(records);
-        
+
         log.info("分页查询耗材列表成功，总记录数：{}", pageVO.getTotal());
         return pageVO;
     }
 
     /**
      * 切换耗材状态
-     * 
-     * @param id 耗材ID
-     * @return 是否成功
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean toggleMaterialStatus(Long id) {
         log.info("开始切换耗材状态，耗材ID：{}", id);
-        
+
         Material material = getById(id);
         if (material == null) {
             log.error("耗材不存在，耗材ID：{}", id);
             throw BusinessException.dataNotFound("耗材不存在");
         }
-        
+
         // 切换状态：0-禁用，1-启用
         material.setStatus(material.getStatus() == 1 ? 0 : 1);
         boolean result = updateById(material);
-        
-        log.info("切换耗材状态成功，耗材ID：{}，新状态：{}", id, material.getStatus());
+
+        log.info("切换状态成功，耗材ID：{}，新状态：{}", id, material.getStatus());
         return result;
     }
 
     /**
      * 检查耗材编码是否存在
-     * 
-     * @param materialCode 耗材编码
-     * @return 是否存在
      */
     @Override
     public boolean existsByMaterialCode(String materialCode) {
-        Material material = materialMapper.selectByMaterialCode(materialCode);
-        return material != null;
+        LambdaQueryWrapper<Material> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Material::getMaterialCode, materialCode);
+        queryWrapper.eq(Material::getDeleted, 0); // 逻辑删除标识，0表示未删除
+
+        return count(queryWrapper) > 0;
     }
 
     /**
      * 检查耗材编码是否存在（排除指定ID）
-     * 
-     * @param materialCode 耗材编码
-     * @param excludeId 排除的耗材ID
-     * @return 是否存在
      */
     @Override
     public boolean existsByMaterialCodeExcludeId(String materialCode, Long excludeId) {
-        int count = materialMapper.countByMaterialCodeExcludeId(materialCode, excludeId);
-        return count > 0;
+        LambdaQueryWrapper<Material> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Material::getMaterialCode, materialCode);
+        queryWrapper.ne(Material::getId, excludeId);
+        queryWrapper.eq(Material::getDeleted, 0); // 逻辑删除标识，0表示未删除
+
+        return count(queryWrapper) > 0;
     }
 
     /**
      * 根据分类ID查询耗材列表
-     * 
-     * @param categoryId 分类ID
-     * @return 耗材列表
      */
     @Override
     public List<MaterialVO> getMaterialsByCategoryId(Long categoryId) {
         log.info("根据分类ID查询耗材列表，分类ID：{}", categoryId);
-        
-        List<Material> materials = materialMapper.selectByCategoryId(categoryId);
-        
+
+        LambdaQueryWrapper<Material> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Material::getCategoryId, categoryId);
+        queryWrapper.eq(Material::getDeleted, 0); // 逻辑删除标识
+        queryWrapper.orderByDesc(Material::getId);
+
+        List<Material> materials = list(queryWrapper);
+
         List<MaterialVO> vos = materials.stream()
                 .map(this::convertToVO)
                 .collect(Collectors.toList());
-        
-        log.info("根据分类ID查询耗材列表成功，耗材数量：{}", vos.size());
+
+        log.info("查询成功，耗材数量：{}", vos.size());
         return vos;
     }
 
     /**
      * 搜索耗材
-     * 
-     * @param keyword 搜索关键词
-     * @return 耗材列表
      */
     @Override
     public List<MaterialVO> searchMaterials(String keyword) {
         log.info("搜索耗材，关键词：{}", keyword);
-        
-        List<Material> materials = materialMapper.searchMaterials(keyword);
-        
+
+        LambdaQueryWrapper<Material> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.and(wrapper -> wrapper
+                .like(Material::getMaterialName, keyword)
+                .or()
+                .like(Material::getMaterialCode, keyword)
+                .or()
+                .like(Material::getBrand, keyword)
+                .or()
+                .like(Material::getManufacturer, keyword));
+        queryWrapper.eq(Material::getDeleted, 0); // 逻辑删除标识
+        queryWrapper.orderByDesc(Material::getId);
+
+        List<Material> materials = list(queryWrapper);
+
         List<MaterialVO> vos = materials.stream()
                 .map(this::convertToVO)
                 .collect(Collectors.toList());
-        
-        log.info("搜索耗材成功，耗材数量：{}", vos.size());
+
+        log.info("搜索成功，耗材数量：{}", vos.size());
         return vos;
     }
 
     /**
      * 将Material实体转换为MaterialVO
-     *
-     * @param material 耗材实体
-     * @return 耗材VO
      */
     private MaterialVO convertToVO(Material material) {
         MaterialVO vo = new MaterialVO();
-        BeanUtils.copyProperties(material, vo);
+        vo.setId(material.getId());
+        vo.setMaterialName(material.getMaterialName());
+        vo.setMaterialCode(material.getMaterialCode());
+        vo.setCategoryId(material.getCategoryId());
+        vo.setSupplierId(material.getSupplierId());
+        vo.setSpecification(material.getSpecification());
+        vo.setUnit(material.getUnit());
+        vo.setBrand(material.getBrand());
+        vo.setManufacturer(material.getManufacturer());
+        vo.setBarcode(material.getBarcode());
+        vo.setQrCode(material.getQrCode());
+        vo.setUnitPrice(material.getUnitPrice());
+        vo.setTechnicalParameters(material.getTechnicalParameters());
+        vo.setUsageInstructions(material.getUsageInstructions());
+        vo.setStorageRequirements(material.getStorageRequirements());
+        vo.setImageUrl(material.getImageUrl());
+        vo.setDescription(material.getDescription());
+        vo.setMinStock(material.getMinStock());
+        vo.setMaxStock(material.getMaxStock());
+        vo.setSafetyStock(material.getSafetyStock());
+        vo.setStatus(material.getStatus());
+        vo.setCreateTime(material.getCreateTime());
+        vo.setUpdateTime(material.getUpdateTime());
+        vo.setCreateBy(material.getCreateBy());
+        vo.setUpdateBy(material.getUpdateBy());
 
         // 查询分类名称
         if (material.getCategoryId() != null) {
@@ -516,28 +550,27 @@ public class MaterialServiceImpl extends ServiceImpl<MaterialMapper, Material>
             throw BusinessException.dataNotFound("耗材不存在");
         }
 
-        // 这里需要模拟文件上传，实际项目中需要接收MultipartFile类型的参数
-        // 为了演示，我们假设已经有一个临时的文件路径
-        // 实际实现中，需要在Controller中接收MultipartFile，然后传递给Service
-
-        // 模拟上传过程
-        String uploadDir = System.getProperty("user.dir") + "/uploads";
+        // 获取项目根目录下的uploads目录
+        String projectRoot = System.getProperty("user.dir");
+        String uploadDir = projectRoot + "/backend/uploads";
+        
         // 创建上传目录
         java.io.File uploadDirFile = new java.io.File(uploadDir);
         if (!uploadDirFile.exists()) {
             uploadDirFile.mkdirs();
         }
 
-        // 生成唯一的文件名
-        String fileName = java.util.UUID.randomUUID().toString() + ".jpg";
+        // 生成唯一的文件名（保留原始扩展名）
+        String originalFileName = "material_" + id + "_" + System.currentTimeMillis();
+        String fileName = originalFileName + ".jpg";
         String fullPath = uploadDir + "/" + fileName;
 
         try {
             // 保存文件
             java.nio.file.Files.write(java.nio.file.Paths.get(fullPath), imageFile);
 
-            // 更新耗材信息中的图片URL字段
-            String imageUrl = "/uploads/" + fileName;
+            // 返回相对URL（前端可以通过后端API访问）
+            String imageUrl = "/api/files/uploads/" + fileName;
             material.setImageUrl(imageUrl);
             updateById(material);
 
@@ -545,7 +578,7 @@ public class MaterialServiceImpl extends ServiceImpl<MaterialMapper, Material>
             return imageUrl;
         } catch (Exception e) {
             log.error("上传耗材图片失败", e);
-            throw new RuntimeException("上传耗材图片失败", e);
+            throw new RuntimeException("上传耗材图片失败: " + e.getMessage(), e);
         }
     }
 
@@ -566,14 +599,30 @@ public class MaterialServiceImpl extends ServiceImpl<MaterialMapper, Material>
             throw BusinessException.dataNotFound("耗材不存在");
         }
 
-        // 这里简单地将图片URL设为null，实际项目中可能需要删除物理文件
-        String oldImageUrl = material.getImageUrl();
-        material.setImageUrl(null);
-        boolean result = updateById(material);
+        String currentImageUrl = material.getImageUrl();
+        if (currentImageUrl == null || currentImageUrl.isEmpty()) {
+            log.warn("耗材{}没有图片可删除", id);
+            return true; // 没有图片也算成功
+        }
+
+        // 验证imageId是否匹配当前图片
+        String currentFileName = currentImageUrl.substring(currentImageUrl.lastIndexOf('/') + 1);
+        String currentImageId = currentFileName.substring(0, currentFileName.lastIndexOf('.'));
+
+        if (!imageId.equals(currentImageId)) {
+            log.error("图片ID不匹配，传递的imageId：{}，当前的imageId：{}", imageId, currentImageId);
+            throw BusinessException.paramError("图片ID不匹配，无法删除");
+        }
+
+        // 删除图片：将图片URL设为null，使用UpdateWrapper确保null值也被更新
+        boolean result = lambdaUpdate()
+                .eq(Material::getId, id)
+                .set(Material::getImageUrl, null)
+                .update();
 
         // 如果有旧图片，尝试删除物理文件
-        if (oldImageUrl != null && !oldImageUrl.isEmpty()) {
-            FileUploadUtils.deleteFile(oldImageUrl);
+        if (currentImageUrl != null && !currentImageUrl.isEmpty()) {
+            FileUploadUtils.deleteFile(currentImageUrl);
         }
 
         log.info("删除耗材图片{}，耗材ID：{}，图片ID：{}", result ? "成功" : "失败", id, imageId);

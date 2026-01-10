@@ -74,7 +74,19 @@ public class MaterialCreateDTO implements Serializable {
     
     @Schema(description = "图片URL", example = "https://example.com/images/material/123.jpg")
     private String imageUrl;
-    
+
     @Schema(description = "描述", example = "医用防护口罩")
     private String description;
+
+    @Schema(description = "最小库存量", example = "10")
+    private Integer minStock;
+
+    @Schema(description = "最大库存量", example = "100")
+    private Integer maxStock;
+
+    @Schema(description = "安全库存量", example = "20")
+    private Integer safetyStock;
+
+    @Schema(description = "状态（0-禁用，1-启用）", example = "1")
+    private Integer status;
 }

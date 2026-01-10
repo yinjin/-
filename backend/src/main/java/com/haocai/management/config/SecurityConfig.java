@@ -171,6 +171,9 @@ public class SecurityConfig {
                     "/api/users/check/**"
                 ).permitAll()
                 
+                // 文件访问接口（图片等静态资源）
+                .requestMatchers("/api/files/**").permitAll()
+                
                 // ===== 需要认证的接口 =====
                 
                 // 其他所有API接口都需要认证

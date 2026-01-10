@@ -104,9 +104,53 @@ export const materialApi = {
    * 搜索耗材
    */
   searchMaterials(keyword: string): Promise<ApiResponse<Material[]>> {
-    return request.get('/material/search', { 
-      params: { keyword } 
+    return request.get('/material/search', {
+      params: { keyword }
     })
+  },
+
+  /**
+   * 生成耗材编码
+   */
+  generateMaterialCode(categoryId: number): Promise<ApiResponse<string>> {
+    return request.get('/material/generate-code', {
+      params: { categoryId }
+    })
+  },
+
+  /**
+   * 生成耗材条码
+   */
+  generateBarcode(id: number): Promise<ApiResponse<string>> {
+    return request.get(`/material/${id}/barcode`)
+  },
+
+  /**
+   * 生成耗材二维码
+   */
+  generateQRCode(id: number): Promise<ApiResponse<string>> {
+    return request.get(`/material/${id}/qr-code`)
+  },
+
+  /**
+   * 上传耗材图片
+   */
+  uploadMaterialImage(id: number, file: File): Promise<ApiResponse<string>> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return request.post(`/material/${id}/upload-image`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+  },
+
+  /**
+   * 删除耗材图片
+   */
+  deleteMaterialImage(id: number, imageId: string): Promise<ApiResponse<boolean>> {
+    return request.delete(`/material/${id}/image/${imageId}`)
   }
 }
 
