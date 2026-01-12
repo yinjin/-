@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 
 /**
  * 权限控制功能测试
@@ -22,8 +22,7 @@ import { test, expect } from '@playwright/test';
  */
 
 test.describe('权限控制功能', () => {
-  let adminPage: any;
-  let normalUserPage: any;
+  let adminPage: Page;
 
   // 测试数据
   const adminUser = {
@@ -282,10 +281,6 @@ test.describe('权限控制功能', () => {
     await page.click('.el-button--primary:has-text("登录")');
     await page.waitForURL('http://localhost:5175/', { timeout: 5000 });
 
-    // 记录初始权限状态
-    const userManagementMenu = page.locator('h3:has-text("用户管理")');
-    const initialHasAccess = await userManagementMenu.isVisible();
-
     // 切换到管理员页面，为普通用户分配管理员角色
     await adminPage.goto('http://localhost:5175/users');
     await adminPage.waitForSelector('.el-table', { timeout: 5000 });
@@ -441,10 +436,6 @@ test.describe('权限控制功能', () => {
     await page.fill('input[type="password"]', normalUser.password);
     await page.click('.el-button--primary:has-text("登录")');
     await page.waitForURL('http://localhost:5175/', { timeout: 5000 });
-
-    // 检查当前权限状态
-    const userManagementMenu = page.locator('h3:has-text("用户管理")');
-    const hasUserManagementAccess = await userManagementMenu.isVisible();
 
     // 切换到管理员页面，修改普通用户角色的权限
     await adminPage.click('text=系统设置');

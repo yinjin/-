@@ -403,6 +403,95 @@ CREATE TABLE `inventory_check_detail` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='盘点单明细表';
 
 -- ========================================
+-- 供应商管理相关表
+-- ========================================
+
+-- 供应商信息表
+-- 遵循规范：DB-01（审计字段）、DB-02（snake_case命名）、DB-03（唯一索引与逻辑删除）
+DROP TABLE IF EXISTS `supplier_info`;
+CREATE TABLE `supplier_info` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `supplier_code` VARCHAR(50) NOT NULL COMMENT '供应商编码',
+  `supplier_name` VARCHAR(100) NOT NULL COMMENT '供应商名称',
+  `contact_person` VARCHAR(50) COMMENT '联系人',
+  `phone` VARCHAR(20) COMMENT '联系电话',
+  `email` VARCHAR(100) COMMENT '电子邮箱',
+  `address` VARCHAR(255) COMMENT '地址',
+  `business_license` VARCHAR(255) COMMENT '营业执照号',
+  `tax_number` VARCHAR(50) COMMENT '税号',
+  `bank_account` VARCHAR(50) COMMENT '银行账号',
+  `bank_name` VARCHAR(100) COMMENT '开户银行',
+  `credit_rating` INT DEFAULT 3 COMMENT '信用评级(1-5)',
+  `cooperation_status` TINYINT DEFAULT 1 COMMENT '合作状态: 0-已终止, 1-合作中',
+  `status` TINYINT DEFAULT 1 COMMENT '状态: 0-禁用, 1-启用',
+  `description` TEXT COMMENT '备注描述',
+  `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `create_by` BIGINT COMMENT '创建人ID',
+  `update_by` BIGINT COMMENT '更新人ID',
+  `deleted` TINYINT DEFAULT 0 COMMENT '逻辑删除: 0-未删除, 1-已删除',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_supplier_code` (`supplier_code`),
+  KEY `idx_supplier_name` (`supplier_name`),
+  KEY `idx_cooperation_status` (`cooperation_status`),
+  KEY `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='供应商信息表';
+
+-- 供应商评价表
+-- 遵循规范：DB-01（审计字段）、DB-02（snake_case命名）
+DROP TABLE IF EXISTS `supplier_evaluation`;
+CREATE TABLE `supplier_evaluation` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '评价ID',
+  `supplier_id` BIGINT NOT NULL COMMENT '供应商ID',
+  `evaluator_id` BIGINT COMMENT '评价人ID',
+  `evaluator_name` VARCHAR(50) COMMENT '评价人名称',
+  `evaluation_date` DATE COMMENT '评价日期',
+  `delivery_score` DECIMAL(3,1) NOT NULL COMMENT '交付评分（1-10分）',
+  `quality_score` DECIMAL(3,1) NOT NULL COMMENT '质量评分（1-10分）',
+  `service_score` DECIMAL(3,1) NOT NULL COMMENT '服务评分（1-10分）',
+  `price_score` DECIMAL(3,1) NOT NULL COMMENT '价格评分（1-10分）',
+  `total_score` DECIMAL(5,2) COMMENT '总分',
+  `average_score` DECIMAL(5,2) COMMENT '平均分',
+  `credit_rating` INT COMMENT '信用等级（1-10）',
+  `remark` VARCHAR(500) COMMENT '评价备注',
+  `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `deleted` TINYINT DEFAULT 0 COMMENT '删除标记：0-未删除，1-已删除',
+  PRIMARY KEY (`id`),
+  KEY `idx_supplier_id` (`supplier_id`),
+  KEY `idx_evaluator_id` (`evaluator_id`),
+  KEY `idx_evaluation_date` (`evaluation_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='供应商评价表';
+
+-- 供应商资质表
+-- 遵循规范：DB-01（审计字段）、DB-02（snake_case命名）、DB-03（唯一索引与逻辑删除）
+-- 创建时间：2026-01-11
+DROP TABLE IF EXISTS `supplier_qualification`;
+CREATE TABLE `supplier_qualification` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '资质ID',
+  `supplier_id` BIGINT NOT NULL COMMENT '供应商ID',
+  `qualification_type` VARCHAR(50) NOT NULL COMMENT '资质类型：BUSINESS_LICENSE-营业执照，TAX_CERTIFICATE-税务登记证，QUALITY_CERTIFICATE-质量认证，OTHER-其他',
+  `qualification_name` VARCHAR(100) NOT NULL COMMENT '资质名称',
+  `file_url` VARCHAR(500) COMMENT '资质文件URL',
+  `file_name` VARCHAR(200) COMMENT '原始文件名',
+  `issue_date` DATE COMMENT '发证日期',
+  `expiry_date` DATE COMMENT '到期日期',
+  `issuing_authority` VARCHAR(100) COMMENT '发证机关',
+  `status` TINYINT DEFAULT 1 COMMENT '状态：1-有效，2-即将到期，3-已过期',
+  `description` VARCHAR(500) COMMENT '备注描述',
+  `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `create_by` BIGINT COMMENT '创建人ID',
+  `update_by` BIGINT COMMENT '更新人ID',
+  `deleted` TINYINT DEFAULT 0 COMMENT '逻辑删除：0-未删除，1-已删除',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_supplier_type` (`supplier_id`, `qualification_type`),
+  KEY `idx_supplier_id` (`supplier_id`),
+  KEY `idx_expiry_date` (`expiry_date`),
+  KEY `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='供应商资质表';
+
+-- ========================================
 -- 初始化数据
 -- ========================================
 
@@ -466,7 +555,24 @@ INSERT INTO `sys_user_role` (`user_id`, `role_id`) VALUES
 -- 初始化角色权限关联数据（超级管理员拥有所有权限）
 INSERT INTO `sys_role_permission` (`role_id`, `permission_id`) VALUES
 (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (1, 8), (1, 9), (1, 10),
-(1, 11), (1, 12), (1, 13), (1, 14), (1, 15), (1, 16), (1, 17), (1, 18), (1, 19), (1, 20), (1, 21);
+(1, 11), (1, 12), (1, 13), (1, 14), (1, 15), (1, 16), (1, 17), (1, 18), (1, 19), (1, 20), (1, 21),
+-- 供应商管理权限（2026-01-11 添加）
+(1, 23), (1, 24), (1, 25), (1, 26), (1, 27), (1, 28);
+
+-- 初始化供应商测试数据（2026-01-11 添加）
+INSERT INTO `supplier_info` (`supplier_code`, `supplier_name`, `contact_person`, `phone`, `email`, `address`, `business_license`, `tax_number`, `bank_account`, `bank_name`, `credit_rating`, `cooperation_status`, `status`, `description`, `create_by`) VALUES
+('SUP001', '测试供应商A', '张三', '13800138001', 'zhangsan@supplierA.com', '北京市朝阳区测试路1号', '91110000123456789A', '123456789012345678', '6222021234567890123', '中国工商银行北京分行', 5, 1, 1, '测试供应商A描述', 'system'),
+('SUP002', '测试供应商B', '李四', '13800138002', 'lisi@supplierB.com', '上海市浦东新区测试路2号', '91110000123456789B', '234567890123456789', '6222022345678901234', '中国建设银行上海分行', 4, 1, 1, '测试供应商B描述', 'system'),
+('SUP003', '测试供应商C', '王五', '13800138003', 'wangwu@supplierC.com', '广州市天河区测试路3号', '91110000123456789C', '345678901234567890', '6222023456789012345', '中国农业银行广州分行', 3, 1, 1, '测试供应商C描述', 'system');
+
+-- 供应商管理权限数据（2026-01-11 添加）
+INSERT INTO `sys_permission` (`id`, `permission_name`, `permission_code`, `permission_type`, `parent_id`, `path`, `component`, `icon`, `sort_order`, `status`, `create_by`) VALUES
+(23, '供应商管理', 'supplier', 'menu', 0, '/supplier', NULL, 'Shop', 6, 1, 'system'),
+(24, '查看供应商', 'supplier:view', 'button', 23, NULL, NULL, NULL, 1, 1, 'system'),
+(25, '创建供应商', 'supplier:create', 'button', 23, NULL, NULL, NULL, 2, 1, 'system'),
+(26, '编辑供应商', 'supplier:edit', 'button', 23, NULL, NULL, NULL, 3, 1, 'system'),
+(27, '删除供应商', 'supplier:delete', 'button', 23, NULL, NULL, NULL, 4, 1, 'system'),
+(28, '评价供应商', 'supplier:evaluate', 'button', 23, NULL, NULL, NULL, 5, 1, 'system');
 
 -- 初始化耗材分类数据
 INSERT INTO `material_category` (`category_name`, `category_code`, `parent_id`, `level`, `description`, `sort_order`, `status`, `create_by`) VALUES
@@ -505,4 +611,66 @@ INSERT INTO `material_category` (`category_name`, `category_code`, `parent_id`, 
 ('移动硬盘', 'A01-03-02', 7, 3, '移动硬盘', 2, 1, 'system'),
 ('SD卡', 'A01-03-03', 7, 3, 'SD卡', 3, 1, 'system');
 
+-- ========================================
+-- 外键约束（2026-01-10 添加）
+-- ========================================
+
+-- 注意：外键约束要求被引用的字段值必须存在于主表中
+-- sys_department.parent_id 使用 0 表示顶级部门，但外键约束无法引用不存在的 id=0
+-- 因此需要先将 parent_id = 0 的数据更新为 NULL，再添加外键约束
+
+-- 1. 先将 parent_id = 0 的记录更新为 NULL（表示顶级部门）
+UPDATE `sys_department` SET `parent_id` = NULL WHERE `parent_id` = 0;
+
+-- 2. 修改 parent_id 字段，允许 NULL
+ALTER TABLE `sys_department` MODIFY COLUMN `parent_id` BIGINT NULL COMMENT '父部门ID，NULL表示顶级部门';
+
+-- 3. 为 sys_department 表的 parent_id 添加自引用外键约束
+ALTER TABLE `sys_department`
+ADD CONSTRAINT `fk_department_parent`
+FOREIGN KEY (`parent_id`) REFERENCES `sys_department`(`id`)
+ON DELETE SET NULL
+ON UPDATE CASCADE;
+
+-- 4. 为 sys_user 表的 department_id 添加外键约束
+ALTER TABLE `sys_user`
+ADD CONSTRAINT `fk_user_department`
+FOREIGN KEY (`department_id`) REFERENCES `sys_department`(`id`)
+ON DELETE SET NULL
+ON UPDATE CASCADE;
+
 SET FOREIGN_KEY_CHECKS = 1;
+
+-- ========================================
+-- 库存管理相关表
+-- ========================================
+
+-- 库存表
+DROP TABLE IF EXISTS `material_inventory`;
+CREATE TABLE `material_inventory` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '库存ID',
+  `material_id` BIGINT NOT NULL COMMENT '耗材ID',
+  `material_name` VARCHAR(100) COMMENT '耗材名称',
+  `material_code` VARCHAR(50) COMMENT '耗材编码',
+  `quantity` INT NOT NULL DEFAULT 0 COMMENT '库存总数量',
+  `available_quantity` INT NOT NULL DEFAULT 0 COMMENT '可用库存数量',
+  `safe_quantity` INT DEFAULT 0 COMMENT '安全库存量',
+  `max_quantity` INT DEFAULT 0 COMMENT '最大库存量',
+  `warehouse` VARCHAR(50) COMMENT '仓库编号',
+  `location` VARCHAR(100) COMMENT '库存位置',
+  `last_in_time` DATE COMMENT '最后入库时间',
+  `last_out_time` DATE COMMENT '最后出库时间',
+  `total_in_quantity` INT DEFAULT 0 COMMENT '总入库数量',
+  `total_out_quantity` INT DEFAULT 0 COMMENT '总出库数量',
+  `status` VARCHAR(20) NOT NULL DEFAULT 'NORMAL' COMMENT '库存状态：NORMAL-正常，LOW_STOCK-低库存，OVER_STOCK-超储，OUT_OF_STOCK-缺货',
+  `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `create_by` VARCHAR(50) COMMENT '创建人',
+  `update_by` VARCHAR(50) COMMENT '更新人',
+  `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '删除标记：0-未删除，1-已删除',
+  PRIMARY KEY (`id`),
+  KEY `idx_material_id` (`material_id`),
+  KEY `idx_warehouse` (`warehouse`),
+  KEY `idx_available_quantity` (`available_quantity`),
+  KEY `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='库存表';

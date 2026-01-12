@@ -2,7 +2,6 @@ package com.haocai.management.enums;
 
 import com.baomidou.mybatisplus.annotation.EnumValue;
 import com.fasterxml.jackson.annotation.JsonValue;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
@@ -20,7 +19,6 @@ import lombok.Getter;
  * @version 1.0
  */
 @Getter
-@AllArgsConstructor
 public enum DepartmentStatus {
 
     /**
@@ -51,6 +49,14 @@ public enum DepartmentStatus {
      * 用于前端展示和日志记录
      */
     private final String description;
+
+    /**
+     * 构造函数
+     */
+    DepartmentStatus(Integer code, String description) {
+        this.code = code;
+        this.description = description;
+    }
 
     /**
      * 根据状态码获取枚举值

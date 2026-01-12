@@ -2,7 +2,11 @@
   <div class="user-manage-container">
     <el-card>
       <!-- 搜索区域 -->
-      <el-form :model="searchForm" :inline="true" class="search-form">
+      <el-form
+        :model="searchForm"
+        :inline="true"
+        class="search-form"
+      >
         <el-form-item label="用户名">
           <el-input
             v-model="searchForm.username"
@@ -26,9 +30,18 @@
             clearable
             @clear="handleSearch"
           >
-            <el-option label="正常" :value="0" />
-            <el-option label="禁用" :value="1" />
-            <el-option label="锁定" :value="2" />
+            <el-option
+              label="正常"
+              :value="0"
+            />
+            <el-option
+              label="禁用"
+              :value="1"
+            />
+            <el-option
+              label="锁定"
+              :value="2"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="部门">
@@ -40,14 +53,24 @@
           />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSearch">搜索</el-button>
-          <el-button @click="handleReset">重置</el-button>
+          <el-button
+            type="primary"
+            @click="handleSearch"
+          >
+            搜索
+          </el-button>
+          <el-button @click="handleReset">
+            重置
+          </el-button>
         </el-form-item>
       </el-form>
 
       <!-- 操作按钮区域 -->
       <div class="action-buttons">
-        <el-button type="primary" @click="handleAdd">
+        <el-button
+          type="primary"
+          @click="handleAdd"
+        >
           <el-icon><Plus /></el-icon>
           新增用户
         </el-button>
@@ -63,20 +86,47 @@
 
       <!-- 用户列表表格 -->
       <el-table
-        :data="userList"
         v-loading="loading"
-        @selection-change="handleSelectionChange"
+        :data="userList"
         border
         stripe
         style="width: 100%; margin-top: 20px"
+        @selection-change="handleSelectionChange"
       >
-        <el-table-column type="selection" width="55" />
-        <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="username" label="用户名" width="120" />
-        <el-table-column prop="name" label="姓名" width="120" />
-        <el-table-column prop="email" label="邮箱" width="180" />
-        <el-table-column prop="phone" label="手机号" width="130" />
-        <el-table-column prop="roles" label="角色" width="200">
+        <el-table-column
+          type="selection"
+          width="55"
+        />
+        <el-table-column
+          prop="id"
+          label="ID"
+          width="80"
+        />
+        <el-table-column
+          prop="username"
+          label="用户名"
+          width="120"
+        />
+        <el-table-column
+          prop="name"
+          label="姓名"
+          width="120"
+        />
+        <el-table-column
+          prop="email"
+          label="邮箱"
+          width="180"
+        />
+        <el-table-column
+          prop="phone"
+          label="手机号"
+          width="130"
+        />
+        <el-table-column
+          prop="roles"
+          label="角色"
+          width="200"
+        >
           <template #default="{ row }">
             <div v-if="row.roles && row.roles.length > 0">
               <el-tag
@@ -89,24 +139,46 @@
                 {{ role.name || '未知角色' }}
               </el-tag>
             </div>
-            <span v-else style="color: #999">无角色</span>
+            <span
+              v-else
+              style="color: #999"
+            >无角色</span>
           </template>
         </el-table-column>
-        <el-table-column prop="department" label="部门" width="150">
+        <el-table-column
+          prop="department"
+          label="部门"
+          width="150"
+        >
           <template #default="{ row }">
             <span v-if="row.department">{{ row.department.name }}</span>
-            <span v-else style="color: #999">未分配</span>
+            <span
+              v-else
+              style="color: #999"
+            >未分配</span>
           </template>
         </el-table-column>
-        <el-table-column prop="status" label="状态" width="100">
+        <el-table-column
+          prop="status"
+          label="状态"
+          width="100"
+        >
           <template #default="{ row }">
             <el-tag :type="getStatusType(row.status)">
               {{ getStatusText(row.status) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="创建时间" width="180" />
-        <el-table-column label="操作" width="250" fixed="right">
+        <el-table-column
+          prop="createTime"
+          label="创建时间"
+          width="180"
+        />
+        <el-table-column
+          label="操作"
+          width="250"
+          fixed="right"
+        >
           <template #default="{ row }">
             <el-button
               type="primary"
@@ -140,9 +212,9 @@
         :total="pagination.total"
         :page-sizes="[10, 20, 50, 100]"
         layout="total, sizes, prev, pager, next, jumper"
+        style="margin-top: 20px; justify-content: flex-end"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
-        style="margin-top: 20px; justify-content: flex-end"
       />
     </el-card>
 
@@ -159,23 +231,36 @@
         :rules="userRules"
         label-width="100px"
       >
-        <el-form-item label="用户名" prop="username">
+        <el-form-item
+          label="用户名"
+          prop="username"
+        >
           <el-input
             v-model="userForm.username"
             placeholder="请输入用户名"
             :disabled="isEdit"
           />
         </el-form-item>
-        <el-form-item label="密码" prop="password" v-if="!isEdit">
+        <el-form-item
+          v-if="!isEdit"
+          label="密码"
+          prop="password"
+        >
           <el-input
             v-model="userForm.password"
             type="password"
             placeholder="请输入密码"
             show-password
           />
-          <div class="password-tip">密码必须包含大写字母、小写字母、数字和特殊字符（$ @ ! % * ? &）</div>
+          <div class="password-tip">
+            密码必须包含大写字母、小写字母、数字和特殊字符（$ @ ! % * ? &）
+          </div>
         </el-form-item>
-        <el-form-item label="确认密码" prop="confirmPassword" v-if="!isEdit">
+        <el-form-item
+          v-if="!isEdit"
+          label="确认密码"
+          prop="confirmPassword"
+        >
           <el-input
             v-model="userForm.confirmPassword"
             type="password"
@@ -183,32 +268,61 @@
             show-password
           />
         </el-form-item>
-        <el-form-item label="姓名" prop="name">
+        <el-form-item
+          label="姓名"
+          prop="name"
+        >
           <el-input
             v-model="userForm.name"
             placeholder="请输入姓名"
           />
         </el-form-item>
-        <el-form-item label="邮箱" prop="email">
+        <el-form-item
+          label="邮箱"
+          prop="email"
+        >
           <el-input
             v-model="userForm.email"
             placeholder="请输入邮箱"
           />
         </el-form-item>
-        <el-form-item label="手机号" prop="phone">
+        <el-form-item
+          label="手机号"
+          prop="phone"
+        >
           <el-input
             v-model="userForm.phone"
             placeholder="请输入手机号"
           />
         </el-form-item>
-        <el-form-item label="状态" prop="status" v-if="isEdit">
-          <el-select v-model="userForm.status" placeholder="请选择状态">
-            <el-option label="正常" :value="0" />
-            <el-option label="禁用" :value="1" />
-            <el-option label="锁定" :value="2" />
+        <el-form-item
+          v-if="isEdit"
+          label="状态"
+          prop="status"
+        >
+          <el-select
+            v-model="userForm.status"
+            placeholder="请选择状态"
+          >
+            <el-option
+              label="正常"
+              :value="0"
+            />
+            <el-option
+              label="禁用"
+              :value="1"
+            />
+            <el-option
+              label="锁定"
+              :value="2"
+            />
           </el-select>
         </el-form-item>
-        <el-form-item label="角色" prop="roleId" v-if="isEdit">
+        <el-form-item
+          v-if="isEdit"
+          label="角色"
+          prop="roleId"
+        >
           <el-select
             v-model="userForm.roleId"
             placeholder="请选择角色"
@@ -220,12 +334,18 @@
               :label="role.name"
               :value="role.id"
             />
-            <div v-if="allRoles.length === 0" style="padding: 10px; color: #999">
+            <div
+              v-if="allRoles.length === 0"
+              style="padding: 10px; color: #999"
+            >
               暂无角色数据
             </div>
           </el-select>
         </el-form-item>
-        <el-form-item label="部门" prop="departmentId">
+        <el-form-item
+          label="部门"
+          prop="departmentId"
+        >
           <DepartmentSelect
             v-model="userForm.departmentId"
             placeholder="请选择部门"
@@ -234,8 +354,14 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">
+        <el-button @click="dialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="submitLoading"
+          @click="handleSubmit"
+        >
           确定
         </el-button>
       </template>
@@ -247,7 +373,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import { Plus, Delete } from '@element-plus/icons-vue'
-import { getUserList, createUser, updateUser, deleteUser, batchDeleteUsers, updateUserStatus, batchUpdateStatus, getUserRoles, assignRoles, removeUserRole } from '@/api/user'
+import { getUserList, createUser, updateUser, deleteUser, batchDeleteUsers, updateUserStatus, getUserRoles, assignRoles, removeUserRole } from '@/api/user'
 import { roleApi } from '@/api/role'
 import type { UserInfo, UserListRequest, CreateUserRequest, UpdateUserRequest } from '@/api/user'
 import type { RoleInfo } from '@/api/role'

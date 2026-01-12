@@ -25,7 +25,7 @@ public class BusinessException extends RuntimeException {
 
     /**
      * 构造方法
-     *
+     * 
      * @param code 错误码
      * @param message 错误信息
      */
@@ -37,7 +37,7 @@ public class BusinessException extends RuntimeException {
 
     /**
      * 构造方法
-     *
+     * 
      * @param code 错误码
      * @param message 错误信息
      * @param cause 原始异常

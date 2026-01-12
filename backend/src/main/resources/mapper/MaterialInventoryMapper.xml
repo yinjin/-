@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haocai.management.mapper.MaterialInventoryMapper">
+
+    <!-- 库存分页查询 -->
+    <select id="selectInventoryPage" resultType="com.haocai.management.vo.InventoryVO">
+        SELECT 
+            mi.id,
+            mi.material_id AS materialId,
+            mi.material_name AS materialName,
+            mi.material_code AS materialCode,
+            m.specification AS specification,
+            m.unit AS unit,
+            m.brand AS brand,
+            m.unit_price AS unitPrice,
+            mi.quantity,
+            mi.available_quantity AS availableQuantity,
+            mi.safe_quantity AS safeQuantity,
+            mi.max_quantity AS maxQuantity,
+            mi.warehouse,
+            mi.location,
+            mi.last_in_time AS lastInTime,
+            mi.last_out_time AS lastOutTime,
+            mi.total_in_quantity AS totalInQuantity,
+            mi.total_out_quantity AS totalOutQuantity,
+            mi.status,
+            CASE mi.status
+                WHEN 'NORMAL' THEN '正常'
+                WHEN 'LOW_STOCK' THEN '低库存'
+                WHEN 'OVER_STOCK' THEN '超储'
+                WHEN 'OUT_OF_STOCK' THEN '缺货'
+                ELSE mi.status
+            END AS statusDescription,
+            (mi.quantity * m.unit_price) AS inventoryValue,
+            mi.create_time AS createTime,
+            mi.update_time AS updateTime
+        FROM material_inventory mi
+        LEFT JOIN material m ON mi.material_id = m.id
+        <where>
+            mi.deleted = 0
+            <if test="query.materialId != null">
+                AND mi.material_id = #{query.materialId}
+            </if>
+            <if test="query.materialName != null and query.materialName != ''">
+                AND mi.material_name LIKE CONCAT('%', #{query.materialName}, '%')
+            </if>
+            <if test="query.materialCode != null and query.materialCode != ''">
+                AND mi.material_code LIKE CONCAT('%', #{query.materialCode}, '%')
+            </if>
+            <if test="query.warehouse != null and query.warehouse != ''">
+                AND mi.warehouse = #{query.warehouse}
+            </if>
+            <if test="query.status != null and query.status != ''">
+                AND mi.status = #{query.status}
+            </if>
+        </where>
+        <if test="query.orderBy != null and query.orderBy != ''">
+            ORDER BY ${query.orderBy}
+            <if test="query.orderDirection != null and query.orderDirection != ''">
+                ${query.orderDirection}
+            </if>
+        </if>
+    </select>
+
+</mapper>

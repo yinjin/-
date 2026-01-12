@@ -471,33 +471,192 @@ INSERT INTO material (material_name, material_code, category_id, specification, 
 
 **表说明**：存储供应商的基本信息
 
+**遵循规范**：
+- DB-01：所有业务表必须包含审计字段（create_time, update_time, create_by, update_by, deleted）
+- DB-02：表名和字段名使用 snake_case 命名法
+- DB-03：唯一索引与逻辑删除冲突处理（唯一索引字段允许重复值时需额外处理）
+- VAL-01：使用 @Validated 和 JSR-303 注解进行参数校验
+
 | 字段名 | 类型 | 长度 | 允许空 | 默认值 | 说明 |
 |--------|------|------|--------|--------|------|
-| id | BIGINT | - | 否 | AUTO_INCREMENT | 供应商ID（主键） |
-| supplier_code | VARCHAR | 50 | 否 | - | 供应商编码（唯一） |
+| id | BIGINT | - | 否 | AUTO_INCREMENT | 主键ID |
+| supplier_code | VARCHAR | 50 | 否 | - | 供应商编码 |
 | supplier_name | VARCHAR | 100 | 否 | - | 供应商名称 |
 | contact_person | VARCHAR | 50 | 是 | NULL | 联系人 |
 | phone | VARCHAR | 20 | 是 | NULL | 联系电话 |
-| email | VARCHAR | 100 | 是 | NULL | 邮箱 |
-| address | VARCHAR | 200 | 是 | NULL | 地址 |
-| business_license | VARCHAR | 200 | 是 | NULL | 营业执照 |
+| email | VARCHAR | 100 | 是 | NULL | 电子邮箱 |
+| address | VARCHAR | 255 | 是 | NULL | 地址 |
+| business_license | VARCHAR | 255 | 是 | NULL | 营业执照号 |
 | tax_number | VARCHAR | 50 | 是 | NULL | 税号 |
-| bank_account | VARCHAR | 100 | 是 | NULL | 银行账号 |
-| bank_name | VARCHAR | 100 | 是 | NULL | 开户行 |
-| credit_rating | TINYINT | - | 是 | 5 | 信用等级（1-10） |
-| cooperation_status | TINYINT | - | 是 | 1 | 合作状态：1-合作中，0-已终止 |
-| description | TEXT | - | 是 | NULL | 供应商描述 |
+| bank_account | VARCHAR | 50 | 是 | NULL | 银行账号 |
+| bank_name | VARCHAR | 100 | 是 | NULL | 开户银行 |
+| credit_rating | INT | - | 是 | 3 | 信用评级(1-5) |
+| cooperation_status | TINYINT | - | 是 | 1 | 合作状态: 0-已终止, 1-合作中 |
+| status | TINYINT | - | 是 | 1 | 状态: 0-禁用, 1-启用 |
+| description | TEXT | - | 是 | NULL | 备注描述 |
 | create_time | DATETIME | - | 是 | CURRENT_TIMESTAMP | 创建时间 |
 | update_time | DATETIME | - | 是 | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | 更新时间 |
+| create_by | BIGINT | - | 是 | NULL | 创建人ID |
+| update_by | BIGINT | - | 是 | NULL | 更新人ID |
+| deleted | TINYINT | - | 是 | 0 | 逻辑删除: 0-未删除, 1-已删除 |
 
 **索引设计**：
 - PRIMARY KEY: `id`
-- UNIQUE KEY: `supplier_code`
-- INDEX: `idx_supplier_name`, `idx_credit_rating`
+- UNIQUE KEY: `uk_supplier_code` (supplier_code)
+- INDEX: `idx_supplier_name` (supplier_name)
+- INDEX: `idx_cooperation_status` (cooperation_status)
+- INDEX: `idx_status` (status)
+
+**外键关系**：
+- 无（供应商表为基础数据表）
 
 **业务规则**：
 - 供应商编码必须唯一
-- 信用等级范围：1-10
+- 信用评级范围：1-5
+- 合作状态：1-合作中，0-已终止
+- 支持逻辑删除，不物理删除数据
+- 状态：0-禁用，1-启用
+
+**枚举类型映射**：
+- 合作状态：`CooperationStatus`枚举
+  - `COOPERATING`(1)：合作中
+  - `TERMINATED`(0)：已终止
+- 状态：0-禁用，1-启用
+
+**初始化数据**：
+```sql
+-- 示例供应商数据
+INSERT INTO supplier_info (supplier_code, supplier_name, contact_person, phone, email, address, 
+                          business_license, tax_number, bank_account, bank_name, 
+                          credit_rating, cooperation_status, description, status, create_by) VALUES
+('SUP001', '测试供应商A', '张三', '13800138001', 'zhangsan@test.com', '北京市朝阳区',
+ '91110000123456789A', '123456789012345', '6222021234567890123', '中国工商银行北京分行',
+ 5, 1, '测试供应商数据', 1, 1),
+('SUP002', '测试供应商B', '李四', '13800138002', 'lisi@test.com', '上海市浦东新区',
+ '91110000987654321B', '987654321098765', '6222029876543219876', '中国建设银行上海分行',
+ 4, 1, '另一个测试供应商', 1, 1);
+```
+
+**供应商编码生成规则**：
+- 格式：`SUP + 流水号`
+- 示例：`SUP001`（第1个供应商）、`SUP002`（第2个供应商）
+- 流水号：每日从001开始递增
+
+---
+
+#### 2.2.5 供应商评价表 (supplier_evaluation)
+
+**表说明**：存储供应商的评价信息，用于供应商信用评估
+
+**遵循规范**：
+- DB-01：所有业务表必须包含审计字段（create_time, update_time, deleted）
+- DB-02：表名和字段名使用 snake_case 命名法
+
+| 字段名 | 类型 | 长度 | 允许空 | 默认值 | 说明 |
+|--------|------|------|--------|--------|------|
+| id | BIGINT | - | 否 | AUTO_INCREMENT | 评价ID |
+| supplier_id | BIGINT | - | 否 | - | 供应商ID |
+| evaluator_id | BIGINT | - | 是 | NULL | 评价人ID |
+| evaluator_name | VARCHAR | 50 | 是 | NULL | 评价人名称 |
+| evaluation_date | DATE | - | 是 | NULL | 评价日期 |
+| delivery_score | DECIMAL | 3,1 | 否 | - | 交付评分（1-10分） |
+| quality_score | DECIMAL | 3,1 | 否 | - | 质量评分（1-10分） |
+| service_score | DECIMAL | 3,1 | 否 | - | 服务评分（1-10分） |
+| price_score | DECIMAL | 3,1 | 否 | - | 价格评分（1-10分） |
+| total_score | DECIMAL | 5,2 | 是 | NULL | 总分 |
+| average_score | DECIMAL | 5,2 | 是 | NULL | 平均分 |
+| credit_rating | INT | - | 是 | NULL | 信用等级（1-10） |
+| remark | VARCHAR | 500 | 是 | NULL | 评价备注 |
+| create_time | DATETIME | - | 是 | CURRENT_TIMESTAMP | 创建时间 |
+| update_time | DATETIME | - | 是 | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | 更新时间 |
+| deleted | TINYINT | - | 是 | 0 | 删除标记：0-未删除，1-已删除 |
+
+**索引设计**：
+- PRIMARY KEY: `id`
+- INDEX: `idx_supplier_id` (supplier_id)
+- INDEX: `idx_evaluator_id` (evaluator_id)
+- INDEX: `idx_evaluation_date` (evaluation_date)
+
+**外键关系**：
+- `supplier_id` → `supplier_info.id`
+
+**业务规则**：
+- 每个评分必须在1-10之间
+- 总分 = 交付评分 + 质量评分 + 服务评分 + 价格评分
+- 平均分 = 总分 / 4
+- 信用等级根据平均分自动计算
+- 删除评价时级联更新供应商的信用等级
+
+**信用等级计算规则**：
+| 平均分范围 | 信用等级 | 等级描述 |
+|------------|----------|----------|
+| 9.0-10.0 | 10 | 优秀 |
+| 8.0-8.9 | 9 | 良好 |
+| 7.0-7.9 | 8 | 较好 |
+| 6.0-6.9 | 7 | 一般 |
+| 5.0-5.9 | 6 | 及格 |
+| 4.0-4.9 | 5 | 较差 |
+| 3.0-3.9 | 4 | 差 |
+| 2.0-2.9 | 3 | 很差 |
+| 1.0-1.9 | 2 | 极差 |
+| 0.0-0.9 | 1 | 不合格 |
+
+---
+
+#### 2.2.6 供应商资质表 (supplier_qualification)
+
+**表说明**：存储供应商的资质信息，用于供应商资质管理和到期提醒
+
+**遵循规范**：
+- DB-01：所有业务表必须包含审计字段（create_time, update_time, create_by, update_by, deleted）
+- DB-02：表名和字段名使用 snake_case 命名法
+- DB-03：唯一索引与逻辑删除冲突处理
+
+| 字段名 | 类型 | 长度 | 允许空 | 默认值 | 说明 |
+|--------|------|------|--------|--------|------|
+| id | BIGINT | - | 否 | AUTO_INCREMENT | 资质ID |
+| supplier_id | BIGINT | - | 否 | - | 供应商ID |
+| qualification_type | VARCHAR | 50 | 否 | - | 资质类型：BUSINESS_LICENSE-营业执照，TAX_CERTIFICATE-税务登记证，QUALITY_CERTIFICATE-质量认证，OTHER-其他 |
+| qualification_name | VARCHAR | 100 | 否 | - | 资质名称 |
+| file_url | VARCHAR | 500 | 是 | NULL | 资质文件URL |
+| file_name | VARCHAR | 200 | 是 | NULL | 原始文件名 |
+| issue_date | DATE | - | 是 | NULL | 发证日期 |
+| expiry_date | DATE | - | 是 | NULL | 到期日期 |
+| issuing_authority | VARCHAR | 100 | 是 | NULL | 发证机关 |
+| status | TINYINT | - | 是 | 1 | 状态：1-有效，2-即将到期，3-已过期 |
+| description | VARCHAR | 500 | 是 | NULL | 备注描述 |
+| create_time | DATETIME | - | 是 | CURRENT_TIMESTAMP | 创建时间 |
+| update_time | DATETIME | - | 是 | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | 更新时间 |
+| create_by | BIGINT | - | 是 | NULL | 创建人ID |
+| update_by | BIGINT | - | 是 | NULL | 更新人ID |
+| deleted | TINYINT | - | 是 | 0 | 逻辑删除：0-未删除，1-已删除 |
+
+**索引设计**：
+- PRIMARY KEY: `id`
+- UNIQUE KEY: `uk_supplier_type` (supplier_id, qualification_type)
+- INDEX: `idx_supplier_id` (supplier_id)
+- INDEX: `idx_expiry_date` (expiry_date)
+- INDEX: `idx_status` (status)
+
+**外键关系**：
+- `supplier_id` → `supplier_info.id`
+
+**业务规则**：
+- 同一供应商的同一类型资质只能有一条有效记录
+- 资质状态自动计算：到期日期前30天内为"即将到期"，已过期的为"已过期"
+- 支持逻辑删除，不物理删除数据
+- 资质文件存储在文件服务器，file_url存储访问路径
+
+**资质类型枚举**：
+- `BUSINESS_LICENSE`：营业执照
+- `TAX_CERTIFICATE`：税务登记证
+- `QUALITY_CERTIFICATE`：质量认证
+- `OTHER`：其他
+
+**状态枚举**：
+- `1`：有效
+- `2`：即将到期（30天内）
+- `3`：已过期
 
 ---
 
@@ -977,6 +1136,32 @@ SELECT r.id, p.id FROM sys_role r, sys_permission p WHERE r.role_code = 'admin';
 **说明**：
 - 管理员角色拥有所有权限
 
+### 5.5 供应商管理权限数据（2026-01-11 添加）
+
+```sql
+-- 供应商管理权限
+INSERT INTO sys_permission (id, permission_name, permission_code, permission_type, parent_id, path, component, icon, sort_order, status, create_by) VALUES
+(23, '供应商管理', 'supplier', 'menu', 0, '/supplier', NULL, 'Shop', 6, 1, 'system'),
+(24, '查看供应商', 'supplier:view', 'button', 23, NULL, NULL, NULL, 1, 1, 'system'),
+(25, '创建供应商', 'supplier:create', 'button', 23, NULL, NULL, NULL, 2, 1, 'system'),
+(26, '编辑供应商', 'supplier:edit', 'button', 23, NULL, NULL, NULL, 3, 1, 'system'),
+(27, '删除供应商', 'supplier:delete', 'button', 23, NULL, NULL, NULL, 4, 1, 'system'),
+(28, '评价供应商', 'supplier:evaluate', 'button', 23, NULL, NULL, NULL, 5, 1, 'system');
+
+-- 为超级管理员角色添加供应商管理权限
+INSERT INTO sys_role_permission (role_id, permission_id) VALUES
+(1, 23), (1, 24), (1, 25), (1, 26), (1, 27), (1, 28);
+```
+
+**说明**：
+- 供应商管理菜单权限（supplier）
+- 供应商查看权限（supplier:view）
+- 供应商创建权限（supplier:create）
+- 供应商编辑权限（supplier:edit）
+- 供应商删除权限（supplier:delete）
+- 供应商评价权限（supplier:evaluate）
+- 超级管理员拥有所有供应商管理权限
+
 ### 5.5 初始用户角色关联数据
 
 ```sql
@@ -1035,6 +1220,8 @@ SELECT u.id, r.id FROM sys_user u, sys_role r WHERE u.username = 'admin' AND r.r
 | 版本 | 日期 | 变更内容 | 变更人 |
 |------|------|----------|--------|
 | v1.0 | 2026-01-07 | 初始版本，从plan.md抽取数据库设计内容 | 开发团队 |
+| v1.1 | 2026-01-11 | 添加供应商评价表设计、供应商管理权限数据 | 开发团队 |
+| v1.2 | 2026-01-11 | 添加供应商资质表设计 | 开发团队 |
 
 ---
 

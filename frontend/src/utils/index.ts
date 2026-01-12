@@ -16,10 +16,10 @@ export const deepClone = <T>(obj: T): T => {
   if (obj instanceof Date) return new Date(obj.getTime()) as unknown as T
   if (obj instanceof Array) return obj.map(item => deepClone(item)) as unknown as T
   if (typeof obj === 'object') {
-    const clonedObj = {} as { [key: string]: any }
+    const clonedObj = {} as { [key: string]: unknown }
     for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        clonedObj[key] = deepClone(obj[key])
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        clonedObj[key] = deepClone((obj as Record<string, unknown>)[key])
       }
     }
     return clonedObj as T
@@ -28,7 +28,7 @@ export const deepClone = <T>(obj: T): T => {
 }
 
 // 防抖
-export const debounce = <T extends (...args: any[]) => any>(
+export const debounce = <T extends (...args: unknown[]) => unknown>(
   func: T,
   delay: number
 ): ((...args: Parameters<T>) => void) => {
@@ -40,7 +40,7 @@ export const debounce = <T extends (...args: any[]) => any>(
 }
 
 // 节流
-export const throttle = <T extends (...args: any[]) => any>(
+export const throttle = <T extends (...args: unknown[]) => unknown>(
   func: T,
   limit: number
 ): ((...args: Parameters<T>) => void) => {

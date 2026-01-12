@@ -2,6 +2,7 @@ package com.haocai.management.util;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -18,6 +19,7 @@ import java.sql.Statement;
  * 用于在应用启动时自动执行SQL脚本
  */
 @Component
+@ConditionalOnProperty(name = "app.database.init.enabled", havingValue = "true", matchIfMissing = false)
 public class DatabaseInitializer implements CommandLineRunner {
 
     @Autowired
@@ -123,6 +125,7 @@ public class DatabaseInitializer implements CommandLineRunner {
         } catch (Exception e) {
             System.err.println("数据库初始化失败: " + e.getMessage());
             e.printStackTrace();
+            // 不抛出异常，让应用继续启动
         }
     }
 }

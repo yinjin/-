@@ -2,58 +2,148 @@
   <div class="material-manage">
     <el-card>
       <!-- 搜索表单 -->
-      <el-form :inline="true" :model="searchForm" class="search-form">
+      <el-form
+        :inline="true"
+        :model="searchForm"
+        class="search-form"
+      >
         <el-form-item label="耗材名称">
-          <el-input v-model="searchForm.materialName" placeholder="请输入耗材名称" clearable />
+          <el-input
+            v-model="searchForm.materialName"
+            placeholder="请输入耗材名称"
+            clearable
+          />
         </el-form-item>
         <el-form-item label="耗材编码">
-          <el-input v-model="searchForm.materialCode" placeholder="请输入耗材编码" clearable />
+          <el-input
+            v-model="searchForm.materialCode"
+            placeholder="请输入耗材编码"
+            clearable
+          />
         </el-form-item>
         <el-form-item label="分类">
-          <CategorySelect v-model="searchForm.categoryId" placeholder="请选择分类" clearable />
+          <CategorySelect
+            v-model="searchForm.categoryId"
+            placeholder="请选择分类"
+            clearable
+          />
         </el-form-item>
         <el-form-item label="状态">
-          <el-select v-model="searchForm.status" placeholder="请选择状态" clearable>
-            <el-option label="启用" :value="1" />
-            <el-option label="禁用" :value="0" />
+          <el-select
+            v-model="searchForm.status"
+            placeholder="请选择状态"
+            clearable
+          >
+            <el-option
+              label="启用"
+              :value="1"
+            />
+            <el-option
+              label="禁用"
+              :value="0"
+            />
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSearch">搜索</el-button>
-          <el-button @click="handleReset">重置</el-button>
+          <el-button
+            type="primary"
+            @click="handleSearch"
+          >
+            搜索
+          </el-button>
+          <el-button @click="handleReset">
+            重置
+          </el-button>
         </el-form-item>
       </el-form>
 
       <!-- 操作按钮 -->
       <div class="action-buttons">
-        <el-button type="primary" @click="handleAdd">新增耗材</el-button>
-        <el-button type="danger" :disabled="selectedIds.length === 0" @click="handleBatchDelete">
+        <el-button
+          type="primary"
+          @click="handleAdd"
+        >
+          新增耗材
+        </el-button>
+        <el-button
+          type="danger"
+          :disabled="selectedIds.length === 0"
+          @click="handleBatchDelete"
+        >
           批量删除
         </el-button>
       </div>
 
       <!-- 耗材列表 -->
       <el-table
+        v-loading="loading"
         :data="materialList"
         style="width: 100%; margin-top: 20px"
-        v-loading="loading"
         @selection-change="handleSelectionChange"
       >
-        <el-table-column type="selection" width="30" />
-        <el-table-column prop="materialName" label="耗材名称" min-width="120" />
-        <el-table-column prop="materialCode" label="耗材编码" min-width="120" />
-        <el-table-column prop="categoryName" label="分类" min-width="100" />
-        <el-table-column prop="specification" label="规格型号" min-width="100" />
-        <el-table-column prop="unit" label="单位" min-width="40" />
-        <el-table-column prop="minStock" label="最小库存" min-width="50" align="right" />
-        <el-table-column prop="maxStock" label="最大库存" min-width="50" align="right" />
-        <el-table-column prop="safetyStock" label="安全库存" min-width="50" align="right" />
-        <el-table-column prop="unitPrice" label="单价" min-width="100" align="right">
+        <el-table-column
+          type="selection"
+          width="30"
+        />
+        <el-table-column
+          prop="materialName"
+          label="耗材名称"
+          min-width="120"
+        />
+        <el-table-column
+          prop="materialCode"
+          label="耗材编码"
+          min-width="120"
+        />
+        <el-table-column
+          prop="categoryName"
+          label="分类"
+          min-width="100"
+        />
+        <el-table-column
+          prop="specification"
+          label="规格型号"
+          min-width="100"
+        />
+        <el-table-column
+          prop="unit"
+          label="单位"
+          min-width="40"
+        />
+        <el-table-column
+          prop="minStock"
+          label="最小库存"
+          min-width="50"
+          align="right"
+        />
+        <el-table-column
+          prop="maxStock"
+          label="最大库存"
+          min-width="50"
+          align="right"
+        />
+        <el-table-column
+          prop="safetyStock"
+          label="安全库存"
+          min-width="50"
+          align="right"
+        />
+        <el-table-column
+          prop="unitPrice"
+          label="单价"
+          min-width="100"
+          align="right"
+        >
           <template #default="{ row }">
             ¥{{ row.unitPrice?.toFixed(2) || '0.00' }}
           </template>
         </el-table-column>
-        <el-table-column prop="imageUrl" label="图片" min-width="80" align="center">
+        <el-table-column
+          prop="imageUrl"
+          label="图片"
+          min-width="80"
+          align="center"
+        >
           <template #default="{ row }">
             <el-image
               v-if="row.imageUrl"
@@ -66,37 +156,76 @@
             <span v-else>无图片</span>
           </template>
         </el-table-column>
-        <el-table-column label="条码" min-width="100" align="center">
+        <el-table-column
+          label="条码"
+          min-width="100"
+          align="center"
+        >
           <template #default="{ row }">
-            <div v-if="barcodeImages[row.id]" class="barcode-container">
+            <div
+              v-if="barcodeImages[row.id]"
+              class="barcode-container"
+            >
               <el-image
                 :src="barcodeImages[row.id]"
                 style="width: 100px; height: 40px;"
                 fit="contain"
               />
-              <el-button size="mini" type="link" @click="downloadBarcode(row)">下载</el-button>
+              <el-button
+                size="mini"
+                type="link"
+                @click="downloadBarcode(row)"
+              >
+                下载
+              </el-button>
             </div>
-            <el-button v-else size="small" @click="handleGenerateBarcode(row)">
+            <el-button
+              v-else
+              size="small"
+              @click="handleGenerateBarcode(row)"
+            >
               生成条码
             </el-button>
           </template>
         </el-table-column>
-        <el-table-column label="二维码" min-width="100" align="center">
+        <el-table-column
+          label="二维码"
+          min-width="100"
+          align="center"
+        >
           <template #default="{ row }">
-            <div v-if="qrCodeImages[row.id]" class="qrcode-container">
+            <div
+              v-if="qrCodeImages[row.id]"
+              class="qrcode-container"
+            >
               <el-image
                 :src="qrCodeImages[row.id]"
                 style="width: 60px; height: 60px;"
                 fit="contain"
               />
-              <el-button size="mini" type="link" @click="downloadQRCode(row)">下载</el-button>
+              <el-button
+                size="mini"
+                type="link"
+                @click="downloadQRCode(row)"
+              >
+                下载
+              </el-button>
             </div>
-            <el-button v-else size="small" @click="handleGenerateQRCode(row)">
+            <el-button
+              v-else
+              size="small"
+              @click="handleGenerateQRCode(row)"
+            >
               生成二维码
             </el-button>
           </template>
         </el-table-column>
-        <el-table-column prop="status" label="状态" min-width="80" align="center">
+        <el-table-column
+          prop="status"
+          label="状态"
+          min-width="80"
+          align="center"
+        >
           <template #default="{ row }">
             <el-tag :type="row.status === 1 ? 'success' : 'danger'">
               {{ row.status === 1 ? '启用' : '禁用' }}
@@ -104,10 +233,19 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="操作" min-width="150" fixed="right">
+        <el-table-column
+          label="操作"
+          min-width="150"
+          fixed="right"
+        >
           <template #default="{ row }">
             <div class="operation-buttons">
-              <el-button type="primary" size="small" link @click="handleEdit(row)">
+              <el-button
+                type="primary"
+                size="small"
+                link
+                @click="handleEdit(row)"
+              >
                 编辑
               </el-button>
               <el-button
@@ -118,7 +256,12 @@
               >
                 {{ row.status === 1 ? '禁用' : '启用' }}
               </el-button>
-              <el-button type="danger" size="small" link @click="handleDelete(row)">
+              <el-button
+                type="danger"
+                size="small"
+                link
+                @click="handleDelete(row)"
+              >
                 删除
               </el-button>
               <!--
@@ -148,7 +291,6 @@
             </div>
           </template>
         </el-table-column>
-
       </el-table>
 
       <!-- 分页 -->
@@ -171,54 +313,94 @@
       width="800px"
       @close="handleDialogClose"
     >
-      <el-form ref="materialFormRef" :model="materialForm" :rules="materialFormRules" label-width="120px">
+      <el-form
+        ref="materialFormRef"
+        :model="materialForm"
+        :rules="materialFormRules"
+        label-width="120px"
+      >
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="耗材名称" prop="materialName">
-              <el-input v-model="materialForm.materialName" placeholder="请输入耗材名称" />
+            <el-form-item
+              label="耗材名称"
+              prop="materialName"
+            >
+              <el-input
+                v-model="materialForm.materialName"
+                placeholder="请输入耗材名称"
+              />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="耗材编码" prop="materialCode">
+            <el-form-item
+              label="耗材编码"
+              prop="materialCode"
+            >
               <el-input
                 v-model="materialForm.materialCode"
                 placeholder="请输入耗材编码"
-                @blur="handleCodeBlur"
                 style="width: calc(100% - 100px);"
+                @blur="handleCodeBlur"
               />
               <el-button
                 type="primary"
                 size="small"
-                @click="handleGenerateCodeForForm"
                 :disabled="!materialForm.categoryId"
                 style="margin-left: 10px;"
+                @click="handleGenerateCodeForForm"
               >
                 生成编码
               </el-button>
-              <div v-if="codeExists" class="error-tip">该耗材编码已存在</div>
+              <div
+                v-if="codeExists"
+                class="error-tip"
+              >
+                该耗材编码已存在
+              </div>
             </el-form-item>
           </el-col>
         </el-row>
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="分类" prop="categoryId">
-              <CategorySelect v-model="materialForm.categoryId" placeholder="请选择分类" />
+            <el-form-item
+              label="分类"
+              prop="categoryId"
+            >
+              <CategorySelect
+                v-model="materialForm.categoryId"
+                placeholder="请选择分类"
+              />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="规格型号" prop="specification">
-              <el-input v-model="materialForm.specification" placeholder="请输入规格型号" />
+            <el-form-item
+              label="规格型号"
+              prop="specification"
+            >
+              <el-input
+                v-model="materialForm.specification"
+                placeholder="请输入规格型号"
+              />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="单位" prop="unit">
-              <el-input v-model="materialForm.unit" placeholder="请输入单位" />
+            <el-form-item
+              label="单位"
+              prop="unit"
+            >
+              <el-input
+                v-model="materialForm.unit"
+                placeholder="请输入单位"
+              />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="单价" prop="unitPrice">
+            <el-form-item
+              label="单价"
+              prop="unitPrice"
+            >
               <el-input-number
                 v-model="materialForm.unitPrice"
                 :min="0"
@@ -231,7 +413,10 @@
         </el-row>
         <el-row :gutter="20">
           <el-col :span="8">
-            <el-form-item label="最小库存" prop="minStock">
+            <el-form-item
+              label="最小库存"
+              prop="minStock"
+            >
               <el-input-number
                 v-model="materialForm.minStock"
                 :min="0"
@@ -241,7 +426,10 @@
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="最大库存" prop="maxStock">
+            <el-form-item
+              label="最大库存"
+              prop="maxStock"
+            >
               <el-input-number
                 v-model="materialForm.maxStock"
                 :min="0"
@@ -251,7 +439,10 @@
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="安全库存" prop="safetyStock">
+            <el-form-item
+              label="安全库存"
+              prop="safetyStock"
+            >
               <el-input-number
                 v-model="materialForm.safetyStock"
                 :min="0"
@@ -261,7 +452,10 @@
             </el-form-item>
           </el-col>
         </el-row>
-        <el-form-item label="耗材描述" prop="description">
+        <el-form-item
+          label="耗材描述"
+          prop="description"
+        >
           <el-input
             v-model="materialForm.description"
             type="textarea"
@@ -270,7 +464,10 @@
           />
         </el-form-item>
         <el-form-item label="耗材图片">
-          <div v-if="materialForm.imageUrl" class="image-preview">
+          <div
+            v-if="materialForm.imageUrl"
+            class="image-preview"
+          >
             <el-image
               :src="materialForm.imageUrl"
               :preview-src-list="[materialForm.imageUrl]"
@@ -278,7 +475,14 @@
               style="width: 100px; height: 100px; border-radius: 4px;"
               fit="cover"
             />
-            <el-button type="danger" size="small" @click="removeImage" style="margin-left: 10px;">删除图片</el-button>
+            <el-button
+              type="danger"
+              size="small"
+              style="margin-left: 10px;"
+              @click="removeImage"
+            >
+              删除图片
+            </el-button>
           </div>
           <el-upload
             v-else
@@ -288,19 +492,36 @@
             accept="image/*"
             :on-change="handleImageChange"
           >
-            <el-button type="primary">选择图片</el-button>
+            <el-button type="primary">
+              选择图片
+            </el-button>
           </el-upload>
         </el-form-item>
-        <el-form-item label="状态" prop="status">
+        <el-form-item
+          label="状态"
+          prop="status"
+        >
           <el-radio-group v-model="materialForm.status">
-            <el-radio :value="1">启用</el-radio>
-            <el-radio :value="0">禁用</el-radio>
+            <el-radio :value="1">
+              启用
+            </el-radio>
+            <el-radio :value="0">
+              禁用
+            </el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">确定</el-button>
+        <el-button @click="dialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="submitLoading"
+          @click="handleSubmit"
+        >
+          确定
+        </el-button>
       </template>
     </el-dialog>
   </div>
@@ -309,7 +530,6 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules, type UploadFile } from 'element-plus'
-import { ArrowDown } from '@element-plus/icons-vue'
 import CategorySelect from '@/components/CategorySelect.vue'
 import materialApi from '@/api/material'
 import type {
@@ -735,70 +955,6 @@ const downloadQRCode = (row: Material) => {
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
-  }
-}
-
-// 上传图片
-const handleUploadImage = async (row: Material) => {
-  // 创建一个隐藏的文件输入框
-  const input = document.createElement('input')
-  input.type = 'file'
-  input.accept = 'image/*'
-  input.onchange = async (event: any) => {
-    const file = event.target.files[0]
-    if (!file) return
-
-    try {
-      const response = await (materialApi as any).uploadMaterialImage(row.id, file)
-      if (response.code === 200) {
-        ElMessage.success('图片上传成功')
-        // 更新列表以显示新上传的图片
-        getMaterialList()
-      } else {
-        ElMessage.error(response.message || '图片上传失败')
-      }
-    } catch (error) {
-      ElMessage.error('图片上传失败')
-    }
-  }
-  input.click()
-}
-
-// 查看图片
-const handleViewImages = (row: Material) => {
-  if (row.imageUrl) {
-    window.open(row.imageUrl, '_blank')
-  } else {
-    ElMessage.info('该耗材暂无图片')
-  }
-}
-
-// 生成编码
-const handleGenerateCode = async (row: Material) => {
-  try {
-    const response = await (materialApi as any).generateMaterialCode(row.categoryId)
-    if (response.code === 200) {
-      ElMessage.success(`编码生成成功: ${response.data}`)
-      // 可以选择自动填充到表单中
-      ElMessageBox.confirm(
-        `生成的编码为: ${response.data}\n是否将此编码填入当前表单？`,
-        '确认操作',
-        {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'info'
-        }
-      ).then(() => {
-        materialForm.materialCode = response.data
-        ElMessage.success('编码已填入表单')
-      }).catch(() => {
-        // 用户取消操作
-      })
-    } else {
-      ElMessage.error(response.message || '编码生成失败')
-    }
-  } catch (error) {
-    ElMessage.error('编码生成失败')
   }
 }
 

@@ -5,21 +5,48 @@
       <div class="header-left">
         <el-breadcrumb separator="/">
           <el-breadcrumb-item>耗材分类</el-breadcrumb-item>
-          <el-breadcrumb-item v-for="b in breadList" :key="b.id">{{ b.categoryName }}</el-breadcrumb-item>
+          <el-breadcrumb-item
+            v-for="b in breadList"
+            :key="b.id"
+          >
+            {{ b.categoryName }}
+          </el-breadcrumb-item>
         </el-breadcrumb>
         <div class="tree-buttons">
-          <el-button type="success" size="small" @click="handleExpandAll">展开全部</el-button>
-          <el-button type="info" size="small" @click="handleCollapseAll">折叠全部</el-button>
+          <el-button
+            type="success"
+            size="small"
+            @click="handleExpandAll"
+          >
+            展开全部
+          </el-button>
+          <el-button
+            type="info"
+            size="small"
+            @click="handleCollapseAll"
+          >
+            折叠全部
+          </el-button>
         </div>
       </div>
       <div class="header-right">
-        <el-button type="primary" :icon="Plus" size="small" @click="handleAddChild">新增子级</el-button>
+        <el-button
+          type="primary"
+          :icon="Plus"
+          size="small"
+          @click="handleAddChild"
+        >
+          新增子级
+        </el-button>
       </div>
     </el-header>
 
     <el-container>
       <!-- 左侧树 -->
-      <el-aside width="280px" class="aside">
+      <el-aside
+        width="280px"
+        class="aside"
+      >
         <el-input
           v-model="filterText"
           placeholder="输入关键字过滤"
@@ -29,30 +56,51 @@
         />
         <el-tree
           ref="treeRef"
+          :key="treeKey"
           :data="categoryTree"
           node-key="id"
           :props="{label:'categoryName',children:'children'}"
           highlight-current
           :filter-node-method="filterNode"
-          @node-click="handleNodeClick"
           :default-expanded-keys="defaultExpandedKeys"
-          :key="treeKey"
+          @node-click="handleNodeClick"
         />
       </el-aside>
 
       <!-- 右侧表 -->
       <el-main>
-        <el-table :data="tableData" size="small" stripe>
-          <el-table-column prop="categoryName" label="分类名称" min-width="150" />
-          <el-table-column prop="categoryCode" label="分类编码" min-width="120" />
-          <el-table-column label="状态" min-width="80">
+        <el-table
+          :data="tableData"
+          size="small"
+          stripe
+        >
+          <el-table-column
+            prop="categoryName"
+            label="分类名称"
+            min-width="150"
+          />
+          <el-table-column
+            prop="categoryCode"
+            label="分类编码"
+            min-width="120"
+          />
+          <el-table-column
+            label="状态"
+            min-width="80"
+          >
             <template #default="{row}">
-              <el-tag :type="row.status === 1 ? 'success' : 'info'" size="small">
+              <el-tag
+                :type="row.status === 1 ? 'success' : 'info'"
+                size="small"
+              >
                 {{ row.status === 1 ? '启用' : '禁用' }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="操作" min-width="180">
+          <el-table-column
+            label="操作"
+            min-width="180"
+          >
             <template #default="{row}">
               <div class="operation-buttons">
                 <el-button
@@ -83,7 +131,10 @@
             </template>
           </el-table-column>
         </el-table>
-        <el-empty v-if="tableData.length === 0" description="暂无子分类数据" />
+        <el-empty
+          v-if="tableData.length === 0"
+          description="暂无子分类数据"
+        />
       </el-main>
     </el-container>
 
@@ -94,19 +145,42 @@
       width="600px"
       @close="handleDialogClose"
     >
-      <el-form ref="categoryFormRef" :model="categoryForm" :rules="categoryFormRules" label-width="120px">
-        <el-form-item label="分类名称" prop="categoryName">
-          <el-input v-model="categoryForm.categoryName" placeholder="请输入分类名称" />
+      <el-form
+        ref="categoryFormRef"
+        :model="categoryForm"
+        :rules="categoryFormRules"
+        label-width="120px"
+      >
+        <el-form-item
+          label="分类名称"
+          prop="categoryName"
+        >
+          <el-input
+            v-model="categoryForm.categoryName"
+            placeholder="请输入分类名称"
+          />
         </el-form-item>
-        <el-form-item label="分类编码" prop="categoryCode">
+        <el-form-item
+          label="分类编码"
+          prop="categoryCode"
+        >
           <el-input
             v-model="categoryForm.categoryCode"
             placeholder="请输入分类编码（不填则自动生成）"
             @blur="handleCodeBlur"
           />
-          <div v-if="codeExists" class="error-tip">该分类编码已存在</div>
+          <div
+            v-if="codeExists"
+            class="error-tip"
+          >
+            该分类编码已存在
+          </div>
         </el-form-item>
-        <el-form-item v-if="currentCategoryId" label="父分类" prop="parentId">
+        <el-form-item
+          v-if="currentCategoryId"
+          label="父分类"
+          prop="parentId"
+        >
           <el-tree-select
             v-model="categoryForm.parentId"
             :data="parentCategoryTree"
@@ -117,16 +191,32 @@
             node-key="id"
             clearable
           >
-            <template #default="{ node, data }">
+            <template #default="{ data }">
               <span>{{ data.categoryName }}</span>
-              <el-tag v-if="data.id === 0" size="small" style="margin-left: 8px">顶级分类</el-tag>
+              <el-tag
+                v-if="data.id === 0"
+                size="small"
+                style="margin-left: 8px"
+              >
+                顶级分类
+              </el-tag>
             </template>
           </el-tree-select>
         </el-form-item>
-        <el-form-item label="排序号" prop="sortOrder">
-          <el-input-number v-model="categoryForm.sortOrder" :min="0" :max="9999" />
+        <el-form-item
+          label="排序号"
+          prop="sortOrder"
+        >
+          <el-input-number
+            v-model="categoryForm.sortOrder"
+            :min="0"
+            :max="9999"
+          />
         </el-form-item>
-        <el-form-item label="分类描述" prop="description">
+        <el-form-item
+          label="分类描述"
+          prop="description"
+        >
           <el-input
             v-model="categoryForm.description"
             type="textarea"
@@ -134,25 +224,40 @@
             placeholder="请输入分类描述"
           />
         </el-form-item>
-        <el-form-item label="状态" prop="status">
+        <el-form-item
+          label="状态"
+          prop="status"
+        >
           <el-radio-group v-model="categoryForm.status">
-            <el-radio :value="1">启用</el-radio>
-            <el-radio :value="0">禁用</el-radio>
+            <el-radio :value="1">
+              启用
+            </el-radio>
+            <el-radio :value="0">
+              禁用
+            </el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">确定</el-button>
+        <el-button @click="dialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="submitLoading"
+          @click="handleSubmit"
+        >
+          确定
+        </el-button>
       </template>
     </el-dialog>
   </el-container>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, watch, nextTick } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
-import { Search, Plus, MoreFilled } from '@element-plus/icons-vue'
+import { Search, Plus } from '@element-plus/icons-vue'
 import {
   getMaterialCategoryTree,
   createMaterialCategory,
@@ -207,9 +312,6 @@ const treeProps = {
   children: 'children',
   label: 'categoryName'
 }
-
-// 树组件引用
-const categoryTreeRef = ref<InstanceType<typeof ElTree> | null>(null)
 
 // 弹窗显示状态
 const dialogVisible = ref(false)
@@ -345,17 +447,6 @@ const loadTable = (parentId: number) => {
   tableData.value = findChildren(categoryTree.value)
 }
 
-// 处理下拉菜单命令
-const handleCmd = (cmd: string, row: MaterialCategoryTree) => {
-  if (cmd === 'edit') {
-    handleEdit(row)
-  } else if (cmd === 'toggle') {
-    handleToggleStatus(row)
-  } else if (cmd === 'delete') {
-    handleDelete(row)
-  }
-}
-
 // 获取所有节点ID
 const getAllNodeKeys = (nodes: MaterialCategoryTree[]): number[] => {
   const keys: number[] = []
@@ -382,32 +473,6 @@ const handleExpandAll = () => {
 const handleCollapseAll = () => {
   defaultExpandedKeys.value = []
   treeKey.value++
-}
-
-// 获取层级文本
-const getLevelText = (level: number) => {
-  const levelMap: Record<number, string> = {
-    1: '一级',
-    2: '二级',
-    3: '三级'
-  }
-  return levelMap[level] || `${level}级`
-}
-
-// 新增分类
-const handleAdd = () => {
-  dialogTitle.value = '新增分类'
-  currentCategoryId.value = undefined
-  Object.assign(categoryForm, {
-    categoryName: '',
-    categoryCode: '',
-    parentId: 0,
-    description: '',
-    sortOrder: 0,
-    status: 1
-  })
-  codeExists.value = false
-  dialogVisible.value = true
 }
 
 // 新增子分类

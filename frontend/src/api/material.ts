@@ -16,10 +16,8 @@ import type {
   MaterialCreateRequest,
   MaterialUpdateRequest,
   MaterialQueryParams,
-  MaterialSearchParams,
   MaterialPageResponse,
-  MaterialBatchDeleteRequest,
-  MaterialCheckCodeRequest
+  MaterialBatchDeleteRequest
 } from '../types/material'
 
 /**

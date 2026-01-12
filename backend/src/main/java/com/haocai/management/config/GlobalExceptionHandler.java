@@ -2,6 +2,7 @@ package com.haocai.management.config;
 
 import com.haocai.management.common.ApiResponse;
 import com.haocai.management.exception.BusinessException;
+import com.haocai.management.exception.SupplierException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
@@ -50,6 +51,25 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.error(e.getCode(), e.getMessage()));
+    }
+
+    /**
+     * 处理供应商业务异常
+     * 供应商相关的业务逻辑异常
+     * 
+     * 遵循规范：后端开发规范-第2.3条（异常处理：Service层捕获异常后，应抛出统一的BusinessException）
+     * 
+     * @param e 供应商异常
+     * @return 统一响应格式
+     */
+    @ExceptionHandler(SupplierException.class)
+    public ResponseEntity<ApiResponse<Void>> handleSupplierException(SupplierException e) {
+        log.warn("供应商异常: code={}, message={}", e.getErrorCode(), e.getMessage());
+        // 将错误码转换为 Integer（取hashCode的绝对值，确保为正数）
+        int errorCode = Math.abs(e.getErrorCode().hashCode()) % 10000;
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(errorCode, e.getMessage()));
     }
 
     /**

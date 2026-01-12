@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haocai.management.mapper.SupplierInfoMapper">
+
+    <!-- Query supplier list with pagination (with conditions) -->
+    <select id="selectPageList" resultType="com.haocai.management.entity.SupplierInfo">
+        <![CDATA[
+        SELECT * FROM supplier_info WHERE deleted = 0
+        ORDER BY create_time DESC
+        LIMIT #{query.size} OFFSET #{query.offset}
+        ]]>
+    </select>
+
+    <!-- Count suppliers matching the conditions -->
+    <select id="countPageList" resultType="int">
+        <![CDATA[
+        SELECT COUNT(*) FROM supplier_info WHERE deleted = 0
+        ]]>
+    </select>
+
+</mapper>

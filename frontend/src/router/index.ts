@@ -76,6 +76,51 @@ const router = createRouter({
         requiresAuth: true,
         title: '耗材管理'
       }
+    },
+    {
+      path: '/suppliers',
+      name: 'suppliers',
+      component: () => import('@/views/SupplierManage.vue'),
+      meta: {
+        requiresAuth: true,
+        title: '供应商管理'
+      }
+    },
+    {
+      path: '/suppliers/:id',
+      name: 'supplier-detail',
+      component: () => import('@/views/SupplierDetail.vue'),
+      meta: {
+        requiresAuth: true,
+        title: '供应商详情'
+      }
+    },
+    {
+      path: '/inventories',
+      name: 'inventories',
+      component: () => import('@/views/InventoryList.vue'),
+      meta: {
+        requiresAuth: true,
+        title: '库存管理'
+      }
+    },
+    {
+      path: '/inventory-warnings',
+      name: 'inventory-warnings',
+      component: () => import('@/views/InventoryWarning.vue'),
+      meta: {
+        requiresAuth: true,
+        title: '库存预警'
+      }
+    },
+    {
+      path: '/inventory-statistics',
+      name: 'inventory-statistics',
+      component: () => import('@/views/InventoryStatistics.vue'),
+      meta: {
+        requiresAuth: true,
+        title: '库存统计'
+      }
     }
   ]
 })

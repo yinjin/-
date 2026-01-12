@@ -2,29 +2,67 @@
   <div class="role-manage">
     <el-card>
       <!-- 搜索表单 -->
-      <el-form :inline="true" :model="searchForm" class="search-form">
+      <el-form
+        :inline="true"
+        :model="searchForm"
+        class="search-form"
+      >
         <el-form-item label="角色名称">
-          <el-input v-model="searchForm.name" placeholder="请输入角色名称" clearable />
+          <el-input
+            v-model="searchForm.name"
+            placeholder="请输入角色名称"
+            clearable
+          />
         </el-form-item>
         <el-form-item label="角色编码">
-          <el-input v-model="searchForm.code" placeholder="请输入角色编码" clearable />
+          <el-input
+            v-model="searchForm.code"
+            placeholder="请输入角色编码"
+            clearable
+          />
         </el-form-item>
         <el-form-item label="状态">
-          <el-select v-model="searchForm.status" placeholder="请选择状态" clearable>
-            <el-option label="启用" :value="1" />
-            <el-option label="禁用" :value="0" />
+          <el-select
+            v-model="searchForm.status"
+            placeholder="请选择状态"
+            clearable
+          >
+            <el-option
+              label="启用"
+              :value="1"
+            />
+            <el-option
+              label="禁用"
+              :value="0"
+            />
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSearch">搜索</el-button>
-          <el-button @click="handleReset">重置</el-button>
+          <el-button
+            type="primary"
+            @click="handleSearch"
+          >
+            搜索
+          </el-button>
+          <el-button @click="handleReset">
+            重置
+          </el-button>
         </el-form-item>
       </el-form>
 
       <!-- 操作按钮 -->
       <div class="action-buttons">
-        <el-button type="primary" @click="handleAdd">新增角色</el-button>
-        <el-button type="danger" :disabled="selectedIds.length === 0" @click="handleBatchDelete">
+        <el-button
+          type="primary"
+          @click="handleAdd"
+        >
+          新增角色
+        </el-button>
+        <el-button
+          type="danger"
+          :disabled="selectedIds.length === 0"
+          @click="handleBatchDelete"
+        >
           批量删除
         </el-button>
         <el-button
@@ -44,7 +82,10 @@
       </div>
 
       <!-- 角色列表栅格布局 -->
-      <div class="role-grid" style="margin-top: 20px">
+      <div
+        class="role-grid"
+        style="margin-top: 20px"
+      >
         <el-row :gutter="20">
           <el-col
             v-for="role in roleList"
@@ -56,13 +97,16 @@
             :xl="6"
             style="margin-bottom: 20px"
           >
-            <el-card class="role-card" shadow="hover">
+            <el-card
+              class="role-card"
+              shadow="hover"
+            >
               <template #header>
                 <div class="role-card-header">
                   <el-checkbox
                     :model-value="selectedIds.includes(role.id!)"
-                    @change="() => handleCheckboxChange(role)"
                     style="margin-right: 10px"
+                    @change="() => handleCheckboxChange(role)"
                   />
                   <span class="role-name">{{ role.name }}</span>
                   <el-tag
@@ -81,11 +125,17 @@
                 </div>
                 <div class="role-info">
                   <span class="label">描述：</span>
-                  <span class="value" :title="role.description">{{ role.description || '暂无描述' }}</span>
+                  <span
+                    class="value"
+                    :title="role.description"
+                  >{{ role.description || '暂无描述' }}</span>
                 </div>
                 <div class="role-info">
                   <span class="label">权限：</span>
-                  <div v-if="role.permissions && role.permissions.length > 0" class="permission-tags">
+                  <div
+                    v-if="role.permissions && role.permissions.length > 0"
+                    class="permission-tags"
+                  >
                     <el-tag
                       v-for="permission in role.permissions"
                       :key="permission.id"
@@ -95,7 +145,10 @@
                       {{ permission.permissionName }}
                     </el-tag>
                   </div>
-                  <span v-else class="no-permissions">暂无权限</span>
+                  <span
+                    v-else
+                    class="no-permissions"
+                  >暂无权限</span>
                 </div>
                 <div class="role-info">
                   <span class="label">创建时间：</span>
@@ -104,17 +157,36 @@
               </div>
               <template #footer>
                 <div class="role-card-footer">
-                  <el-button type="primary" size="small" @click="handleEdit(role)">编辑</el-button>
-                  <el-button type="success" size="small" @click="handleAssignPermission(role)">
+                  <el-button
+                    type="primary"
+                    size="small"
+                    @click="handleEdit(role)"
+                  >
+                    编辑
+                  </el-button>
+                  <el-button
+                    type="success"
+                    size="small"
+                    @click="handleAssignPermission(role)"
+                  >
                     分配权限
                   </el-button>
-                  <el-button type="danger" size="small" @click="handleDelete(role)">删除</el-button>
+                  <el-button
+                    type="danger"
+                    size="small"
+                    @click="handleDelete(role)"
+                  >
+                    删除
+                  </el-button>
                 </div>
               </template>
             </el-card>
           </el-col>
         </el-row>
-        <el-empty v-if="roleList.length === 0" description="暂无角色数据" />
+        <el-empty
+          v-if="roleList.length === 0"
+          description="暂无角色数据"
+        />
       </div>
 
       <!-- 分页 -->
@@ -137,14 +209,34 @@
       width="500px"
       @close="handleDialogClose"
     >
-      <el-form ref="roleFormRef" :model="roleForm" :rules="roleFormRules" label-width="100px">
-        <el-form-item label="角色名称" prop="name">
-          <el-input v-model="roleForm.name" placeholder="请输入角色名称" />
+      <el-form
+        ref="roleFormRef"
+        :model="roleForm"
+        :rules="roleFormRules"
+        label-width="100px"
+      >
+        <el-form-item
+          label="角色名称"
+          prop="name"
+        >
+          <el-input
+            v-model="roleForm.name"
+            placeholder="请输入角色名称"
+          />
         </el-form-item>
-        <el-form-item label="角色编码" prop="code">
-          <el-input v-model="roleForm.code" placeholder="请输入角色编码" />
+        <el-form-item
+          label="角色编码"
+          prop="code"
+        >
+          <el-input
+            v-model="roleForm.code"
+            placeholder="请输入角色编码"
+          />
         </el-form-item>
-        <el-form-item label="描述" prop="description">
+        <el-form-item
+          label="描述"
+          prop="description"
+        >
           <el-input
             v-model="roleForm.description"
             type="textarea"
@@ -152,16 +244,30 @@
             placeholder="请输入描述"
           />
         </el-form-item>
-        <el-form-item label="状态" prop="status">
+        <el-form-item
+          label="状态"
+          prop="status"
+        >
           <el-radio-group v-model="roleForm.status">
-            <el-radio :value="1">启用</el-radio>
-            <el-radio :value="0">禁用</el-radio>
+            <el-radio :value="1">
+              启用
+            </el-radio>
+            <el-radio :value="0">
+              禁用
+            </el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSubmit">确定</el-button>
+        <el-button @click="dialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="handleSubmit"
+        >
+          确定
+        </el-button>
       </template>
     </el-dialog>
 
@@ -181,8 +287,15 @@
         default-expand-all
       />
       <template #footer>
-        <el-button @click="permissionDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleAssignPermissions">确定</el-button>
+        <el-button @click="permissionDialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="handleAssignPermissions"
+        >
+          确定
+        </el-button>
       </template>
     </el-dialog>
   </div>
@@ -266,21 +379,6 @@ const currentAssignRoleId = ref<number>()
 // 所有权限的引用
 const allPermissions = ref<PermissionInfo[]>([])
 
-// 扁平化权限树
-const flattenPermissions = (permissions: PermissionInfo[]): PermissionInfo[] => {
-  const result: PermissionInfo[] = []
-  const traverse = (nodes: PermissionInfo[]) => {
-    nodes.forEach(node => {
-      result.push(node)
-      if (node.children && node.children.length > 0) {
-        traverse(node.children)
-      }
-    })
-  }
-  traverse(permissions)
-  return result
-}
-
 // 获取角色列表
 const getRoleList = async () => {
   try {
@@ -300,9 +398,6 @@ const getRoleList = async () => {
       if (allPermsResponse.code === 200) {
         allPermissions.value = allPermsResponse.data
       }
-      
-      // 扁平化权限树
-      const flatPermissions = flattenPermissions(allPermissions.value)
       
       // 为每个角色获取权限信息
       await Promise.all(
@@ -340,11 +435,6 @@ const handleReset = () => {
   searchForm.status = undefined
   pagination.pageNum = 1
   getRoleList()
-}
-
-// 选择变化
-const handleSelectionChange = (selection: RoleInfo[]) => {
-  selectedIds.value = selection.map((item) => item.id!)
 }
 
 // 处理卡片checkbox选择变化
@@ -425,24 +515,6 @@ const handleSubmit = async () => {
 // 关闭弹窗
 const handleDialogClose = () => {
   roleFormRef.value?.resetFields()
-}
-
-// 状态切换
-const handleStatusChange = async (row: RoleInfo) => {
-  try {
-    const response = await roleApi.updateRoleStatus(row.id!, row.status)
-    if (response.code === 200) {
-      ElMessage.success('状态更新成功')
-    } else {
-      ElMessage.error(response.message || '状态更新失败')
-      // 恢复状态
-      row.status = row.status === 1 ? 0 : 1
-    }
-  } catch (error) {
-    ElMessage.error('状态更新失败')
-    // 恢复状态
-    row.status = row.status === 1 ? 0 : 1
-  }
 }
 
 // 删除角色

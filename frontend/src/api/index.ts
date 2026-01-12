@@ -4,7 +4,7 @@ import { ElMessage } from 'element-plus'
 import router from '@/router'
 
 // API响应接口
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   code: number
   message: string
   data: T
@@ -13,12 +13,12 @@ export interface ApiResponse<T = any> {
 // 创建类型化的axios实例，响应拦截器返回ApiResponse<T>
 // 使用接口继承来保留AxiosInstance的所有属性，同时添加泛型方法类型
 interface TypedAxiosInstance extends AxiosInstance {
-  get<T = ApiResponse<any>>(url: string, config?: Partial<InternalAxiosRequestConfig>): Promise<T>
-  post<T = ApiResponse<any>>(url: string, data?: any, config?: Partial<InternalAxiosRequestConfig>): Promise<T>
-  put<T = ApiResponse<any>>(url: string, data?: any, config?: Partial<InternalAxiosRequestConfig>): Promise<T>
-  delete<T = ApiResponse<any>>(url: string, config?: Partial<InternalAxiosRequestConfig>): Promise<T>
-  patch<T = ApiResponse<any>>(url: string, data?: any, config?: Partial<InternalAxiosRequestConfig>): Promise<T>
-  request<T = ApiResponse<any>>(config: Partial<InternalAxiosRequestConfig>): Promise<T>
+  get<T = ApiResponse<unknown>>(url: string, config?: Partial<InternalAxiosRequestConfig>): Promise<T>
+  post<T = ApiResponse<unknown>>(url: string, data?: unknown, config?: Partial<InternalAxiosRequestConfig>): Promise<T>
+  put<T = ApiResponse<unknown>>(url: string, data?: unknown, config?: Partial<InternalAxiosRequestConfig>): Promise<T>
+  delete<T = ApiResponse<unknown>>(url: string, config?: Partial<InternalAxiosRequestConfig>): Promise<T>
+  patch<T = ApiResponse<unknown>>(url: string, data?: unknown, config?: Partial<InternalAxiosRequestConfig>): Promise<T>
+  request<T = ApiResponse<unknown>>(config: Partial<InternalAxiosRequestConfig>): Promise<T>
 }
 
 const request = axios.create({
@@ -36,7 +36,7 @@ request.interceptors.request.use(
     }
     return config
   },
-  (error: any) => {
+  (error: unknown) => {
     // 对请求错误做些什么
     console.error('请求错误:', error)
     return Promise.reject(error)
@@ -49,7 +49,7 @@ request.interceptors.response.use(
     // 对响应数据做点什么
     return response.data
   },
-  (error: any) => {
+  (error: unknown) => {
     // 对响应错误做点什么
     console.error('响应错误:', error)
     
@@ -57,7 +57,7 @@ request.interceptors.response.use(
       const { status, data } = error.response
       
       switch (status) {
-        case 401:
+        case 401: {
           // 未授权，清除token并跳转到登录页
           ElMessage.error('登录已过期，请重新登录')
           localStorage.removeItem('token')
@@ -70,6 +70,7 @@ request.interceptors.response.use(
             query: { redirect: currentPath }
           })
           break
+        }
           
         case 403:
           // 禁止访问

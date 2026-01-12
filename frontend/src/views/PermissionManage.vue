@@ -2,28 +2,71 @@
   <div class="permission-manage">
     <el-card>
       <!-- 搜索表单 -->
-      <el-form :inline="true" :model="searchForm" class="search-form">
+      <el-form
+        :inline="true"
+        :model="searchForm"
+        class="search-form"
+      >
         <el-form-item label="权限名称">
-          <el-input v-model="searchForm.permissionName" placeholder="请输入权限名称" clearable />
+          <el-input
+            v-model="searchForm.permissionName"
+            placeholder="请输入权限名称"
+            clearable
+          />
         </el-form-item>
         <el-form-item label="权限类型">
-          <el-select v-model="searchForm.permissionType" placeholder="请选择权限类型" clearable>
-            <el-option label="菜单" value="menu" />
-            <el-option label="按钮" value="button" />
-            <el-option label="接口" value="api" />
+          <el-select
+            v-model="searchForm.permissionType"
+            placeholder="请选择权限类型"
+            clearable
+          >
+            <el-option
+              label="菜单"
+              value="menu"
+            />
+            <el-option
+              label="按钮"
+              value="button"
+            />
+            <el-option
+              label="接口"
+              value="api"
+            />
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSearch">搜索</el-button>
-          <el-button @click="handleReset">重置</el-button>
+          <el-button
+            type="primary"
+            @click="handleSearch"
+          >
+            搜索
+          </el-button>
+          <el-button @click="handleReset">
+            重置
+          </el-button>
         </el-form-item>
       </el-form>
 
       <!-- 操作按钮 -->
       <div class="action-buttons">
-        <el-button type="primary" @click="handleAdd">新增权限</el-button>
-        <el-button type="success" @click="handleExpandAll">展开全部</el-button>
-        <el-button type="info" @click="handleCollapseAll">折叠全部</el-button>
+        <el-button
+          type="primary"
+          @click="handleAdd"
+        >
+          新增权限
+        </el-button>
+        <el-button
+          type="success"
+          @click="handleExpandAll"
+        >
+          展开全部
+        </el-button>
+        <el-button
+          type="info"
+          @click="handleCollapseAll"
+        >
+          折叠全部
+        </el-button>
       </div>
 
       <!-- 权限树形表格 -->
@@ -35,34 +78,81 @@
         :expand-row-keys="expandedKeys"
         @expand-change="handleExpandChange"
       >
-        <el-table-column prop="permissionName" label="权限名称" width="200" />
-        <el-table-column prop="permissionCode" label="权限编码" width="200" />
-        <el-table-column prop="type" label="权限类型" width="100">
+        <el-table-column
+          prop="permissionName"
+          label="权限名称"
+          width="200"
+        />
+        <el-table-column
+          prop="permissionCode"
+          label="权限编码"
+          width="200"
+        />
+        <el-table-column
+          prop="type"
+          label="权限类型"
+          width="100"
+        >
           <template #default="{ row }">
-            <el-tag v-if="row.type === 'menu'" type="success">菜单</el-tag>
-            <el-tag v-else-if="row.type === 'button'" type="warning">按钮</el-tag>
-            <el-tag v-else-if="row.type === 'api'" type="info">接口</el-tag>
+            <el-tag
+              v-if="row.type === 'menu'"
+              type="success"
+            >
+              菜单
+            </el-tag>
+            <el-tag
+              v-else-if="row.type === 'button'"
+              type="warning"
+            >
+              按钮
+            </el-tag>
+            <el-tag
+              v-else-if="row.type === 'api'"
+              type="info"
+            >
+              接口
+            </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="path" label="路径" show-overflow-tooltip>
+        <el-table-column
+          prop="path"
+          label="路径"
+          show-overflow-tooltip
+        >
           <template #default="{ row }">
             {{ row.path || '-' }}
           </template>
         </el-table-column>
-        <el-table-column prop="component" label="组件" show-overflow-tooltip>
+        <el-table-column
+          prop="component"
+          label="组件"
+          show-overflow-tooltip
+        >
           <template #default="{ row }">
             {{ row.component || '-' }}
           </template>
         </el-table-column>
-        <el-table-column prop="icon" label="图标" width="100">
+        <el-table-column
+          prop="icon"
+          label="图标"
+          width="100"
+        >
           <template #default="{ row }">
             <el-icon v-if="row.icon">
               <component :is="row.icon" />
             </el-icon>
           </template>
         </el-table-column>
-        <el-table-column prop="sortOrder" label="排序" width="80" />
-        <el-table-column prop="status" label="状态" width="100">
+        <el-table-column
+          prop="sortOrder"
+          label="排序"
+          width="80"
+        />
+        <el-table-column
+          prop="status"
+          label="状态"
+          width="100"
+        >
           <template #default="{ row }">
             <el-switch
               v-model="row.status"
@@ -72,14 +162,38 @@
             />
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="创建时间" width="180" />
-        <el-table-column label="操作" width="280" fixed="right">
+        <el-table-column
+          prop="createTime"
+          label="创建时间"
+          width="180"
+        />
+        <el-table-column
+          label="操作"
+          width="280"
+          fixed="right"
+        >
           <template #default="{ row }">
-            <el-button type="primary" size="small" @click="handleEdit(row)">编辑</el-button>
-            <el-button type="success" size="small" @click="handleAddChild(row)">
+            <el-button
+              type="primary"
+              size="small"
+              @click="handleEdit(row)"
+            >
+              编辑
+            </el-button>
+            <el-button
+              type="success"
+              size="small"
+              @click="handleAddChild(row)"
+            >
               新增子权限
             </el-button>
-            <el-button type="danger" size="small" @click="handleDelete(row)">删除</el-button>
+            <el-button
+              type="danger"
+              size="small"
+              @click="handleDelete(row)"
+            >
+              删除
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -92,21 +206,50 @@
       width="600px"
       @close="handleDialogClose"
     >
-      <el-form ref="permissionFormRef" :model="permissionForm" :rules="permissionFormRules" label-width="100px">
-        <el-form-item label="权限名称" prop="permissionName">
-          <el-input v-model="permissionForm.permissionName" placeholder="请输入权限名称" />
+      <el-form
+        ref="permissionFormRef"
+        :model="permissionForm"
+        :rules="permissionFormRules"
+        label-width="100px"
+      >
+        <el-form-item
+          label="权限名称"
+          prop="permissionName"
+        >
+          <el-input
+            v-model="permissionForm.permissionName"
+            placeholder="请输入权限名称"
+          />
         </el-form-item>
-        <el-form-item label="权限编码" prop="permissionCode">
-          <el-input v-model="permissionForm.permissionCode" placeholder="请输入权限编码" />
+        <el-form-item
+          label="权限编码"
+          prop="permissionCode"
+        >
+          <el-input
+            v-model="permissionForm.permissionCode"
+            placeholder="请输入权限编码"
+          />
         </el-form-item>
-        <el-form-item label="权限类型" prop="type">
+        <el-form-item
+          label="权限类型"
+          prop="type"
+        >
           <el-radio-group v-model="permissionForm.type">
-            <el-radio value="menu">菜单</el-radio>
-            <el-radio value="button">按钮</el-radio>
-            <el-radio value="api">接口</el-radio>
+            <el-radio value="menu">
+              菜单
+            </el-radio>
+            <el-radio value="button">
+              按钮
+            </el-radio>
+            <el-radio value="api">
+              接口
+            </el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="父级权限" prop="parentId">
+        <el-form-item
+          label="父级权限"
+          prop="parentId"
+        >
           <el-tree-select
             v-model="permissionForm.parentId"
             :data="permissionTree"
@@ -117,28 +260,67 @@
             :render-after-expand="false"
           />
         </el-form-item>
-        <el-form-item label="路径" prop="path">
-          <el-input v-model="permissionForm.path" placeholder="请输入路径" />
+        <el-form-item
+          label="路径"
+          prop="path"
+        >
+          <el-input
+            v-model="permissionForm.path"
+            placeholder="请输入路径"
+          />
         </el-form-item>
-        <el-form-item label="组件" prop="component">
-          <el-input v-model="permissionForm.component" placeholder="请输入组件路径" />
+        <el-form-item
+          label="组件"
+          prop="component"
+        >
+          <el-input
+            v-model="permissionForm.component"
+            placeholder="请输入组件路径"
+          />
         </el-form-item>
-        <el-form-item label="图标" prop="icon">
-          <el-input v-model="permissionForm.icon" placeholder="请输入图标名称" />
+        <el-form-item
+          label="图标"
+          prop="icon"
+        >
+          <el-input
+            v-model="permissionForm.icon"
+            placeholder="请输入图标名称"
+          />
         </el-form-item>
-        <el-form-item label="排序" prop="sortOrder">
-          <el-input-number v-model="permissionForm.sortOrder" :min="0" :max="9999" />
+        <el-form-item
+          label="排序"
+          prop="sortOrder"
+        >
+          <el-input-number
+            v-model="permissionForm.sortOrder"
+            :min="0"
+            :max="9999"
+          />
         </el-form-item>
-        <el-form-item label="状态" prop="status">
+        <el-form-item
+          label="状态"
+          prop="status"
+        >
           <el-radio-group v-model="permissionForm.status">
-            <el-radio :value="1">启用</el-radio>
-            <el-radio :value="0">禁用</el-radio>
+            <el-radio :value="1">
+              启用
+            </el-radio>
+            <el-radio :value="0">
+              禁用
+            </el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSubmit">确定</el-button>
+        <el-button @click="dialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="handleSubmit"
+        >
+          确定
+        </el-button>
       </template>
     </el-dialog>
   </div>

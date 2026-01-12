@@ -2,7 +2,11 @@
   <div class="department-manage-container">
     <el-card>
       <!-- 搜索区域 -->
-      <el-form :model="searchForm" :inline="true" class="search-form">
+      <el-form
+        :model="searchForm"
+        :inline="true"
+        class="search-form"
+      >
         <el-form-item label="部门名称">
           <el-input
             v-model="searchForm.keyword"
@@ -18,19 +22,35 @@
             clearable
             @clear="handleSearch"
           >
-            <el-option label="正常" value="NORMAL" />
-            <el-option label="禁用" value="DISABLED" />
+            <el-option
+              label="正常"
+              value="NORMAL"
+            />
+            <el-option
+              label="禁用"
+              value="DISABLED"
+            />
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSearch">搜索</el-button>
-          <el-button @click="handleReset">重置</el-button>
+          <el-button
+            type="primary"
+            @click="handleSearch"
+          >
+            搜索
+          </el-button>
+          <el-button @click="handleReset">
+            重置
+          </el-button>
         </el-form-item>
       </el-form>
 
       <!-- 操作按钮区域 -->
       <div class="action-buttons">
-        <el-button type="primary" @click="handleAdd">
+        <el-button
+          type="primary"
+          @click="handleAdd"
+        >
           <el-icon><Plus /></el-icon>
           新增部门
         </el-button>
@@ -75,11 +95,20 @@
             <template #default="{ node, data }">
               <div class="tree-node">
                 <span class="node-label">
-                  <el-icon v-if="data.status === 'DISABLED'" style="color: #909399"><Lock /></el-icon>
-                  <el-icon v-else style="color: #67c23a"><OfficeBuilding /></el-icon>
+                  <el-icon
+                    v-if="data.status === 'DISABLED'"
+                    style="color: #909399"
+                  ><Lock /></el-icon>
+                  <el-icon
+                    v-else
+                    style="color: #67c23a"
+                  ><OfficeBuilding /></el-icon>
                   {{ node.label }}
                 </span>
-                <span class="node-actions" @click.stop>
+                <span
+                  class="node-actions"
+                  @click.stop
+                >
                   <el-button
                     type="primary"
                     link
@@ -116,34 +145,80 @@
             <span>部门列表</span>
           </div>
           <el-table
-            :data="departmentList"
             v-loading="loading"
+            :data="departmentList"
             border
             stripe
             style="width: 100%"
           >
-            <el-table-column prop="id" label="ID" width="80" />
-            <el-table-column prop="name" label="部门名称" width="150" />
-            <el-table-column prop="code" label="部门编码" width="120" />
-            <el-table-column prop="parentName" label="上级部门" width="120" />
-            <el-table-column prop="level" label="层级" width="80">
+            <el-table-column
+              prop="id"
+              label="ID"
+              width="80"
+            />
+            <el-table-column
+              prop="name"
+              label="部门名称"
+              width="150"
+            />
+            <el-table-column
+              prop="code"
+              label="部门编码"
+              width="120"
+            />
+            <el-table-column
+              prop="parentName"
+              label="上级部门"
+              width="120"
+            />
+            <el-table-column
+              prop="level"
+              label="层级"
+              width="80"
+            >
               <template #default="{ row }">
-                <el-tag size="small">第{{ row.level }}级</el-tag>
+                <el-tag size="small">
+                  第{{ row.level }}级
+                </el-tag>
               </template>
             </el-table-column>
-            <el-table-column prop="status" label="状态" width="100">
+            <el-table-column
+              prop="status"
+              label="状态"
+              width="100"
+            >
               <template #default="{ row }">
                 <el-tag :type="row.status === 'NORMAL' ? 'success' : 'info'">
                   {{ row.status === 'NORMAL' ? '正常' : '禁用' }}
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column prop="leaderName" label="负责人" width="100" />
-            <el-table-column prop="sortOrder" label="排序" width="80" />
-            <el-table-column prop="createTime" label="创建时间" width="180" />
-            <el-table-column label="操作" width="200" fixed="right">
+            <el-table-column
+              prop="leaderName"
+              label="负责人"
+              width="100"
+            />
+            <el-table-column
+              prop="sortOrder"
+              label="排序"
+              width="80"
+            />
+            <el-table-column
+              prop="createTime"
+              label="创建时间"
+              width="180"
+            />
+            <el-table-column
+              label="操作"
+              width="200"
+              fixed="right"
+            >
               <template #default="{ row }">
-                <el-button type="primary" size="small" @click="handleEdit(row)">
+                <el-button
+                  type="primary"
+                  size="small"
+                  @click="handleEdit(row)"
+                >
                   编辑
                 </el-button>
                 <el-button
@@ -153,7 +228,11 @@
                 >
                   {{ row.status === 'NORMAL' ? '禁用' : '启用' }}
                 </el-button>
-                <el-button type="danger" size="small" @click="handleDelete(row)">
+                <el-button
+                  type="danger"
+                  size="small"
+                  @click="handleDelete(row)"
+                >
                   删除
                 </el-button>
               </template>
@@ -167,9 +246,9 @@
             :total="pagination.total"
             :page-sizes="[10, 20, 50, 100]"
             layout="total, sizes, prev, pager, next, jumper"
+            style="margin-top: 20px; justify-content: flex-end"
             @size-change="handleSizeChange"
             @current-change="handleCurrentChange"
-            style="margin-top: 20px; justify-content: flex-end"
           />
         </div>
       </div>
@@ -188,7 +267,10 @@
         :rules="departmentRules"
         label-width="100px"
       >
-        <el-form-item label="部门名称" prop="name">
+        <el-form-item
+          label="部门名称"
+          prop="name"
+        >
           <el-input
             v-model="departmentForm.name"
             placeholder="请输入部门名称"
@@ -196,7 +278,10 @@
             show-word-limit
           />
         </el-form-item>
-        <el-form-item label="部门编码" prop="code">
+        <el-form-item
+          label="部门编码"
+          prop="code"
+        >
           <el-input
             v-model="departmentForm.code"
             placeholder="请输入部门编码"
@@ -205,7 +290,10 @@
             :disabled="isEdit"
           />
         </el-form-item>
-        <el-form-item label="上级部门" prop="parentId">
+        <el-form-item
+          label="上级部门"
+          prop="parentId"
+        >
           <el-tree-select
             v-model="departmentForm.parentId"
             :data="parentDepartmentTree"
@@ -217,7 +305,10 @@
             style="width: 100%"
           />
         </el-form-item>
-        <el-form-item label="排序号" prop="sortOrder">
+        <el-form-item
+          label="排序号"
+          prop="sortOrder"
+        >
           <el-input-number
             v-model="departmentForm.sortOrder"
             :min="0"
@@ -226,10 +317,18 @@
           />
           <span class="form-tip">数字越小越靠前</span>
         </el-form-item>
-        <el-form-item label="状态" prop="status" v-if="isEdit">
+        <el-form-item
+          v-if="isEdit"
+          label="状态"
+          prop="status"
+        >
           <el-radio-group v-model="departmentForm.status">
-            <el-radio label="NORMAL">正常</el-radio>
-            <el-radio label="DISABLED">禁用</el-radio>
+            <el-radio label="NORMAL">
+              正常
+            </el-radio>
+            <el-radio label="DISABLED">
+              禁用
+            </el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="负责人">
@@ -266,8 +365,14 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">
+        <el-button @click="dialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="submitLoading"
+          @click="handleSubmit"
+        >
           确定
         </el-button>
       </template>
@@ -290,10 +395,14 @@
             {{ deleteCheckResult.reason }}
           </template>
         </el-alert>
-        <p v-else>确定要删除部门「{{ deleteTarget?.name }}」吗？</p>
+        <p v-else>
+          确定要删除部门「{{ deleteTarget?.name }}」吗？
+        </p>
       </template>
       <template #footer>
-        <el-button @click="deleteDialogVisible = false">取消</el-button>
+        <el-button @click="deleteDialogVisible = false">
+          取消
+        </el-button>
         <el-button
           type="danger"
           :loading="deleteLoading"
@@ -308,7 +417,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Delete, Refresh, Lock, OfficeBuilding } from '@element-plus/icons-vue'
 import { departmentApi } from '@/api/department'

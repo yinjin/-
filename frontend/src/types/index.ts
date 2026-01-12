@@ -29,6 +29,9 @@ export interface Material {
   updateTime: string
 }
 
+// 供应商相关类型
+export * from './supplier'
+
 // 入库单相关类型
 export interface InboundOrder {
   id: number

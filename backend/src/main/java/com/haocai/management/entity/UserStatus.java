@@ -1,7 +1,6 @@
 package com.haocai.management.entity;
 
 import com.baomidou.mybatisplus.annotation.EnumValue;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
@@ -12,7 +11,6 @@ import lombok.Getter;
  * @since 2026-01-07
  */
 @Getter
-@AllArgsConstructor
 public enum UserStatus {
 
     /**
@@ -46,6 +44,14 @@ public enum UserStatus {
      * 状态描述
      */
     private final String description;
+
+    /**
+     * 构造函数
+     */
+    UserStatus(Integer code, String description) {
+        this.code = code;
+        this.description = description;
+    }
 
     /**
      * 根据状态码获取枚举值
